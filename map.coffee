@@ -4,7 +4,11 @@
 watchId = null
 traceHeadingEnable = false
 
-latlng = new google.maps.LatLng 35.757794, 139.876819
+latlng = if localStorage['position']?
+        position = JSON.parse localStorage['position']
+        new google.maps.LatLng position.lat, position.lng
+    else
+        new google.maps.LatLng 35.660389,139.729225
 
 myOptions =
     zoom: 16,
@@ -101,5 +105,6 @@ $('#address').on 'change', ->
             alert status
 
 window.onpagehide = ->
-    console.log 'hide'
     navigator.geolocation.clearWatch watchId unless watchId
+    pos = map.getCenter()
+    localStorage['position'] = JSON.stringify {lat: pos.lat(), lng: pos.lng()}
