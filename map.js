@@ -19,6 +19,8 @@
 
   map = new google.maps.Map(document.getElementById("map"), myOptions);
 
+  window.map = map;
+
   image = new google.maps.MarkerImage('img/bluedot.png', null, null, new google.maps.Point(8, 8), new google.maps.Size(17, 17));
 
   myMarker = null;
@@ -101,8 +103,7 @@
         });
         return $gps.data('status', 'trace-position');
       case 'trace-position':
-        traceHeadingEnable = true;
-        $gps.addClass('btn-primary');
+        $gps.addClass('disabled');
         $gps.children('i').removeClass('icon-globe');
         $gps.children('i').addClass('icon-hand-up');
         return $gps.data('status', 'trace-heading');

@@ -14,6 +14,7 @@ myOptions =
 
 geocoder = new google.maps.Geocoder()
 map = new google.maps.Map document.getElementById("map"), myOptions
+window.map = map
 
 image = new google.maps.MarkerImage 'img/bluedot.png', null, null, new google.maps.Point( 8, 8 ), new google.maps.Size( 17, 17 )
 myMarker = null
@@ -78,8 +79,8 @@ $gps.on 'click', ->
                 , { enableHighAccuracy: true, timeout: 30000 }
             $gps.data 'status', 'trace-position'
         when 'trace-position'
-            traceHeadingEnable = true
-            $gps.addClass 'btn-primary'            
+            # traceHeadingEnable = true
+            $gps.addClass 'disabled'            
             $gps.children('i').removeClass 'icon-globe'       
             $gps.children('i').addClass 'icon-hand-up'
             $gps.data 'status', 'trace-heading'
