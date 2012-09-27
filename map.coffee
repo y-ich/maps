@@ -8,13 +8,28 @@ myOptions =
     center: latlng,
     mapTypeId: google.maps.MapTypeId.ROADMAP
     disableDefaultUI: true
+
+image = new google.maps.MarkerImage 'img/bluedot.png', null, null, new google.maps.Point( 8, 8 ), new google.maps.Size( 17, 17 )
+myMarker = null
     
 map = new google.maps.Map document.getElementById("map"), myOptions
 geocoder = new google.maps.Geocoder()
 
 $('#gps').on 'click', ->
     navigator.geolocation.getCurrentPosition (position) ->
-        map.setCenter new google.maps.LatLng(position.coords.latitude,position.coords.longitude)
+        latLng = new google.maps.LatLng(position.coords.latitude,position.coords.longitude)
+        if myMarker
+            myMarker.setPosition latLng
+        else
+            myMarker = new google.maps.Marker
+                flat: true
+                icon: image
+                map: map
+                optimized: false
+                position: latLng
+                title: 'I might be here'
+                visible: true
+        map.setCenter latLng
 
 $('#address').on 'change', ->
     geocoder.geocode {address : this.value }, (result, status) ->
