@@ -35,15 +35,16 @@ getLocationHandler = (data, status) ->
         when google.maps.StreetViewStatus.OK
             sv = map.getStreetView()
             sv.setPosition data.location.latLng
+            marker.setPosition data.location.latLng
             sv.setPov
                 heading: map.getHeading() ? 0
                 pitch: 0
                 zoom: 1
             sv.setVisible true
         when google.maps.StreetViewStatus.ZERO_RESULTS
-            alert "Please click near street."
+            alert "近くにストリートビューが見つかりませんでした。"
         else
-            alert "Sorry, unknown error. Try again."
+            alert "すいません、エラーが起こりました。"
 
 traceHandler = (position) ->
     latLng = new google.maps.LatLng(position.coords.latitude,position.coords.longitude)

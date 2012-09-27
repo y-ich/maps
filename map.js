@@ -45,6 +45,7 @@
       case google.maps.StreetViewStatus.OK:
         sv = map.getStreetView();
         sv.setPosition(data.location.latLng);
+        marker.setPosition(data.location.latLng);
         sv.setPov({
           heading: (_ref = map.getHeading()) != null ? _ref : 0,
           pitch: 0,
@@ -52,9 +53,9 @@
         });
         return sv.setVisible(true);
       case google.maps.StreetViewStatus.ZERO_RESULTS:
-        return alert("Please click near street.");
+        return alert("近くにストリートビューが見つかりませんでした。");
       default:
-        return alert("Sorry, unknown error. Try again.");
+        return alert("すいません、エラーが起こりました。");
     }
   };
 
