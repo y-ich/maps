@@ -4,17 +4,20 @@
 watchId = null
 traceHeadingEnable = false
 
-latlng = if localStorage['position']?
-        position = JSON.parse localStorage['position']
-        new google.maps.LatLng position.lat, position.lng
+myOptions = (->
+    if localStorage['last']?
+        last = JSON.parse localStorage['last']
+        lat = last.lat
+        lng = last.lng
+        zoom = last.zoom
     else
-        new google.maps.LatLng 35.660389,139.729225
-
-myOptions =
-    zoom: 16,
-    center: latlng,
+        lat = 35.660389
+        lng = 139.729225
+        zoom = 14
+    { zoom: zoom
+    center: new google.maps.LatLng lat, lng
     mapTypeId: google.maps.MapTypeId.ROADMAP
-    disableDefaultUI: true
+    disableDefaultUI: true })()
 
 geocoder = new google.maps.Geocoder()
 map = new google.maps.Map document.getElementById("map"), myOptions
@@ -24,13 +27,23 @@ image = new google.maps.MarkerImage 'img/bluedot.png', null, null, new google.ma
 myMarker = null
 marker = new google.maps.Marker
     map: map
-    position: latlng
+    position: myOptions.center
     title: 'ドロップされたピン'
     visible: false
 
 google.maps.event.addListener map, 'click', (event) ->
     marker.setVisible true
     marker.setPosition event.latLng
+
+# This is a workaround for web app on home screen. There is no onpagehide event.
+google.maps.event.addListener map, 'center_changed', () ->
+    pos = map.getCenter()
+    localStorage['last'] = JSON.stringify { lat: pos.lat(), lng: pos.lng(), zoom: map.getZoom() }
+
+google.maps.event.addListener map, 'zoom_changed', () ->
+    pos = map.getCenter()
+    localStorage['last'] = JSON.stringify { lat: pos.lat(), lng: pos.lng(), zoom: map.getZoom() }
+    
 
 google.maps.event.addListener marker, 'click', (event) ->
     new google.maps.StreetViewService().getPanoramaByLocation marker.getPosition(), 49, getLocationHandler
@@ -107,4 +120,4 @@ $('#address').on 'change', ->
 window.onpagehide = ->
     navigator.geolocation.clearWatch watchId unless watchId
     pos = map.getCenter()
-    localStorage['position'] = JSON.stringify {lat: pos.lat(), lng: pos.lng()}
+    localStorage['last'] = JSON.stringify { lat: pos.lat(), lng: pos.lng(), zoom: map.getZoom() }
