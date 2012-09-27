@@ -80,6 +80,8 @@
     }
   };
 
+  $('#map').height(window.innerHeight - $('#header').outerHeight(true) - $('#footer').outerHeight(true));
+
   $gps = $('#gps');
 
   $gps.data('status', 'normal');

@@ -61,6 +61,8 @@ traceHandler = (position) ->
     map.setCenter latLng
     map.setHeading position.coords.heading if traceHeadingEnable
 
+$('#map').height window.innerHeight - $('#header').outerHeight(true) - $('#footer').outerHeight(true)
+
 $gps = $('#gps')
 $gps.data 'status', 'normal' 
 $gps.on 'click', ->
