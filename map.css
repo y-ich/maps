@@ -48,4 +48,20 @@ body {
 #footer {
     position: absolute;
     bottom: 0;
+    width: 320px;
+}
+
+#gps {
+    position: relative;
+    left: 6px;
+}
+
+#nav {
+    position: absolute;
+    left: 100px;
+}
+
+#option {
+    position: absolute;
+    right: 6px;
 }

@@ -10,3 +10,7 @@ myOptions =
     disableDefaultUI: true
     
 map = new google.maps.Map document.getElementById("map"), myOptions
+
+$('#gps').on 'click', ->
+    navigator.geolocation.getCurrentPosition (position) ->
+        map.setCenter new google.maps.LatLng(position.coords.latitude,position.coords.longitude)

@@ -13,4 +13,10 @@
 
   map = new google.maps.Map(document.getElementById("map"), myOptions);
 
+  $('#gps').on('click', function() {
+    return navigator.geolocation.getCurrentPosition(function(position) {
+      return map.setCenter(new google.maps.LatLng(position.coords.latitude, position.coords.longitude));
+    });
+  });
+
 }).call(this);
