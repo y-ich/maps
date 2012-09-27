@@ -1,6 +1,9 @@
 # Google Maps Web App
 # Copyright (C) ICHIKAWA, Yuji (New 3 Rs) 2012
 
+watchId = null
+traceHeadingEnable = false
+
 latlng = new google.maps.LatLng 35.757794, 139.876819
 
 myOptions =
@@ -9,14 +12,38 @@ myOptions =
     mapTypeId: google.maps.MapTypeId.ROADMAP
     disableDefaultUI: true
 
+geocoder = new google.maps.Geocoder()
+map = new google.maps.Map document.getElementById("map"), myOptions
+
 image = new google.maps.MarkerImage 'img/bluedot.png', null, null, new google.maps.Point( 8, 8 ), new google.maps.Size( 17, 17 )
 myMarker = null
-    
-map = new google.maps.Map document.getElementById("map"), myOptions
-geocoder = new google.maps.Geocoder()
+marker = new google.maps.Marker
+    map: map
+    position: latlng
+    title: 'ドロップされたピン'
+    visible: false
 
-watchId = null
-traceHeadingEnable = false
+google.maps.event.addListener map, 'click', (event) ->
+    marker.setVisible true
+    marker.setPosition event.latLng
+
+google.maps.event.addListener marker, 'click', (event) ->
+    new google.maps.StreetViewService().getPanoramaByLocation marker.getPosition(), 49, getLocationHandler
+
+getLocationHandler = (data, status) -> 
+    switch status
+        when google.maps.StreetViewStatus.OK
+            sv = map.getStreetView()
+            sv.setPosition data.location.latLng
+            sv.setPov
+                heading: map.getHeading() ? 0
+                pitch: 0
+                zoom: 1
+            sv.setVisible true
+        when google.maps.StreetViewStatus.ZERO_RESULTS
+            alert "Please click near street."
+        else
+            alert "Sorry, unknown error. Try again."
 
 traceHandler = (position) ->
     latLng = new google.maps.LatLng(position.coords.latitude,position.coords.longitude)
