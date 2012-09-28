@@ -50,7 +50,7 @@ google.maps.event.addListener map, 'zoom_changed', () ->
 google.maps.event.addListener droppedMarker, 'click', (event) ->
     new google.maps.StreetViewService().getPanoramaByLocation droppedMarker.getPosition(), 49, getLocationHandler
 
-getLocationHandler = (data, status) -> 
+getLocationHandler = (data, status) ->
     switch status
         when google.maps.StreetViewStatus.OK
             sv = map.getStreetView()
@@ -68,7 +68,6 @@ getLocationHandler = (data, status) ->
 
 traceHandler = (position) ->
     latLng = new google.maps.LatLng(position.coords.latitude,position.coords.longitude)
-    position.coords.heading = 180
     if pulsatingMarker
         pulsatingMarker.setPosition latLng
     else
@@ -105,7 +104,6 @@ $gps.on 'click', ->
             $gps.data 'status', 'trace-position'
             $gps.addClass 'btn-primary'            
             traceHeadingEnable = false
-            map.setHeading 0
             watchId = navigator.geolocation.watchPosition traceHandler
                 , (error) ->
                     console.log error.message

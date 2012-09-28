@@ -99,7 +99,6 @@
   traceHandler = function(position) {
     var latLng, transform;
     latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-    position.coords.heading = 180;
     if (pulsatingMarker) {
       pulsatingMarker.setPosition(latLng);
     } else {
@@ -145,7 +144,6 @@
         $gps.data('status', 'trace-position');
         $gps.addClass('btn-primary');
         traceHeadingEnable = false;
-        map.setHeading(0);
         return watchId = navigator.geolocation.watchPosition(traceHandler, function(error) {
           return console.log(error.message);
         }, {
