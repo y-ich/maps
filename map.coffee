@@ -24,16 +24,18 @@ map = new google.maps.Map document.getElementById("map"), myOptions
 window.map = map
 
 image = new google.maps.MarkerImage 'img/bluedot.png', null, null, new google.maps.Point( 8, 8 ), new google.maps.Size( 17, 17 )
-myMarker = null
-marker = new google.maps.Marker
+pulsatingMarker = null
+droppedMarker = new google.maps.Marker
     map: map
     position: myOptions.center
     title: 'ドロップされたピン'
     visible: false
+startMarker = null
+destinationMarker = null
 
 google.maps.event.addListener map, 'click', (event) ->
-    marker.setVisible true
-    marker.setPosition event.latLng
+    droppedMarker.setVisible true
+    droppedMarker.setPosition event.latLng
 
 # This is a workaround for web app on home screen. There is no onpagehide event.
 google.maps.event.addListener map, 'center_changed', () ->
@@ -45,15 +47,15 @@ google.maps.event.addListener map, 'zoom_changed', () ->
     localStorage['last'] = JSON.stringify { lat: pos.lat(), lng: pos.lng(), zoom: map.getZoom() }
     
 
-google.maps.event.addListener marker, 'click', (event) ->
-    new google.maps.StreetViewService().getPanoramaByLocation marker.getPosition(), 49, getLocationHandler
+google.maps.event.addListener droppedMarker, 'click', (event) ->
+    new google.maps.StreetViewService().getPanoramaByLocation droppedMarker.getPosition(), 49, getLocationHandler
 
 getLocationHandler = (data, status) -> 
     switch status
         when google.maps.StreetViewStatus.OK
             sv = map.getStreetView()
             sv.setPosition data.location.latLng
-            marker.setPosition data.location.latLng
+            droppedMarker.setPosition data.location.latLng
             sv.setPov
                 heading: map.getHeading() ? 0
                 pitch: 0
@@ -66,10 +68,10 @@ getLocationHandler = (data, status) ->
 
 traceHandler = (position) ->
     latLng = new google.maps.LatLng(position.coords.latitude,position.coords.longitude)
-    if myMarker
-        myMarker.setPosition latLng
+    if pulsatingMarker
+        pulsatingMarker.setPosition latLng
     else
-        myMarker = new google.maps.Marker
+        pulsatingMarker = new google.maps.Marker
             flat: true
             icon: image
             map: map
