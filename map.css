@@ -26,9 +26,6 @@
 .navbar {
     margin-bottom: 0;
 }
-.navbar-search {
-    position: relative;
-}
   
 .navbar-search .search-query {
     padding-left: 29px;
@@ -92,7 +89,12 @@
 
 #nav {
     position: absolute;
-    left: 100px;
+    left: 50%;
+    margin-left: -100px; /* these two lines are for centering */
+}
+
+#search, #route {
+width: 100px;
 }
 
 #option {
