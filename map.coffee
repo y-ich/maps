@@ -112,7 +112,6 @@ $gps.on 'click', ->
         when 'trace-position'
             $gps.data 'status', 'trace-heading'
             traceHeadingEnable = true
-            $gps.addClass 'disabled'            
             $gps.children('i').removeClass 'icon-globe'       
             $gps.children('i').addClass 'icon-hand-up'
         when 'trace-heading'

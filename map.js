@@ -154,7 +154,6 @@
       case 'trace-position':
         $gps.data('status', 'trace-heading');
         traceHeadingEnable = true;
-        $gps.addClass('disabled');
         $gps.children('i').removeClass('icon-globe');
         return $gps.children('i').addClass('icon-hand-up');
       case 'trace-heading':
