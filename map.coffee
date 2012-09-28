@@ -80,15 +80,28 @@ traceHandler = (position) ->
             title: 'I might be here'
             visible: true
     map.setCenter latLng
-    map.setHeading position.coords.heading if traceHeadingEnable
+    if traceHeadingEnable and position.coords.heading?
+        transform = $map.css('-webkit-transform')
+        if /rotate(-?[\d.]+deg)/.test(transform)
+            transform = transform.replace(/rotate(-?[\d.]+deg)/, "rotate(#{-position.coords.heading}deg)")
+        else
+            transform = transform + " rotate(#{-position.coords.heading}deg)"
+        $map.css('-webkit-transform', transform)
 
-$('#map').height window.innerHeight - $('#header').outerHeight(true) - $('#footer').outerHeight(true)
+$mapframe = $('#map-frame')
+$mapframe.height window.innerHeight - $('#header').outerHeight(true) - $('#footer').outerHeight(true)
+squareSize = Math.floor(Math.sqrt(Math.pow($mapframe.width(), 2) + Math.pow($mapframe.height(), 2)))
+$map = $('#map')
+$map.width(squareSize)
+    .height(squareSize)
+    .css('margin', - squareSize / 2 + 'px')
 
 $gps = $('#gps')
 $gps.data 'status', 'normal' 
 $gps.on 'click', ->
     switch $gps.data 'status'
         when 'normal'
+            $gps.data 'status', 'trace-position'
             $gps.addClass 'btn-primary'            
             traceHeadingEnable = false
             map.setHeading 0
@@ -96,21 +109,20 @@ $gps.on 'click', ->
                 , (error) ->
                     console.log error.message
                 , { enableHighAccuracy: true, timeout: 30000 }
-            $gps.data 'status', 'trace-position'
         when 'trace-position'
-            # traceHeadingEnable = true
+            $gps.data 'status', 'trace-heading'
+            traceHeadingEnable = true
             $gps.addClass 'disabled'            
             $gps.children('i').removeClass 'icon-globe'       
             $gps.children('i').addClass 'icon-hand-up'
-            $gps.data 'status', 'trace-heading'
         when 'trace-heading'
             navigator.geolocation.clearWatch watchId
             watchId = null
-            map.setHeading 0
+            $gps.data 'status', 'normal'
+            map.css '-webkit-transform', map.css('-webkit-transform').replace(/\s*rotate(-?[\d.]+deg)/, '')
             $gps.removeClass 'btn-primary'  
             $gps.children('i').removeClass 'icon-hand-up'
             $gps.children('i').addClass 'icon-globe'          
-            $gps.data 'status', 'normal'
             
 $('#address').on 'change', ->
     geocoder.geocode {address : this.value }, (result, status) ->

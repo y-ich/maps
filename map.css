@@ -46,8 +46,16 @@
     background-image: url("http://twitter.github.com/bootstrap/assets/img/glyphicons-halflings.png");
 }
 
-#map {
+#map-frame {
     width: 100%;
+    overflow: hidden;
+}
+
+#map {
+    position: relative;
+    left: 50%; /* for centering. margin will be defined by javascript. */
+    top: 50%; /* for centering. margin will be defined by javascript. */ 
+    -webkit-transition: -webkit-transform 0.1s;
 }
 
 #map div.gmnoprint[title="I might be here"] {
@@ -77,9 +85,9 @@
 }
 
 #footer {
-    position: absolute;
+    position: fixed;
     bottom: 0;
-    width: 320px;
+    width: 100%;
 }
 
 #gps {
