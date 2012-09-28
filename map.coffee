@@ -68,6 +68,7 @@ getLocationHandler = (data, status) ->
 
 traceHandler = (position) ->
     latLng = new google.maps.LatLng(position.coords.latitude,position.coords.longitude)
+    position.coords.heading = 180
     if pulsatingMarker
         pulsatingMarker.setPosition latLng
     else
@@ -118,7 +119,7 @@ $gps.on 'click', ->
             navigator.geolocation.clearWatch watchId
             watchId = null
             $gps.data 'status', 'normal'
-            map.css '-webkit-transform', map.css('-webkit-transform').replace(/\s*rotate(-?[\d.]+deg)/, '')
+            $map.css '-webkit-transform', $map.css('-webkit-transform').replace(/\s*rotate(-?[\d.]+deg)/, '')
             $gps.removeClass 'btn-primary'  
             $gps.children('i').removeClass 'icon-hand-up'
             $gps.children('i').addClass 'icon-globe'          

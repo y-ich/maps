@@ -99,6 +99,7 @@
   traceHandler = function(position) {
     var latLng, transform;
     latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+    position.coords.heading = 180;
     if (pulsatingMarker) {
       pulsatingMarker.setPosition(latLng);
     } else {
@@ -160,7 +161,7 @@
         navigator.geolocation.clearWatch(watchId);
         watchId = null;
         $gps.data('status', 'normal');
-        map.css('-webkit-transform', map.css('-webkit-transform').replace(/\s*rotate(-?[\d.]+deg)/, ''));
+        $map.css('-webkit-transform', $map.css('-webkit-transform').replace(/\s*rotate(-?[\d.]+deg)/, ''));
         $gps.removeClass('btn-primary');
         $gps.children('i').removeClass('icon-hand-up');
         return $gps.children('i').addClass('icon-globe');
