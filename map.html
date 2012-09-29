@@ -24,14 +24,45 @@
                 <div class="icon-search"></div>
             </div>
         </div>
+        <div id="navi">
+            <div id="navi-toolbar" class="btn-toolbar">
+                <button id="edit" class="btn btn-left">編集</button>
+                <div class="btn-group btn-center">
+                    <button id="gps" class="btn"><i class="icon-plane"></i></button>
+                    <button id="gps" class="btn"><i class="icon-calendar"></i></button>
+                    <button id="gps" class="btn"><i class="icon-user"></i></button>                
+                </div>
+                <button id="start" class="btn btn-right">出発</button>
+            </div>
+            <div id="navi-etc">
+                <div id="message">こんにちは</div>
+                <div id="route-search-frame">
+                    <div id="switch" class="btn-toolbar">
+                        <button class="btn"><i class="icon-random"></i></button>
+                    </div>
+                    <form id="route-search" class="form-horizontal">
+                        <div class="control-group">
+                            <label class="control-label">出発: </label>
+                            <div class="controls"><input id="start" type="text" class="search-query" ></div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="control-group">
+                            <label class="control-label">到着: </label>
+                            <div class="controls"><input id="destination" type="text" class="search-query"></div>
+                        </div>
+                    </form>
+                    <div class="clearfix"></div> <!-- to realize a height of #route-search-frame -->
+                </div>
+            </div>
+        </div>
     </div>
     <div id="footer" class="btn-toolbar">
-        <button id="gps" class="btn"><i class="icon-globe"></i></button>
-        <div id="nav" class="btn-group">
+        <button id="gps" class="btn btn-left"><i class="icon-globe"></i></button>
+        <div id="nav" class="btn-group btn-center">
             <button id="search" class="btn btn-primary">検索</button>
             <button id="route" class="btn disabled">経路</button>
         </div>
-        <button id="option" class="btn disabled"><i class=" icon-info-sign"></i></button>
+        <button id="option" class="btn btn-right disabled"><i class=" icon-info-sign"></i></button>
     </div>
     <script src="js/jquery-1.8.2.min.js"></script>
     <script src="js/bootstrap.min.js"></script>

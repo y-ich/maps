@@ -24,6 +24,10 @@ html, body {
     height: 100%;
 }
 
+form {
+    margin: 0;
+}
+
 .navbar {
     margin-bottom: 0;
 }
@@ -80,32 +84,69 @@ html, body {
 	}
 }
 
+.btn-toolbar {
+    background-color: rgb(250,250,250);
+    margin: 0;
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+#navi {
+    display: none;
+    position: absolute;
+    top: 0;
+    width: 100%;
+}
+
+#navi-toolbar {
+}
+
+#navi-etc {
+    position: absolute;
+    width: 100%;
+    z-index: -1; /* in order to hide #route-search-frame to upper region */
+}
+
+#message {
+    color: black;
+    text-align: center;
+    background-color: rgb(250,250,250);
+    opacity: 0.8;
+}
+
+#route-search-frame {
+    background-color: rgb(250,250,250);
+    width: 100%;
+    position: absolute;
+    top: 0;
+}
+
+#switch, #route-search {
+    float: left;
+}
+
 #footer {
     position: fixed;
     bottom: 0;
     width: 100%;
-    margin: 0;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    background-color: rgb(250,250,250);
 }
 
-#gps {
-    position: relative;
+.btn-left {
+    position: relative; /* not absolute in order to give some height to parent */
     left: 6px;
 }
 
-#nav {
+.btn-center {
     position: absolute;
     left: 50%;
-    margin-left: -100px; /* these two lines are for centering */
+    margin-left: -100px !important; /* these two lines are for centering */
 }
 
 #search, #route {
 width: 100px;
 }
 
-#option {
+.btn-right {
     position: absolute;
     right: 6px;
 }
