@@ -9,6 +9,8 @@ map = null
 pulsatingMarker = null
 directionsService = null
 directionsRenderer = null
+$origin = $('#origin')
+$destination = $('#destination')
 
 travelMode = -> google.maps.TravelMode[$('#travel-mode').children('.btn-primary').attr('id').toUpperCase()]
 
@@ -31,8 +33,8 @@ saveStatus = () ->
         lat: pos.lat()
         lng: pos.lng()
         zoom: map.getZoom()
-        origin: $('#origin').val()
-        destination: $('destination').val()
+        origin: $origin.val()
+        destination: $destination.val()
 
 initializeGoogleMaps = ->
     mapOptions =
@@ -138,6 +140,7 @@ initializeDOM = ->
                         console.log error.message
                     , { enableHighAccuracy: true, timeout: 30000 }
             when 'trace-position'
+# disabled trace-heading
 #                $gps.data 'status', 'trace-heading'
 #                traceHeadingEnable = true
 #                $gps.children('i').removeClass 'icon-globe'       
