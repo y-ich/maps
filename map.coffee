@@ -14,18 +14,51 @@ $destination = $('#destination')
 
 travelMode = -> google.maps.TravelMode[$('#travel-mode').children('.btn-primary').attr('id').toUpperCase()]
 
+secondToString = (sec) ->
+    result = ''
+    min = Math.floor(sec / 60)
+    sec -= min * 60
+    hour = Math.floor(min / 60)
+    min -= hour * 60
+    day = Math.floor(hour / 24)
+    hour -= day * 24
+    result += day + '日' if day > 0
+    result += hour + '時間' if hour > 0 and day < 10
+    result += min + '分' if min > 0 and day == 0 and hour < 10
+    result
+    
+meterToString = (meter) ->
+    result = ''
+    km = Math.floor(meter / 1000)
+    meter -= km * 1000
+    result += km + 'km' if km > 0
+    result += meter + 'm' if meter > 0 and km < 10
+    result
+
 searchDirections = ->
     directionsService.route
             destination: $('#destination').val()
             origin: $('#origin').val()
             travelMode: travelMode()
         , (result, status) ->
+            window.result = result
             switch status
                 when google.maps.DirectionsStatus.OK
                     directionsRenderer.setMap map
                     directionsRenderer.setDirections result
+                    switch travelMode()
+                        when google.maps.TravelMode.WALKING
+                            distance = (result.routes[0].legs.map (e) -> e.distance.value).reduce (a, b) -> a + b
+                            duration = (result.routes[0].legs.map (e) -> e.duration.value).reduce (a, b) -> a + b
+                            $('#message').html("#{secondToString duration}〜#{meterToString distance}〜#{result.routes[0].summary}")
+                        when google.maps.TravelMode.DRIVING
+                            distance = (result.routes[0].legs.map (e) -> e.distance.value).reduce (a, b) -> a + b
+                            duration = (result.routes[0].legs.map (e) -> e.duration.value).reduce (a, b) -> a + b
+                            $('#message').html("#{result.routes[0].summary}<br>#{secondToString duration}〜#{meterToString distance}")
                 else
                     directionsRenderer.setMap null
+                    $('#message').html("#{status}")
+                    
 
 saveStatus = () ->
     pos = map.getCenter()
