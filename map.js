@@ -98,8 +98,7 @@
     } else {
       pulsatingMarker = new google.maps.Marker({
         flat: true,
-        icon: new google.maps.MarkerImage('img/bluedot.png')
-      }, null, null, new google.maps.Point(8, 8), new google.maps.Size(17, 17), {
+        icon: new google.maps.MarkerImage('img/bluedot.png', null, null, new google.maps.Point(8, 8), new google.maps.Size(17, 17)),
         map: map,
         optimized: false,
         position: latLng,
