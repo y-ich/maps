@@ -7,6 +7,8 @@ traceHeadingEnable = false
 geocoder = null
 map = null
 pulsatingMarker = null
+directionsService = null
+directionsRenderer = null
 
 initializeGoogleMaps = ->
     mapOptions =
@@ -23,8 +25,10 @@ initializeGoogleMaps = ->
 
     geocoder = new google.maps.Geocoder()
     map = new google.maps.Map document.getElementById("map"), mapOptions
-    window.map = map # for debugging
-
+    directionsService = new google.maps.DirectionsService()
+    directionsRenderer = new google.maps.DirectionsRenderer()
+    directionsRenderer.setMap map
+    
     droppedMarker = new google.maps.Marker
         map: map
         position: mapOptions.center
@@ -94,7 +98,7 @@ initializeDOM = ->
     $map.width(squareSize)
         .height(squareSize)
         .css('margin', - squareSize / 2 + 'px')
-
+        
     $gps = $('#gps')
     $gps.data 'status', 'normal' 
     $gps.on 'click', ->
@@ -127,6 +131,47 @@ initializeDOM = ->
                 map.setCenter result[0].geometry.location
             else
                 alert status
+    
+    $navi = $('#navi')
+    $search = $('#search')
+    $search.on 'click', ->
+        $route.removeClass 'btn-primary'
+        $search.addClass 'btn-primary'
+        $navi.toggle()
+    $route = $('#route')
+    $route.on 'click', ->
+        $search.removeClass 'btn-primary'
+        $route.addClass 'btn-primary'
+        $navi.toggle()
+
+    $edit = $('#edit')
+    $versatile = $('#versatile')
+    $routeSearchFrame = $('#route-search-frame')
+    $edit.on 'click', ->
+        if $edit.text() == '編集'
+            $edit.text 'キャンセル'
+            $versatile.text '経路'
+            $routeSearchFrame.css 'top', '0px'
+        else
+            $edit.text '編集'
+            $versatile.text '出発'
+            $routeSearchFrame.css 'top', ''
+
+    $versatile.on 'click', ->
+        if $versatile.text() == '経路'
+            $edit.text '編集'
+            $versatile.text '出発'
+            $routeSearchFrame.css 'top', ''
+            
+            directionsService.route
+                    destination: $('#destination').val()
+                    origin: $('#origin').val()
+                    travelMode: google.maps.TravelMode.WALKING
+                , (result, status) ->
+                    switch status
+                        when google.maps.DirectionsStatus.OK
+                            directionsRenderer.setDirections result
+
 
     window.onpagehide = ->
         navigator.geolocation.clearWatch watchId unless watchId
