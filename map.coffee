@@ -4,6 +4,9 @@
 watchId = null # id for watchPosition
 traceHeadingEnable = false
 
+geocoder = null
+map = null
+
 initializeGoogleMaps = ->
     myOptions = (-> # if stored data exists, then restore, otherwise default value.
         if localStorage['last']?
