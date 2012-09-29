@@ -6,6 +6,7 @@ traceHeadingEnable = false
 
 geocoder = null
 map = null
+pulsatingMarker = null
 
 initializeGoogleMaps = ->
     myOptions = (-> # if stored data exists, then restore, otherwise default value.
@@ -32,7 +33,6 @@ initializeGoogleMaps = ->
         position: myOptions.center
         title: 'ドロップされたピン'
         visible: false
-    pulsatingMarker = null
     startMarker = null
     destinationMarker = null
 
@@ -69,27 +69,27 @@ initializeGoogleMaps = ->
             else
                 alert "すいません、エラーが起こりました。"
 
-    traceHandler = (position) ->
-        latLng = new google.maps.LatLng(position.coords.latitude,position.coords.longitude)
-        if pulsatingMarker
-            pulsatingMarker.setPosition latLng
+traceHandler = (position) ->
+    latLng = new google.maps.LatLng(position.coords.latitude,position.coords.longitude)
+    if pulsatingMarker
+        pulsatingMarker.setPosition latLng
+    else
+        pulsatingMarker = new google.maps.Marker
+            flat: true
+            icon: new google.maps.MarkerImage 'img/bluedot.png', null, null, new google.maps.Point(8, 8), new google.maps.Size(17, 17)
+            map: map
+            optimized: false
+            position: latLng
+            title: 'I might be here'
+            visible: true
+    map.setCenter latLng
+    if traceHeadingEnable and position.coords.heading?
+        transform = $map.css('-webkit-transform')
+        if /rotate(-?[\d.]+deg)/.test(transform)
+            transform = transform.replace(/rotate(-?[\d.]+deg)/, "rotate(#{-position.coords.heading}deg)")
         else
-            pulsatingMarker = new google.maps.Marker
-                flat: true
-                icon: new google.maps.MarkerImage 'img/bluedot.png', null, null, new google.maps.Point(8, 8), new google.maps.Size(17, 17)
-                map: map
-                optimized: false
-                position: latLng
-                title: 'I might be here'
-                visible: true
-        map.setCenter latLng
-        if traceHeadingEnable and position.coords.heading?
-            transform = $map.css('-webkit-transform')
-            if /rotate(-?[\d.]+deg)/.test(transform)
-                transform = transform.replace(/rotate(-?[\d.]+deg)/, "rotate(#{-position.coords.heading}deg)")
-            else
-                transform = transform + " rotate(#{-position.coords.heading}deg)"
-            $map.css('-webkit-transform', transform)
+            transform = transform + " rotate(#{-position.coords.heading}deg)"
+        $map.css('-webkit-transform', transform)
 
 initializeDOM = ->
     squareSize = Math.floor(Math.sqrt(Math.pow(innerWidth, 2) + Math.pow(innerHeight, 2)))
