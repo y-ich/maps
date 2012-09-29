@@ -13,32 +13,25 @@
   pulsatingMarker = null;
 
   initializeGoogleMaps = function() {
-    var destinationMarker, droppedMarker, getLocationHandler, myOptions, startMarker;
-    myOptions = (function() {
-      var last, lat, lng, zoom;
-      if (localStorage['last'] != null) {
-        last = JSON.parse(localStorage['last']);
-        lat = last.lat;
-        lng = last.lng;
-        zoom = last.zoom;
-      } else {
-        lat = 35.660389;
-        lng = 139.729225;
-        zoom = 14;
-      }
-      return {
-        zoom: zoom,
-        center: new google.maps.LatLng(lat, lng),
-        mapTypeId: google.maps.MapTypeId.ROADMAP,
-        disableDefaultUI: true
-      };
-    })();
+    var destinationMarker, droppedMarker, getLocationHandler, last, mapOptions, startMarker;
+    mapOptions = {
+      mapTypeId: google.maps.MapTypeId.ROADMAP,
+      disableDefaultUI: true
+    };
+    if (localStorage['last'] != null) {
+      last = JSON.parse(localStorage['last']);
+      mapOptions.center = new google.maps.LatLng(last.lat, last.lng);
+      mapOptions.zoom = last.zoom;
+    } else {
+      mapOptions.center = new google.maps.LatLng(35.660389, 139.729225);
+      mapOptions.zoom = 14;
+    }
     geocoder = new google.maps.Geocoder();
-    map = new google.maps.Map(document.getElementById("map"), myOptions);
+    map = new google.maps.Map(document.getElementById("map"), mapOptions);
     window.map = map;
     droppedMarker = new google.maps.Marker({
       map: map,
-      position: myOptions.center,
+      position: mapOptions.center,
       title: 'ドロップされたピン',
       visible: false
     });

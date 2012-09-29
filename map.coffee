@@ -9,28 +9,25 @@ map = null
 pulsatingMarker = null
 
 initializeGoogleMaps = ->
-    myOptions = (-> # if stored data exists, then restore, otherwise default value.
-        if localStorage['last']?
-            last = JSON.parse localStorage['last']
-            lat = last.lat
-            lng = last.lng
-            zoom = last.zoom
-        else
-            lat = 35.660389
-            lng = 139.729225
-            zoom = 14
-        { zoom: zoom
-        center: new google.maps.LatLng lat, lng
+    mapOptions =
         mapTypeId: google.maps.MapTypeId.ROADMAP
-        disableDefaultUI: true })()
+        disableDefaultUI: true
+    # if previous position data exists, then restore it, otherwise default value.
+    if localStorage['last']?
+        last = JSON.parse localStorage['last']
+        mapOptions.center = new google.maps.LatLng last.lat, last.lng
+        mapOptions.zoom = last.zoom
+    else
+        mapOptions.center = new google.maps.LatLng 35.660389, 139.729225
+        mapOptions.zoom = 14
 
     geocoder = new google.maps.Geocoder()
-    map = new google.maps.Map document.getElementById("map"), myOptions
+    map = new google.maps.Map document.getElementById("map"), mapOptions
     window.map = map # for debugging
 
     droppedMarker = new google.maps.Marker
         map: map
-        position: myOptions.center
+        position: mapOptions.center
         title: 'ドロップされたピン'
         visible: false
     startMarker = null
@@ -70,7 +67,7 @@ initializeGoogleMaps = ->
                 alert "すいません、エラーが起こりました。"
 
 traceHandler = (position) ->
-    latLng = new google.maps.LatLng(position.coords.latitude,position.coords.longitude)
+    latLng = new google.maps.LatLng position.coords.latitude,position.coords.longitude
     if pulsatingMarker
         pulsatingMarker.setPosition latLng
     else
