@@ -55,10 +55,12 @@ searchDirections = ->
                             distance = (result.routes[0].legs.map (e) -> e.distance.value).reduce (a, b) -> a + b
                             duration = (result.routes[0].legs.map (e) -> e.duration.value).reduce (a, b) -> a + b
                             $('#message').html("#{result.routes[0].summary}<br>#{secondToString duration}〜#{meterToString distance}")
+                when google.maps.DirectionsStatus.ZERO_RESULTS
+                    directionsRenderer.setMap null
+                    $('#message').html("見つかりませんでした。")
                 else
                     directionsRenderer.setMap null
-                    $('#message').html("#{status}")
-                    
+                    console.log status
 
 saveStatus = () ->
     pos = map.getCenter()

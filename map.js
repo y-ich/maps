@@ -98,9 +98,12 @@
               return $('#message').html("" + result.routes[0].summary + "<br>" + (secondToString(duration)) + "〜" + (meterToString(distance)));
           }
           break;
+        case google.maps.DirectionsStatus.ZERO_RESULTS:
+          directionsRenderer.setMap(null);
+          return $('#message').html("見つかりませんでした。");
         default:
           directionsRenderer.setMap(null);
-          return $('#message').html("" + status);
+          return console.log(status);
       }
     });
   };
