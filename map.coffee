@@ -10,6 +10,30 @@ pulsatingMarker = null
 directionsService = null
 directionsRenderer = null
 
+travelMode = -> google.maps.TravelMode[$('#travel-mode').children('.btn-primary').attr('id').toUpperCase()]
+
+searchDirections = ->
+    directionsService.route
+            destination: $('#destination').val()
+            origin: $('#origin').val()
+            travelMode: travelMode()
+        , (result, status) ->
+            switch status
+                when google.maps.DirectionsStatus.OK
+                    directionsRenderer.setMap map
+                    directionsRenderer.setDirections result
+                else
+                    directionsRenderer.setMap null
+
+saveStatus = () ->
+    pos = map.getCenter()
+    localStorage['last'] = JSON.stringify
+        lat: pos.lat()
+        lng: pos.lng()
+        zoom: map.getZoom()
+        origin: $('#origin').val()
+        destination: $('destination').val()
+
 initializeGoogleMaps = ->
     mapOptions =
         mapTypeId: google.maps.MapTypeId.ROADMAP
@@ -27,6 +51,7 @@ initializeGoogleMaps = ->
     map = new google.maps.Map document.getElementById("map"), mapOptions
     directionsService = new google.maps.DirectionsService()
     directionsRenderer = new google.maps.DirectionsRenderer()
+    window.directionsRenderer = directionsRenderer
     directionsRenderer.setMap map
     
     droppedMarker = new google.maps.Marker
@@ -42,18 +67,9 @@ initializeGoogleMaps = ->
         droppedMarker.setPosition event.latLng
 
     # This is a workaround for web app on home screen. There is no onpagehide event.
-    google.maps.event.addListener map, 'center_changed', () ->
-        pos = map.getCenter()
-        localStorage['last'] = JSON.stringify { lat: pos.lat(), lng: pos.lng(), zoom: map.getZoom() }
-
-    google.maps.event.addListener map, 'zoom_changed', () ->
-        pos = map.getCenter()
-        localStorage['last'] = JSON.stringify { lat: pos.lat(), lng: pos.lng(), zoom: map.getZoom() }
+    google.maps.event.addListener map, 'center_changed', saveStatus
+    google.maps.event.addListener map, 'zoom_changed', saveStatus
     
-
-    google.maps.event.addListener droppedMarker, 'click', (event) ->
-        new google.maps.StreetViewService().getPanoramaByLocation droppedMarker.getPosition(), 49, getLocationHandler
-
     getLocationHandler = (data, status) ->
         switch status
             when google.maps.StreetViewStatus.OK
@@ -69,6 +85,10 @@ initializeGoogleMaps = ->
                 alert "近くにストリートビューが見つかりませんでした。"
             else
                 alert "すいません、エラーが起こりました。"
+
+    google.maps.event.addListener droppedMarker, 'click', (event) ->
+        new google.maps.StreetViewService().getPanoramaByLocation droppedMarker.getPosition(), 49, getLocationHandler
+
 
 traceHandler = (position) ->
     latLng = new google.maps.LatLng position.coords.latitude,position.coords.longitude
@@ -93,6 +113,12 @@ traceHandler = (position) ->
         $map.css('-webkit-transform', transform)
 
 initializeDOM = ->
+    if localStorage['last']?
+        last = JSON.parse localStorage['last']
+        $('#origin').val(last.origin) if last.origin?
+        $('#destination').val(last.destination) if last.destination?
+        
+
     squareSize = Math.floor(Math.sqrt(Math.pow(innerWidth, 2) + Math.pow(innerHeight, 2)))
     $map = $('#map')
 #    $map.width(squareSize)
@@ -157,26 +183,25 @@ initializeDOM = ->
             $versatile.text '出発'
             $routeSearchFrame.css 'top', ''
 
+    $travelMode = $('#travel-mode')
+    $travelMode.children().on 'click', ->
+        $this = $(this)
+        return if $this.hasClass 'btn-primary'
+        $travelMode.children().removeClass 'btn-primary'
+        $this.addClass 'btn-primary'
+        searchDirections()
+        
     $versatile.on 'click', ->
         if $versatile.text() == '経路'
             $edit.text '編集'
             $versatile.text '出発'
             $routeSearchFrame.css 'top', ''
-            
-            directionsService.route
-                    destination: $('#destination').val()
-                    origin: $('#origin').val()
-                    travelMode: google.maps.TravelMode.WALKING
-                , (result, status) ->
-                    switch status
-                        when google.maps.DirectionsStatus.OK
-                            directionsRenderer.setDirections result
+            searchDirections()
 
 
     window.onpagehide = ->
         navigator.geolocation.clearWatch watchId unless watchId
-        pos = map.getCenter()
-        localStorage['last'] = JSON.stringify { lat: pos.lat(), lng: pos.lng(), zoom: map.getZoom() }
+        saveStatus()
 
 initializeGoogleMaps()
 initializeDOM()
