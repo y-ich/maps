@@ -88,9 +88,7 @@ traceHandler = (position) ->
             transform = transform + " rotate(#{-position.coords.heading}deg)"
         $map.css('-webkit-transform', transform)
 
-$mapframe = $('#map-frame')
-$mapframe.height window.innerHeight - $('#header').outerHeight(true) - $('#footer').outerHeight(true)
-squareSize = Math.floor(Math.sqrt(Math.pow($mapframe.width(), 2) + Math.pow($mapframe.height(), 2)))
+squareSize = Math.floor(Math.sqrt(Math.pow(innerWidth, 2) + Math.pow(innerHeight, 2)))
 $map = $('#map')
 $map.width(squareSize)
     .height(squareSize)

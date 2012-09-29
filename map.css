@@ -18,7 +18,8 @@
 	}
 }
 
-.container {
+
+html, body {
     width: 100%;
     height: 100%;
 }
@@ -44,11 +45,6 @@
 
 .search-query:focus + .icon-search {
     background-image: url("http://twitter.github.com/bootstrap/assets/img/glyphicons-halflings.png");
-}
-
-#map-frame {
-    width: 100%;
-    overflow: hidden;
 }
 
 #map {
@@ -88,6 +84,10 @@
     position: fixed;
     bottom: 0;
     width: 100%;
+    margin: 0;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: rgb(250,250,250);
 }
 
 #gps {

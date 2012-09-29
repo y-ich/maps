@@ -16,24 +16,22 @@
     <script src="http://maps.google.com/maps/api/js?sensor=true"></script>
 </head>
 <body>
-    <div class="container">
-        <div id="header" class="navbar">
-            <div class="navbar-inner">
-                <div class="navbar-search">
-                    <input id="address" type="text" class="search-query" placeholder="検索または住所">
-                    <div class="icon-search"></div>
-                </div>
+    <div id="map"></div>
+    <div id="header" class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+            <div class="navbar-search">
+                <input id="address" type="text" class="search-query" placeholder="検索または住所">
+                <div class="icon-search"></div>
             </div>
         </div>
-        <div id="map-frame"><div id="map"></div></div>
-        <div id="footer" class="btn-toolbar">
-            <button id="gps" class="btn"><i class="icon-globe"></i></button>
-            <div id="nav" class="btn-group">
-                <button id="search" class="btn btn-primary">検索</button>
-                <button id="route" class="btn disabled">経路</button>
-            </div>
-            <button id="option" class="btn disabled"><i class=" icon-info-sign"></i></button>
+    </div>
+    <div id="footer" class="btn-toolbar">
+        <button id="gps" class="btn"><i class="icon-globe"></i></button>
+        <div id="nav" class="btn-group">
+            <button id="search" class="btn btn-primary">検索</button>
+            <button id="route" class="btn disabled">経路</button>
         </div>
+        <button id="option" class="btn disabled"><i class=" icon-info-sign"></i></button>
     </div>
     <script src="js/jquery-1.8.2.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
