@@ -53,8 +53,10 @@ form {
 
 #map {
     position: relative;
-    left: 50%; /* for centering. margin will be defined by javascript. */
-    top: 50%; /* for centering. margin will be defined by javascript. */ 
+    width: 100%;
+    height: 100%;
+/*    left: 50%; /* for centering. margin will be defined by javascript. */
+/*    top: 50%; /* for centering. margin will be defined by javascript. */ 
     -webkit-transition: -webkit-transform 0.1s;
 }
 

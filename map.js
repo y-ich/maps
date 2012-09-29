@@ -121,7 +121,6 @@
     var $edit, $gps, $map, $navi, $route, $routeSearchFrame, $search, $versatile, squareSize;
     squareSize = Math.floor(Math.sqrt(Math.pow(innerWidth, 2) + Math.pow(innerHeight, 2)));
     $map = $('#map');
-    $map.width(squareSize).height(squareSize).css('margin', -squareSize / 2 + 'px');
     $gps = $('#gps');
     $gps.data('status', 'normal');
     $gps.on('click', function() {
@@ -137,11 +136,6 @@
             timeout: 30000
           });
         case 'trace-position':
-          $gps.data('status', 'trace-heading');
-          traceHeadingEnable = true;
-          $gps.children('i').removeClass('icon-globe');
-          return $gps.children('i').addClass('icon-hand-up');
-        case 'trace-heading':
           navigator.geolocation.clearWatch(watchId);
           watchId = null;
           $gps.data('status', 'normal');

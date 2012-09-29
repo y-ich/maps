@@ -95,9 +95,9 @@ traceHandler = (position) ->
 initializeDOM = ->
     squareSize = Math.floor(Math.sqrt(Math.pow(innerWidth, 2) + Math.pow(innerHeight, 2)))
     $map = $('#map')
-    $map.width(squareSize)
-        .height(squareSize)
-        .css('margin', - squareSize / 2 + 'px')
+#    $map.width(squareSize)
+#        .height(squareSize)
+#        .css('margin', - squareSize / 2 + 'px')
         
     $gps = $('#gps')
     $gps.data 'status', 'normal' 
@@ -112,11 +112,11 @@ initializeDOM = ->
                         console.log error.message
                     , { enableHighAccuracy: true, timeout: 30000 }
             when 'trace-position'
-                $gps.data 'status', 'trace-heading'
-                traceHeadingEnable = true
-                $gps.children('i').removeClass 'icon-globe'       
-                $gps.children('i').addClass 'icon-hand-up'
-            when 'trace-heading'
+#                $gps.data 'status', 'trace-heading'
+#                traceHeadingEnable = true
+#                $gps.children('i').removeClass 'icon-globe'       
+#                $gps.children('i').addClass 'icon-hand-up'
+#            when 'trace-heading'
                 navigator.geolocation.clearWatch watchId
                 watchId = null
                 $gps.data 'status', 'normal'
