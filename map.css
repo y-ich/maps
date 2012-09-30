@@ -28,6 +28,16 @@ form {
     margin: 0;
 }
 
+.control-label {
+    width: auto !important;
+}
+.controls {
+    margin-left: 40px !important;
+}
+.controls input {
+    width: 160px;
+}
+
 .navbar {
     margin-bottom: 0;
 }
@@ -101,6 +111,10 @@ form {
     width: 100%;
 }
 
+#navi-toolbar {
+    text-align: center; /* for centering of center buttons */
+}
+
 #navi-toolbar2 {
     display: none;
     position: absolute;
@@ -138,17 +152,12 @@ form {
     position: fixed;
     bottom: 0;
     width: 100%;
+    text-align: center; /* for centering of center buttons */
 }
 
 .btn-left {
-    position: relative; /* not absolute in order to give some height to parent */
-    left: 6px;
-}
-
-.btn-center {
     position: absolute;
-    left: 50%;
-    margin-left: -100px !important; /* these two lines are for centering */
+    left: 6px;
 }
 
 #search, #route {
