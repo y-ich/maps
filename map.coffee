@@ -275,6 +275,9 @@ initializeDOM = ->
             $('#navi-toolbar2').css 'display', 'block' if navigate.leg? and navigate.step?
             $routeSearchFrame.css 'top', ''
 
+    $('#edit2').on 'click', ->
+        $edit.trigger 'click'
+
     $('#switch').on 'click', ->
         tmp = $('#destination').val()
         $('#destination').val $('#origin').val()

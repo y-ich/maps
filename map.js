@@ -353,6 +353,9 @@
         return $routeSearchFrame.css('top', '');
       }
     });
+    $('#edit2').on('click', function() {
+      return $edit.trigger('click');
+    });
     $('#switch').on('click', function() {
       var tmp;
       tmp = $('#destination').val();
