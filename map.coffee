@@ -7,6 +7,7 @@ traceHeadingEnable = false
 geocoder = null
 map = null
 pulsatingMarker = null
+naviMarker = null
 directionsService = null
 directionsRenderer = null
 $origin = $('#origin')
@@ -71,6 +72,39 @@ saveStatus = () ->
         origin: $origin.val()
         destination: $destination.val()
 
+
+navigate = (str) ->
+    route = directionsRenderer.getDirections()?.routes[directionsRenderer.getRouteIndex()]
+    return unless route?
+    switch str
+        when 'start'
+            navigate.leg = 0
+            navigate.step = 0
+            $('#navi-toolbar2').css 'display', 'block'
+            naviMarker.setVisible true
+        when 'next'
+            if navigate.step < route.legs[navigate.leg].steps.length - 1
+                navigate.step += 1
+            else if navigate.leg < route.legs.length - 1
+                navigate.leg += 1            
+                navigate.step = 0
+        when 'previous'
+            if navigate.step > 0
+                navigate.step -= 1
+            else if navigate.leg > 0
+                navigate.leg -= 1
+                navigate.step = route.legs[navigate.leg].steps.legth - 1
+        
+    map.setZoom 15
+    step = route.legs[navigate.leg].steps[navigate.step]
+    naviMarker.setPosition step.start_location
+    map.setCenter step.start_location
+    $('#message').html step.instructions
+
+navigate.leg = null
+navigate.step = null
+
+
 initializeGoogleMaps = ->
     mapOptions =
         mapTypeId: google.maps.MapTypeId.ROADMAP
@@ -88,8 +122,13 @@ initializeGoogleMaps = ->
     map = new google.maps.Map document.getElementById("map"), mapOptions
     directionsService = new google.maps.DirectionsService()
     directionsRenderer = new google.maps.DirectionsRenderer()
-    window.directionsRenderer = directionsRenderer
     directionsRenderer.setMap map
+    google.maps.event.addListener directionsRenderer, 'directions_changed', ->
+        navigate.leg = null
+        navigate.step = null
+        $('#navi-toolbar2').css 'display', 'none'
+        naviMarker.setVisible false
+        
     
     droppedMarker = new google.maps.Marker
         map: map
@@ -98,6 +137,13 @@ initializeGoogleMaps = ->
         visible: false
     startMarker = null
     destinationMarker = null
+
+    naviMarker = new google.maps.Marker
+        flat: true
+        icon: new google.maps.MarkerImage('img/bluedot.png', null, null, new google.maps.Point(8, 8), new google.maps.Size(17, 17))
+        map: map
+        optimized: false
+        visible: false
 
     google.maps.event.addListener map, 'click', (event) ->
         droppedMarker.setVisible true
@@ -199,6 +245,8 @@ initializeDOM = ->
     $navi = $('#navi')
     $search = $('#search')
     $search.on 'click', ->
+        directionsRenderer.setMap null
+        naviMarker.setVisible false
         $route.removeClass 'btn-primary'
         $search.addClass 'btn-primary'
         $navi.toggle()
@@ -207,6 +255,7 @@ initializeDOM = ->
         $search.removeClass 'btn-primary'
         $route.addClass 'btn-primary'
         $navi.toggle()
+        directionsRenderer.setMap map
 
     $edit = $('#edit')
     $versatile = $('#versatile')
@@ -215,14 +264,16 @@ initializeDOM = ->
         if $edit.text() == '編集'
             $edit.text 'キャンセル'
             $versatile.text '経路'
+            $('#navi-toolbar2').css 'display', 'none'
             $routeSearchFrame.css 'top', '0px'
         else
             $edit.text '編集'
             $versatile.text '出発'
+            $('#navi-toolbar2').css 'display', 'block' if navigate.leg? and navigate.step?
             $routeSearchFrame.css 'top', ''
 
     $travelMode = $('#travel-mode')
-    $travelMode.children().on 'click', ->
+    $travelMode.children(':not(#transit)').on 'click', -> # disabled transit
         $this = $(this)
         return if $this.hasClass 'btn-primary'
         $travelMode.children().removeClass 'btn-primary'
@@ -230,12 +281,17 @@ initializeDOM = ->
         searchDirections()
         
     $versatile.on 'click', ->
-        if $versatile.text() == '経路'
-            $edit.text '編集'
-            $versatile.text '出発'
-            $routeSearchFrame.css 'top', ''
-            searchDirections()
+        switch $versatile.text()
+            when '経路'
+                $edit.text '編集'
+                $versatile.text '出発'
+                $routeSearchFrame.css 'top', ''
+                searchDirections()
+            when '出発'
+                navigate 'start'
 
+    $('#cursor-left').on 'click', -> navigate 'previous'
+    $('#cursor-right').on 'click', -> navigate 'next'       
 
     window.onpagehide = ->
         navigator.geolocation.clearWatch watchId unless watchId

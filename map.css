@@ -101,7 +101,12 @@ form {
     width: 100%;
 }
 
-#navi-toolbar {
+#navi-toolbar2 {
+    display: none;
+    position: absolute;
+    width: 100%;
+    top: 0;
+    background-color: transparent;
 }
 
 #navi-etc {
