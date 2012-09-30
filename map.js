@@ -123,7 +123,7 @@
   };
 
   navigate = function(str) {
-    var route, step, _ref;
+    var lengths, route, step, steps, _ref;
     route = (_ref = directionsRenderer.getDirections()) != null ? _ref.routes[directionsRenderer.getRouteIndex()] : void 0;
     if (route == null) {
       return;
@@ -155,6 +155,17 @@
     step = route.legs[navigate.leg].steps[navigate.step];
     naviMarker.setPosition(step.start_location);
     map.setCenter(step.start_location);
+    lengths = route.legs.map(function(e) {
+      return e.steps.length;
+    });
+    steps = navigate.leg === 0 ? navigate.step : lengths.slice(0, navigate.leg).reduce(function(a, b) {
+      return a + b;
+    });
+    $('#numbering').text((steps + 1) + '/' + (route.legs.map(function(e) {
+      return e.steps.length;
+    })).reduce(function(a, b) {
+      return a + b;
+    }));
     return $('#message').html(step.instructions);
   };
 
@@ -342,6 +353,14 @@
         return $routeSearchFrame.css('top', '');
       }
     });
+    $('#switch').on('click', function() {
+      var tmp;
+      tmp = $('#destination').val();
+      $('#destination').val($('#origin').val());
+      $('#origin').val(tmp);
+      return saveStatus();
+    });
+    $('#origin, #destination').on('changed', saveStatus);
     $travelMode = $('#travel-mode');
     $travelMode.children(':not(#transit)').on('click', function() {
       var $this;

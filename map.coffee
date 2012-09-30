@@ -99,6 +99,9 @@ navigate = (str) ->
     step = route.legs[navigate.leg].steps[navigate.step]
     naviMarker.setPosition step.start_location
     map.setCenter step.start_location
+    lengths = (route.legs.map (e) -> e.steps.length)
+    steps = if navigate.leg == 0 then navigate.step else lengths[0...navigate.leg].reduce (a, b) -> a + b
+    $('#numbering').text (steps + 1) + '/' + (route.legs.map (e) -> e.steps.length).reduce (a, b) -> a + b
     $('#message').html step.instructions
 
 navigate.leg = null
@@ -271,6 +274,14 @@ initializeDOM = ->
             $versatile.text '出発'
             $('#navi-toolbar2').css 'display', 'block' if navigate.leg? and navigate.step?
             $routeSearchFrame.css 'top', ''
+
+    $('#switch').on 'click', ->
+        tmp = $('#destination').val()
+        $('#destination').val $('#origin').val()
+        $('#origin').val tmp
+        saveStatus()
+
+    $('#origin, #destination').on 'changed', saveStatus
 
     $travelMode = $('#travel-mode')
     $travelMode.children(':not(#transit)').on 'click', -> # disabled transit
