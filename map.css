@@ -160,11 +160,12 @@ form {
     left: 6px;
 }
 
-#search, #route {
-width: 100px;
-}
-
 .btn-right {
     position: absolute;
     right: 6px;
 }
+
+#search, #route {
+width: 100px;
+}
+
