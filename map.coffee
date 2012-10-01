@@ -8,6 +8,10 @@ directionsRenderer = null
 $origin = $('#origin')
 $destination = $('#destination')
 
+
+mapSum = (array, fn) ->
+    array.map(fn).reduce (a, b) -> a + b
+
 # returns formatted string '?日?時間?分' from sec(number)
 secondToString = (sec) ->
     result = ''
@@ -22,6 +26,7 @@ secondToString = (sec) ->
     result += min + '分' if min > 0 and day == 0 and hour < 10
     result
     
+
 # returns formatted string '?km' or '?m' from sec(number)
 meterToString = (meter) ->
     if meter < 1000
@@ -30,35 +35,27 @@ meterToString = (meter) ->
         parseFloat((meter / 1000).toPrecision(2)) + 'km'
 
 
+# returns current travel mode on display
 getTravelMode = -> google.maps.TravelMode[$('#travel-mode').children('.btn-primary').attr('id').toUpperCase()]
 
-geocodeHandler = ->
-    geocodeHandler.geocoder.geocode {address : this.value }, (result, status) ->
-        if status is google.maps.GeocoderStatus.OK
-            map.setCenter result[0].geometry.location
-        else
-            alert status
-geocodeHandler.geocoder = new google.maps.Geocoder()
 
+# invokes to search directions and displays a result.
 searchDirections = ->
     searchDirections.service.route
             destination: $('#destination').val()
             origin: $('#origin').val()
             travelMode: getTravelMode()
         , (result, status) ->
-            window.result = result
             switch status
                 when google.maps.DirectionsStatus.OK
                     directionsRenderer.setMap map
                     directionsRenderer.setDirections result
+                    distance = mapSum result.routes[0].legs, (e) -> e.distance.value
+                    duration = mapSum result.routes[0].legs, (e) -> e.duration.value
                     switch getTravelMode()
                         when google.maps.TravelMode.WALKING
-                            distance = (result.routes[0].legs.map (e) -> e.distance.value).reduce (a, b) -> a + b
-                            duration = (result.routes[0].legs.map (e) -> e.duration.value).reduce (a, b) -> a + b
                             $('#message').html("#{secondToString duration}〜#{meterToString distance}〜#{result.routes[0].summary}")
                         when google.maps.TravelMode.DRIVING
-                            distance = (result.routes[0].legs.map (e) -> e.distance.value).reduce (a, b) -> a + b
-                            duration = (result.routes[0].legs.map (e) -> e.duration.value).reduce (a, b) -> a + b
                             $('#message').html("#{result.routes[0].summary}<br>#{secondToString duration}〜#{meterToString distance}")
                 when google.maps.DirectionsStatus.ZERO_RESULTS
                     directionsRenderer.setMap null
@@ -112,6 +109,14 @@ navigate = (str) ->
 navigate.leg = null
 navigate.step = null
 
+
+geocodeHandler = ->
+    geocodeHandler.geocoder.geocode {address : this.value }, (result, status) ->
+        if status is google.maps.GeocoderStatus.OK
+            map.setCenter result[0].geometry.location
+        else
+            alert status
+geocodeHandler.geocoder = new google.maps.Geocoder()
 
 initializeGoogleMaps = ->
     mapOptions =
