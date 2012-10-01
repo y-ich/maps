@@ -72,7 +72,7 @@ form {
     -webkit-transition: top 0.5s;
 }
 
-#map * {
+#map img {
     max-width: none; /* work around against a coherence between Google Maps and Bootstrap */
 }
 
