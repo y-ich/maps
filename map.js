@@ -59,27 +59,31 @@
       origin: $('#origin').val(),
       travelMode: getTravelMode()
     }, function(result, status) {
-      var distance, duration;
+      var distance, duration, index, message, summary;
+      message = '';
       switch (status) {
         case google.maps.DirectionsStatus.OK:
           directionsRenderer.setMap(map);
           directionsRenderer.setDirections(result);
-          distance = mapSum(result.routes[0].legs, function(e) {
+          index = 0;
+          if (result.routes.length > 1) {
+            message += "候補経路：全" + result.routes.length + "件中" + (index + 1) + "件目<br>";
+          }
+          distance = mapSum(result.routes[index].legs, function(e) {
             return e.distance.value;
           });
-          duration = mapSum(result.routes[0].legs, function(e) {
+          duration = mapSum(result.routes[index].legs, function(e) {
             return e.duration.value;
           });
-          switch (getTravelMode()) {
-            case google.maps.TravelMode.WALKING:
-              return $('#message').html("" + (secondToString(duration)) + "〜" + (meterToString(distance)) + "〜" + result.routes[0].summary);
-            case google.maps.TravelMode.DRIVING:
-              return $('#message').html("" + result.routes[0].summary + "<br>" + (secondToString(duration)) + "〜" + (meterToString(distance)));
+          summary = "" + (secondToString(duration)) + "〜" + (meterToString(distance)) + "〜" + result.routes[index].summary;
+          if (summary.length > innerWidth / 14) {
+            summary = "" + result.routes[index].summary + "<br>" + (secondToString(duration)) + "〜" + (meterToString(distance));
           }
-          break;
+          message += summary;
+          return $('#message').html(message);
         case google.maps.DirectionsStatus.ZERO_RESULTS:
           directionsRenderer.setMap(null);
-          return $('#message').html("見つかりませんでした。");
+          return $('#message').html("経路が見つかりませんでした。");
         default:
           directionsRenderer.setMap(null);
           return console.log(status);

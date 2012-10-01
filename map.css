@@ -118,12 +118,12 @@ form {
     width: 100%;
     top: 0;
     background-color: transparent;
+    font-size: inherit; /* font size of .btn-toolbar is 0 canceling here */
 }
 
 #numbering {
     display: inline-block;
     background-color: rgb(250,250,250);
-    font-size: 14px;
     line-height: 20px;
     width: 200px;
     height: 40px;

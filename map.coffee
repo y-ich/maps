@@ -46,20 +46,22 @@ searchDirections = ->
             origin: $('#origin').val()
             travelMode: getTravelMode()
         , (result, status) ->
+            message = ''
             switch status
                 when google.maps.DirectionsStatus.OK
                     directionsRenderer.setMap map
                     directionsRenderer.setDirections result
-                    distance = mapSum result.routes[0].legs, (e) -> e.distance.value
-                    duration = mapSum result.routes[0].legs, (e) -> e.duration.value
-                    switch getTravelMode()
-                        when google.maps.TravelMode.WALKING
-                            $('#message').html("#{secondToString duration}〜#{meterToString distance}〜#{result.routes[0].summary}")
-                        when google.maps.TravelMode.DRIVING
-                            $('#message').html("#{result.routes[0].summary}<br>#{secondToString duration}〜#{meterToString distance}")
+                    index = 0
+                    message += "候補経路：全#{result.routes.length}件中#{index + 1}件目<br>" if result.routes.length > 1
+                    distance = mapSum result.routes[index].legs, (e) -> e.distance.value
+                    duration = mapSum result.routes[index].legs, (e) -> e.duration.value
+                    summary = "#{secondToString duration}〜#{meterToString distance}〜#{result.routes[index].summary}"
+                    summary = "#{result.routes[index].summary}<br>#{secondToString duration}〜#{meterToString distance}" if summary.length > innerWidth / 14 # 14 is font size                        
+                    message += summary
+                    $('#message').html message
                 when google.maps.DirectionsStatus.ZERO_RESULTS
                     directionsRenderer.setMap null
-                    $('#message').html("見つかりませんでした。")
+                    $('#message').html "経路が見つかりませんでした。"
                 else
                     directionsRenderer.setMap null
                     console.log status
