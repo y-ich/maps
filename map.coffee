@@ -3,6 +3,7 @@
 
 map = null
 pulsatingMarker = null
+droppedMarker = null
 naviMarker = null
 directionsRenderer = null
 $origin = $('#origin')
@@ -362,6 +363,15 @@ initializeDOM = ->
             trafficLayer.setMap null
             $traffic.text '渋滞状況を表示'
         backToMap()
+
+    $('#replace-pin').on 'click', ->
+        droppedMarker.setPosition map.getCenter()
+        droppedMarker.setVisible true
+        backToMap()
+
+    $('#print').on 'click', ->
+        setTimeout window.print, 0
+        backToMap()        
         
     window.onpagehide = ->
         navigator.geolocation.clearWatch traceHandler.id unless traceHandler.id
