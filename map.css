@@ -41,7 +41,7 @@ form {
 .navbar {
     margin-bottom: 0;
 }
-  
+
 .navbar-search .search-query {
     padding-left: 29px;
 }
@@ -53,12 +53,23 @@ form {
     background-image: url("http://twitter.github.com/bootstrap/assets/img/glyphicons-halflings-white.png");
 }
 
+.navbar-search button {
+    position: absolute;
+    top: -2px;
+    right: 10px;
+}
+
 .navbar-search .search-query:focus, .navbar-search .search-query.focused {
     padding-left: 30px;
 }
 
 .search-query:focus + .icon-search {
     background-image: url("http://twitter.github.com/bootstrap/assets/img/glyphicons-halflings.png");
+}
+
+img.icon {
+    width: 14px;
+    height: 14px;
 }
 
 #map {
