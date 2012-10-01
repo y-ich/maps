@@ -46,6 +46,7 @@ searchDirections = ->
             origin: $('#origin').val()
             travelMode: getTravelMode()
         , (result, status) ->
+            $message = $('#message')
             message = ''
             switch status
                 when google.maps.DirectionsStatus.OK
@@ -56,7 +57,8 @@ searchDirections = ->
                     distance = mapSum result.routes[index].legs, (e) -> e.distance.value
                     duration = mapSum result.routes[index].legs, (e) -> e.duration.value
                     summary = "#{secondToString duration}〜#{meterToString distance}〜#{result.routes[index].summary}"
-                    summary = "#{result.routes[index].summary}<br>#{secondToString duration}〜#{meterToString distance}" if summary.length > innerWidth / 14 # 14 is font size                        
+                    if summary.length > innerWidth / parseInt($message.css('font-size')) # assuming the unit is px.
+                        summary = "#{result.routes[index].summary}<br>#{secondToString duration}〜#{meterToString distance}"
                     message += summary
                     $('#message').html message
                 when google.maps.DirectionsStatus.ZERO_RESULTS

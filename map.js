@@ -59,7 +59,8 @@
       origin: $('#origin').val(),
       travelMode: getTravelMode()
     }, function(result, status) {
-      var distance, duration, index, message, summary;
+      var $message, distance, duration, index, message, summary;
+      $message = $('#message');
       message = '';
       switch (status) {
         case google.maps.DirectionsStatus.OK:
@@ -76,7 +77,7 @@
             return e.duration.value;
           });
           summary = "" + (secondToString(duration)) + "〜" + (meterToString(distance)) + "〜" + result.routes[index].summary;
-          if (summary.length > innerWidth / 14) {
+          if (summary.length > innerWidth / parseInt($message.css('font-size'))) {
             summary = "" + result.routes[index].summary + "<br>" + (secondToString(duration)) + "〜" + (meterToString(distance));
           }
           message += summary;
