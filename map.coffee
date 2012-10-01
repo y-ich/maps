@@ -199,17 +199,21 @@ traceHandler = (position) ->
         $map.css('-webkit-transform', transform)
 
 initializeDOM = ->
+    $(document.body).css 'padding-top', $('#header').outerHeight(true) # padding corespondent with header
+
     if localStorage['last']?
         last = JSON.parse localStorage['last']
         $('#origin').val(last.origin) if last.origin?
         $('#destination').val(last.destination) if last.destination?
         
 
-    squareSize = Math.floor(Math.sqrt(Math.pow(innerWidth, 2) + Math.pow(innerHeight, 2)))
     $map = $('#map')
+# disabled heading trace
+#    squareSize = Math.floor(Math.sqrt(Math.pow(innerWidth, 2) + Math.pow(innerHeight, 2)))
 #    $map.width(squareSize)
 #        .height(squareSize)
 #        .css('margin', - squareSize / 2 + 'px')
+    $map.height innerHeight - $('#header').outerHeight(true) - $('#footer').outerHeight(true)
         
     $gps = $('#gps')
     $gps.data 'status', 'normal' 

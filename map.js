@@ -272,7 +272,8 @@
   };
 
   initializeDOM = function() {
-    var $edit, $gps, $map, $navi, $route, $routeSearchFrame, $search, $travelMode, $versatile, last, squareSize;
+    var $edit, $gps, $map, $navi, $route, $routeSearchFrame, $search, $travelMode, $versatile, last;
+    $(document.body).css('padding-top', $('#header').outerHeight(true));
     if (localStorage['last'] != null) {
       last = JSON.parse(localStorage['last']);
       if (last.origin != null) {
@@ -282,8 +283,8 @@
         $('#destination').val(last.destination);
       }
     }
-    squareSize = Math.floor(Math.sqrt(Math.pow(innerWidth, 2) + Math.pow(innerHeight, 2)));
     $map = $('#map');
+    $map.height(innerHeight - $('#header').outerHeight(true) - $('#footer').outerHeight(true));
     $gps = $('#gps');
     $gps.data('status', 'normal');
     $gps.on('click', function() {
