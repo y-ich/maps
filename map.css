@@ -62,13 +62,14 @@ form {
 }
 
 #map {
-    position: relative;
+    position: relative; /* to utilize padding of body */
     width: 100%;
     height: 100%;
 /* disable tracing heading, so commented out the below. */
 /*    left: 50%; /* for centering. margin will be defined by javascript. */
 /*    top: 50%; /* for centering. margin will be defined by javascript. */ 
     -webkit-transition: -webkit-transform 0.1s;
+    -webkit-transition: top 0.5s;
 }
 
 #map div.gmnoprint[title="I might be here"] {
@@ -174,3 +175,12 @@ form {
 width: 100px;
 }
 
+#option-container {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+}
+
+#option-container > * {
+    margin: 5px;
+}

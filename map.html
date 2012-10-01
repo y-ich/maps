@@ -29,6 +29,21 @@
     --></script>
 </head>
 <body>
+    <div id="option-container">
+        <div>
+            <button class="btn">ピンを置き換え</button>
+            <button class="btn">プリント</button>
+        </div>
+        <div>
+            <button id="traffic" class="btn btn-block">渋滞状況を表示</button>
+        </div>
+        <div id="map-type" class="btn-group">
+            <button id="roadmap" class="btn btn-primary">標準</button>
+            <button id="satellite" class="btn">航空写真</button>
+            <button id="hybrid" class="btn">地図+写真</button>
+            <button id="panel" class="btn disabled">リスト</button>
+        </div>
+    </div>
     <div id="map"></div>
     <div id="header" class="navbar navbar-fixed-top">
         <div class="navbar-inner">
@@ -82,7 +97,7 @@
             <button id="search" class="btn btn-primary">検索</button>
             <button id="route" class="btn">経路</button>
         </div>
-        <button id="option" class="btn btn-right disabled"><i class=" icon-info-sign"></i></button>
+        <button id="option" class="btn btn-right"><i class=" icon-info-sign"></i></button>
     </div>
     <script src="js/jquery-1.8.2.min.js"></script>
     <script src="js/bootstrap.min.js"></script>

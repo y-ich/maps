@@ -38,6 +38,9 @@ meterToString = (meter) ->
 # returns current travel mode on display
 getTravelMode = -> google.maps.TravelMode[$('#travel-mode').children('.btn-primary').attr('id').toUpperCase()]
 
+# returns current map type on display
+getMapType = -> google.maps.MapTypeId[$('#map-type').children('.btn-primary').attr('id').toUpperCase()]
+
 
 # invokes to search directions and displays a result.
 searchDirections = ->
@@ -126,7 +129,7 @@ geocodeHandler.geocoder = new google.maps.Geocoder()
 
 initializeGoogleMaps = ->
     mapOptions =
-        mapTypeId: google.maps.MapTypeId.ROADMAP
+        mapTypeId: getMapType()
         disableDefaultUI: true
     # if previous position data exists, then restore it, otherwise default value.
     if localStorage['last']?
@@ -216,14 +219,16 @@ traceHandler.id = null
 
 
 initializeDOM = ->
-    $(document.body).css 'padding-top', $('#header').outerHeight(true) # padding corespondent with header
-
+    # restore
     if localStorage['last']?
         last = JSON.parse localStorage['last']
         $('#origin').val(last.origin) if last.origin?
         $('#destination').val(last.destination) if last.destination?
-        
 
+    # layouts
+    
+    $(document.body).css 'padding-top', $('#header').outerHeight(true) # padding corespondent with header
+    $('#option-container').css 'bottom', $('#footer').outerHeight(true)
     $map = $('#map')
 # disabled heading trace
 #    squareSize = Math.floor(Math.sqrt(Math.pow(innerWidth, 2) + Math.pow(innerHeight, 2)))
@@ -232,6 +237,9 @@ initializeDOM = ->
 #        .css('margin', - squareSize / 2 + 'px')
     $map.height innerHeight - $('#header').outerHeight(true) - $('#footer').outerHeight(true)
         
+
+    # event handlers
+
     $gps = $('#gps')
     $gps.data 'status', 'normal' 
     $gps.on 'click', ->
@@ -323,6 +331,38 @@ initializeDOM = ->
     $('#cursor-left').on 'click', -> navigate 'previous'
     $('#cursor-right').on 'click', -> navigate 'next'       
 
+    backToMap = ->
+        $map.css 'top', ''
+        $option.removeClass 'btn-primary'
+        
+    $option = $('#option')
+    $option.on 'click', ->
+        if $option.hasClass 'btn-primary'
+            backToMap()
+        else
+            $map.css 'top', - $('#option-container').outerHeight(true) + 'px'
+            $option.addClass 'btn-primary'
+
+    $mapType = $('#map-type')
+    $mapType.children(':not(#panel)').on 'click', ->
+        $this = $(this)
+        return if $this.hasClass 'btn-primary'
+        $mapType.children().removeClass 'btn-primary'
+        $this.addClass 'btn-primary'
+        map.setMapTypeId getMapType()
+        backToMap()
+
+    $traffic = $('#traffic')
+    trafficLayer = new google.maps.TrafficLayer()
+    $traffic.on 'click', ->
+        if $traffic.text() is '渋滞状況を表示'
+            trafficLayer.setMap map
+            $traffic.text '渋滞状況を隠す'
+        else
+            trafficLayer.setMap null
+            $traffic.text '渋滞状況を表示'
+        backToMap()
+        
     window.onpagehide = ->
         navigator.geolocation.clearWatch traceHandler.id unless traceHandler.id
         saveStatus()
