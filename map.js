@@ -57,16 +57,18 @@
     return searchDirections.service.route({
       destination: $('#destination').val(),
       origin: $('#origin').val(),
+      provideRouteAlternatives: getTravelMode() !== google.maps.TravelMode.WALKING,
       travelMode: getTravelMode()
     }, function(result, status) {
       var $message, distance, duration, index, message, summary;
       $message = $('#message');
       message = '';
+      window.result = result;
       switch (status) {
         case google.maps.DirectionsStatus.OK:
           directionsRenderer.setMap(map);
           directionsRenderer.setDirections(result);
-          index = 0;
+          index = directionsRenderer.getRouteIndex();
           if (result.routes.length > 1) {
             message += "候補経路：全" + result.routes.length + "件中" + (index + 1) + "件目<br>";
           }

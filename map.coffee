@@ -44,15 +44,17 @@ searchDirections = ->
     searchDirections.service.route
             destination: $('#destination').val()
             origin: $('#origin').val()
+            provideRouteAlternatives: getTravelMode() isnt google.maps.TravelMode.WALKING
             travelMode: getTravelMode()
         , (result, status) ->
             $message = $('#message')
             message = ''
+            window.result = result
             switch status
                 when google.maps.DirectionsStatus.OK
                     directionsRenderer.setMap map
                     directionsRenderer.setDirections result
-                    index = 0
+                    index = directionsRenderer.getRouteIndex()
                     message += "候補経路：全#{result.routes.length}件中#{index + 1}件目<br>" if result.routes.length > 1
                     distance = mapSum result.routes[index].legs, (e) -> e.distance.value
                     duration = mapSum result.routes[index].legs, (e) -> e.duration.value
