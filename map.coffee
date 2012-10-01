@@ -1,20 +1,14 @@
 # Google Maps Web App
 # Copyright (C) ICHIKAWA, Yuji (New 3 Rs) 2012
 
-watchId = null # id for watchPosition
-traceHeadingEnable = false
-
-geocoder = null
 map = null
 pulsatingMarker = null
 naviMarker = null
-directionsService = null
 directionsRenderer = null
 $origin = $('#origin')
 $destination = $('#destination')
 
-travelMode = -> google.maps.TravelMode[$('#travel-mode').children('.btn-primary').attr('id').toUpperCase()]
-
+# returns formatted string '?日?時間?分' from sec(number)
 secondToString = (sec) ->
     result = ''
     min = Math.floor(sec / 60)
@@ -28,26 +22,36 @@ secondToString = (sec) ->
     result += min + '分' if min > 0 and day == 0 and hour < 10
     result
     
+# returns formatted string '?km' or '?m' from sec(number)
 meterToString = (meter) ->
-    result = ''
-    km = Math.floor(meter / 1000)
-    meter -= km * 1000
-    result += km + 'km' if km > 0
-    result += meter + 'm' if meter > 0 and km < 10
-    result
+    if meter < 1000
+        meter + 'm'
+    else
+        parseFloat((meter / 1000).toPrecision(2)) + 'km'
+
+
+getTravelMode = -> google.maps.TravelMode[$('#travel-mode').children('.btn-primary').attr('id').toUpperCase()]
+
+geocodeHandler = ->
+    geocodeHandler.geocoder.geocode {address : this.value }, (result, status) ->
+        if status is google.maps.GeocoderStatus.OK
+            map.setCenter result[0].geometry.location
+        else
+            alert status
+geocodeHandler.geocoder = new google.maps.Geocoder()
 
 searchDirections = ->
-    directionsService.route
+    searchDirections.service.route
             destination: $('#destination').val()
             origin: $('#origin').val()
-            travelMode: travelMode()
+            travelMode: getTravelMode()
         , (result, status) ->
             window.result = result
             switch status
                 when google.maps.DirectionsStatus.OK
                     directionsRenderer.setMap map
                     directionsRenderer.setDirections result
-                    switch travelMode()
+                    switch getTravelMode()
                         when google.maps.TravelMode.WALKING
                             distance = (result.routes[0].legs.map (e) -> e.distance.value).reduce (a, b) -> a + b
                             duration = (result.routes[0].legs.map (e) -> e.duration.value).reduce (a, b) -> a + b
@@ -62,6 +66,7 @@ searchDirections = ->
                 else
                     directionsRenderer.setMap null
                     console.log status
+searchDirections.service = new google.maps.DirectionsService()
 
 saveStatus = () ->
     pos = map.getCenter()
@@ -121,9 +126,7 @@ initializeGoogleMaps = ->
         mapOptions.center = new google.maps.LatLng 35.660389, 139.729225
         mapOptions.zoom = 14
 
-    geocoder = new google.maps.Geocoder()
     map = new google.maps.Map document.getElementById("map"), mapOptions
-    directionsService = new google.maps.DirectionsService()
     directionsRenderer = new google.maps.DirectionsRenderer()
     directionsRenderer.setMap map
     google.maps.event.addListener directionsRenderer, 'directions_changed', ->
@@ -190,13 +193,16 @@ traceHandler = (position) ->
             title: 'I might be here'
             visible: true
     map.setCenter latLng
-    if traceHeadingEnable and position.coords.heading?
+    if traceHandler.heading and position.coords.heading?
         transform = $map.css('-webkit-transform')
         if /rotate(-?[\d.]+deg)/.test(transform)
             transform = transform.replace(/rotate(-?[\d.]+deg)/, "rotate(#{-position.coords.heading}deg)")
         else
             transform = transform + " rotate(#{-position.coords.heading}deg)"
         $map.css('-webkit-transform', transform)
+traceHandler.heading = false
+traceHandler.id = null
+
 
 initializeDOM = ->
     $(document.body).css 'padding-top', $('#header').outerHeight(true) # padding corespondent with header
@@ -222,32 +228,27 @@ initializeDOM = ->
             when 'normal'
                 $gps.data 'status', 'trace-position'
                 $gps.addClass 'btn-primary'            
-                traceHeadingEnable = false
-                watchId = navigator.geolocation.watchPosition traceHandler
+                traceHandler.heading = false
+                traceHandler.id = navigator.geolocation.watchPosition traceHandler
                     , (error) ->
                         console.log error.message
                     , { enableHighAccuracy: true, timeout: 30000 }
             when 'trace-position'
 # disabled trace-heading
 #                $gps.data 'status', 'trace-heading'
-#                traceHeadingEnable = true
+#                traceHandler.heading = true
 #                $gps.children('i').removeClass 'icon-globe'       
 #                $gps.children('i').addClass 'icon-hand-up'
 #            when 'trace-heading'
-                navigator.geolocation.clearWatch watchId
-                watchId = null
+                navigator.geolocation.clearWatch traceHandler.id
+                traceHandler.id = null
                 $gps.data 'status', 'normal'
                 $map.css '-webkit-transform', $map.css('-webkit-transform').replace(/\s*rotate(-?[\d.]+deg)/, '')
                 $gps.removeClass 'btn-primary'  
                 $gps.children('i').removeClass 'icon-hand-up'
                 $gps.children('i').addClass 'icon-globe'          
             
-    $('#address').on 'change', ->
-        geocoder.geocode {address : this.value }, (result, status) ->
-            if status is google.maps.GeocoderStatus.OK
-                map.setCenter result[0].geometry.location
-            else
-                alert status
+    $('#address').on 'change', geocodeHandler
     
     $navi = $('#navi')
     $search = $('#search')
@@ -312,7 +313,7 @@ initializeDOM = ->
     $('#cursor-right').on 'click', -> navigate 'next'       
 
     window.onpagehide = ->
-        navigator.geolocation.clearWatch watchId unless watchId
+        navigator.geolocation.clearWatch traceHandler.id unless traceHandler.id
         saveStatus()
 
 initializeGoogleMaps()
