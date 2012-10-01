@@ -2,8 +2,10 @@
 # Copyright (C) ICHIKAWA, Yuji (New 3 Rs) 2012
 
 map = null
+deocoder = null
 pulsatingMarker = null
 droppedMarker = null
+droppedInfo = null
 naviMarker = null
 directionsRenderer = null
 $origin = $('#origin')
@@ -120,79 +122,30 @@ navigate.leg = null
 navigate.step = null
 
 
+# handlers
+
 geocodeHandler = ->
-    geocodeHandler.geocoder.geocode {address : this.value }, (result, status) ->
+    geocoder.geocode {address : this.value }, (result, status) ->
         if status is google.maps.GeocoderStatus.OK
             map.setCenter result[0].geometry.location
         else
             alert status
-geocodeHandler.geocoder = new google.maps.Geocoder()
 
-initializeGoogleMaps = ->
-    mapOptions =
-        mapTypeId: getMapType()
-        disableDefaultUI: true
-    # if previous position data exists, then restore it, otherwise default value.
-    if localStorage['last']?
-        last = JSON.parse localStorage['last']
-        mapOptions.center = new google.maps.LatLng last.lat, last.lng
-        mapOptions.zoom = last.zoom
-    else
-        mapOptions.center = new google.maps.LatLng 35.660389, 139.729225
-        mapOptions.zoom = 14
-
-    map = new google.maps.Map document.getElementById("map"), mapOptions
-    directionsRenderer = new google.maps.DirectionsRenderer()
-    directionsRenderer.setMap map
-    google.maps.event.addListener directionsRenderer, 'directions_changed', ->
-        navigate.leg = null
-        navigate.step = null
-        $('#navi-toolbar2').css 'display', 'none'
-        naviMarker.setVisible false
-        
-    
-    droppedMarker = new google.maps.Marker
-        map: map
-        position: mapOptions.center
-        title: 'ドロップされたピン'
-        visible: false
-    startMarker = null
-    destinationMarker = null
-
-    naviMarker = new google.maps.Marker
-        flat: true
-        icon: new google.maps.MarkerImage('img/bluedot.png', null, null, new google.maps.Point(8, 8), new google.maps.Size(17, 17))
-        map: map
-        optimized: false
-        visible: false
-
-    google.maps.event.addListener map, 'click', (event) ->
-        droppedMarker.setVisible true
-        droppedMarker.setPosition event.latLng
-
-    # This is a workaround for web app on home screen. There is no onpagehide event.
-    google.maps.event.addListener map, 'center_changed', saveStatus
-    google.maps.event.addListener map, 'zoom_changed', saveStatus
-    
-    getLocationHandler = (data, status) ->
-        switch status
-            when google.maps.StreetViewStatus.OK
-                sv = map.getStreetView()
-                sv.setPosition data.location.latLng
-                droppedMarker.setPosition data.location.latLng
-                sv.setPov
-                    heading: map.getHeading() ? 0
-                    pitch: 0
-                    zoom: 1
-                sv.setVisible true
-            when google.maps.StreetViewStatus.ZERO_RESULTS
-                alert "近くにストリートビューが見つかりませんでした。"
-            else
-                alert "すいません、エラーが起こりました。"
-
-    google.maps.event.addListener droppedMarker, 'click', (event) ->
-        new google.maps.StreetViewService().getPanoramaByLocation droppedMarker.getPosition(), 49, getLocationHandler
-
+getLocationHandler = (data, status) ->
+    switch status
+        when google.maps.StreetViewStatus.OK
+            sv = map.getStreetView()
+            sv.setPosition data.location.latLng
+            droppedMarker.setPosition data.location.latLng
+            sv.setPov
+                heading: map.getHeading() ? 0
+                pitch: 0
+                zoom: 1
+            sv.setVisible true
+        when google.maps.StreetViewStatus.ZERO_RESULTS
+            alert "近くにストリートビューが見つかりませんでした。"
+        else
+            alert "すいません、エラーが起こりました。"
 
 traceHandler = (position) ->
     latLng = new google.maps.LatLng position.coords.latitude,position.coords.longitude
@@ -218,6 +171,66 @@ traceHandler = (position) ->
 traceHandler.heading = false
 traceHandler.id = null
 
+# initializations
+
+initializeGoogleMaps = ->
+    mapOptions =
+        mapTypeId: getMapType()
+        disableDefaultUI: true
+    # if previous position data exists, then restore it, otherwise default value.
+    if localStorage['last']?
+        last = JSON.parse localStorage['last']
+        mapOptions.center = new google.maps.LatLng last.lat, last.lng
+        mapOptions.zoom = last.zoom
+    else
+        mapOptions.center = new google.maps.LatLng 35.660389, 139.729225
+        mapOptions.zoom = 14
+
+    map = new google.maps.Map document.getElementById("map"), mapOptions
+    geocoder = new google.maps.Geocoder()
+    directionsRenderer = new google.maps.DirectionsRenderer()
+    directionsRenderer.setMap map
+    google.maps.event.addListener directionsRenderer, 'directions_changed', ->
+        navigate.leg = null
+        navigate.step = null
+        $('#navi-toolbar2').css 'display', 'none'
+        naviMarker.setVisible false
+        
+    
+    droppedMarker = new google.maps.Marker
+        map: map
+        position: mapOptions.center
+        title: 'ドロップされたピン'
+        visible: false
+    droppedInfo = new google.maps.InfoWindow
+        content: '<div><button id="street-view" style="float:left"><i class="icon-user"></i></button><div style="float:left;position:relative;">ドロップされたピン<br><span id="dropped-message" style="font-size:10px"></span></div><i style="float:left" class="icon-chevron-right"></i></div>'
+        disableAutoPan: true
+        maxWidth: innerWidth
+        
+    startMarker = null
+    destinationMarker = null
+
+    naviMarker = new google.maps.Marker
+        flat: true
+        icon: new google.maps.MarkerImage('img/bluedot.png', null, null, new google.maps.Point(8, 8), new google.maps.Size(17, 17))
+        map: map
+        optimized: false
+        visible: false
+
+    google.maps.event.addListener map, 'click', (event) ->
+        droppedMarker.setVisible true
+        droppedMarker.setPosition event.latLng
+        droppedInfo.open map, droppedMarker
+        geocoder.geocode {latLng : event.latLng }, (result, status) ->
+            if status is google.maps.GeocoderStatus.OK
+                $('#dropped-message').text result[0].formatted_address.replace(/日本, /, '').replace(/.*〒[\d-]+/, '')
+            else
+                $('#dropped-message').text 'ドロップされたピン</br>情報がみつかりませんでした。'
+
+    # This is a workaround for web app on home screen. There is no onpagehide event.
+    google.maps.event.addListener map, 'center_changed', saveStatus
+    google.maps.event.addListener map, 'zoom_changed', saveStatus
+    
 
 initializeDOM = ->
     # restore
@@ -371,8 +384,11 @@ initializeDOM = ->
 
     $('#print').on 'click', ->
         setTimeout window.print, 0
-        backToMap()        
+        backToMap()
         
+    $(document).on 'click', '#street-view', (event) ->
+        new google.maps.StreetViewService().getPanoramaByLocation droppedMarker.getPosition(), 49, getLocationHandler
+
     window.onpagehide = ->
         navigator.geolocation.clearWatch traceHandler.id unless traceHandler.id
         saveStatus()
