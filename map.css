@@ -72,6 +72,10 @@ form {
     -webkit-transition: top 0.5s;
 }
 
+#map * {
+    max-width: none; /* work around against a coherence between Google Maps and Bootstrap */
+}
+
 #map div.gmnoprint[title="I might be here"] {
 	-webkit-animation: pulsate 1.5s ease-in-out infinite;
 	border:1pt solid #fff;

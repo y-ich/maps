@@ -45,6 +45,16 @@ getTravelMode = -> google.maps.TravelMode[$('#travel-mode').children('.btn-prima
 getMapType = -> google.maps.MapTypeId[$('#map-type').children('.btn-primary').attr('id').toUpperCase()]
 
 
+makeInfoMessage = (message) ->
+    """
+    <table id="info-window"><tr>
+        <td><button id="street-view" class="btn"><i class="icon-user"></i></button></td>
+        <td style="white-space: nowrap;"><div>ドロップされたピン<br><span id="dropped-message" style="font-size:10px">#{message}</span></div></td>
+        <td><button id="info" class"btn disabled"><i class="icon-chevron-right"></i></button></td>
+    </tr></table>
+    """
+
+
 # invokes to search directions and displays a result.
 searchDirections = ->
     searchDirections.service.route
@@ -195,17 +205,16 @@ initializeGoogleMaps = ->
         navigate.step = null
         $('#navi-toolbar2').css 'display', 'none'
         naviMarker.setVisible false
-        
-    
+
     droppedMarker = new google.maps.Marker
         map: map
         position: mapOptions.center
         title: 'ドロップされたピン'
         visible: false
     droppedInfo = new google.maps.InfoWindow
-        content: '<div><button id="street-view" style="float:left"><i class="icon-user"></i></button><div style="float:left;position:relative;">ドロップされたピン<br><span id="dropped-message" style="font-size:10px"></span></div><i style="float:left" class="icon-chevron-right"></i></div>'
         disableAutoPan: true
         maxWidth: innerWidth
+    droppedInfo.open map, droppedMarker
         
     startMarker = null
     destinationMarker = null
@@ -220,17 +229,18 @@ initializeGoogleMaps = ->
     google.maps.event.addListener map, 'click', (event) ->
         droppedMarker.setVisible true
         droppedMarker.setPosition event.latLng
-        droppedInfo.open map, droppedMarker
+        droppedInfo.setContent makeInfoMessage ''
         geocoder.geocode {latLng : event.latLng }, (result, status) ->
-            if status is google.maps.GeocoderStatus.OK
-                $('#dropped-message').text result[0].formatted_address.replace(/日本, /, '').replace(/.*〒[\d-]+/, '')
-            else
-                $('#dropped-message').text 'ドロップされたピン</br>情報がみつかりませんでした。'
+            message = if status is google.maps.GeocoderStatus.OK
+                    result[0].formatted_address.replace(/日本, /, '').replace(/.*〒[\d-]+/, '')
+                else
+                    'ドロップされたピン</br>情報がみつかりませんでした。'
+            droppedInfo.setContent makeInfoMessage message
 
     # This is a workaround for web app on home screen. There is no onpagehide event.
     google.maps.event.addListener map, 'center_changed', saveStatus
     google.maps.event.addListener map, 'zoom_changed', saveStatus
-    
+
 
 initializeDOM = ->
     # restore
