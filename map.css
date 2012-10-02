@@ -43,7 +43,9 @@ form {
 }
 
 .navbar-search .search-query {
-    padding-left: 29px;
+    margin: 0 4px 0 4px;
+    width: 270px;
+    padding-left: 25px;
 }
 
 .navbar-search .icon-search {
@@ -55,12 +57,9 @@ form {
 
 .navbar-search button {
     position: absolute;
-    top: -2px;
-    right: 10px;
-}
-
-.navbar-search .search-query:focus, .navbar-search .search-query.focused {
-    padding-left: 30px;
+    border-radius: 20px;
+    top: -1px;
+    right: 8px;
 }
 
 .search-query:focus + .icon-search {
