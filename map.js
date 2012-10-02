@@ -487,9 +487,6 @@
     $('.btn-bookmark').on('click', function() {
       return $('#window-bookmark').css('bottom', '0');
     });
-    $('.btn-reset').on('click', function() {
-      return $(this).parent()[0].reset();
-    });
     $('#bookmark-done').on('click', function() {
       return $('#window-bookmark').css('bottom', '-100%');
     });

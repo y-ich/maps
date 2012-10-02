@@ -134,6 +134,7 @@ navigate.step = null
 
 # handlers
 
+# NOTE: This handler is a method, not a function.
 geocodeHandler = ->
     return if this.value is ''
     geocoder.geocode {address : this.value }, (result, status) ->
@@ -420,9 +421,6 @@ initializeDOM = ->
 
     $('.btn-bookmark').on 'click', ->
         $('#window-bookmark').css 'bottom', '0'
-    
-    $('.btn-reset').on 'click', ->
-        $(this).parent()[0].reset()
     
     $('#bookmark-done').on 'click', ->
         $('#window-bookmark').css 'bottom', '-100%'

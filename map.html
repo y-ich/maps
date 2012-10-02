@@ -31,17 +31,17 @@
 <body>
     <div id="option-container">
         <div>
-            <button id="replace-pin" class="btn">ピンを置き換え</button>
-            <button id="print" class="btn">プリント</button>
+            <button id="replace-pin" type="button" class="btn">ピンを置き換え</button>
+            <button id="print" type="button" class="btn">プリント</button>
         </div>
         <div>
-            <button id="traffic" class="btn btn-block">渋滞状況を表示</button>
+            <button id="traffic" type="button" class="btn btn-block">渋滞状況を表示</button>
         </div>
         <div id="map-type" class="btn-group">
-            <button id="roadmap" class="btn btn-primary">標準</button>
-            <button id="satellite" class="btn">航空写真</button>
-            <button id="hybrid" class="btn">地図+写真</button>
-            <button id="panel" class="btn disabled">リスト</button>
+            <button id="roadmap" type="button" class="btn btn-primary">標準</button>
+            <button id="satellite" type="button" class="btn">航空写真</button>
+            <button id="hybrid" type="button" class="btn">地図+写真</button>
+            <button id="panel" type="button" class="btn disabled">リスト</button>
         </div>
     </div>
     <div id="map"></div>
@@ -51,41 +51,41 @@
                 <form>
                     <input id="address" type="text" class="search-query" placeholder="検索または住所">
                     <div class="icon-search"></div>
-                    <button class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
-                    <button class="btn btn-mini btn-bookmark"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
+                    <button type="reset" class="btn btn-mini"><i class="icon-remove-sign"></i></button>
+                    <button type="button" class="btn btn-mini btn-bookmark"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
                 </form>
             </div>
         </div>
         <div id="navi">
             <div id="navi-toolbar" class="btn-toolbar">
-                <button id="edit" class="btn btn-left">編集</button>
+                <button id="edit" type="button" class="btn btn-left">編集</button>
                 <div id="travel-mode" class="btn-group">
-                    <button id="driving" class="btn btn-primary"><img src="glyphicons/png/glyphicons_005_car.png" class="icon"></button>
-                    <button id="transit" class="btn disabled"><img src="glyphicons/png/glyphicons_014_train.png" class="icon"></button>
-                    <button id="walking" class="btn"><img src="glyphicons/png/glyphicons_284_pants.png" class="icon"></button>                
+                    <button id="driving" type="button" class="btn btn-primary"><img src="glyphicons/png/glyphicons_005_car.png" class="icon"></button>
+                    <button id="transit" type="button" class="btn disabled"><img src="glyphicons/png/glyphicons_014_train.png" class="icon"></button>
+                    <button id="walking" type="button" class="btn"><img src="glyphicons/png/glyphicons_284_pants.png" class="icon"></button>                
                 </div>
-                <button id="versatile" class="btn btn-right">出発</button>
+                <button id="versatile" type="button" class="btn btn-right">出発</button>
             </div>
             <div id="navi-toolbar2" class="btn-toolbar">
-                <button id="edit2" class="btn btn-left">編集</button>
+                <button id="edit2" type="button" class="btn btn-left">編集</button>
                 <div id="numbering"></div>
                 <div id="cursors" class="btn-group btn-right">
-                    <button id="cursor-left" class="btn"><i class="icon-arrow-left"></i></button>
-                    <button id="cursor-right" class="btn"><i class="icon-arrow-right"></i></button>
+                    <button id="cursor-left" type="button" class="btn"><i class="icon-arrow-left"></i></button>
+                    <button id="cursor-right" type="button" class="btn"><i class="icon-arrow-right"></i></button>
                 </div>
             </div>
             <div id="navi-etc">
                 <div id="message"></div>
                 <div id="route-search-frame">
-                    <button id="switch" class="btn"><i class="icon-random"></i></button>
+                    <button id="switch" type="button" class="btn"><i class="icon-random"></i></button>
                     <div id="route-search">
                         <form class="form-horizontal">
                             <div class="control-group">
                                 <label class="control-label">出発: </label>
                                 <div class="controls">
                                     <input id="origin" type="text" class="search-query">
-                                    <button class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
-                                    <button class="btn btn-mini btn-bookmark"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
+                                    <button type="reset" class="btn btn-mini"><i class="icon-remove-sign"></i></button>
+                                    <button type="button" class="btn btn-mini btn-bookmark"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
                                 </div>
                             </div>
                         </form>
@@ -94,8 +94,8 @@
                                 <label class="control-label">到着: </label>
                                 <div class="controls">
                                     <input id="destination" type="text" class="search-query">
-                                    <button class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
-                                    <button class="btn btn-mini btn-bookmark"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
+                                    <button type="reset" class="btn btn-mini"><i class="icon-remove-sign"></i></button>
+                                    <button type="button" class="btn btn-mini btn-bookmark"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
                                 </div>
                             </div>
                         </form>
@@ -106,19 +106,19 @@
         </div>
     </div>
     <div id="footer" class="btn-toolbar">
-        <button id="gps" class="btn btn-left"><img src="glyphicons/png/glyphicons_233_direction.png" class="icon"></button>
+        <button id="gps" type="button" class="btn btn-left"><img src="glyphicons/png/glyphicons_233_direction.png" class="icon"></button>
         <div id="nav" class="btn-group">
-            <button id="search" class="btn btn-primary">検索</button>
-            <button id="route" class="btn">経路</button>
+            <button id="search" type="button" class="btn btn-primary">検索</button>
+            <button id="route" type="button" class="btn">経路</button>
         </div>
-        <button id="option" class="btn btn-right"><i class=" icon-info-sign"></i></button>
+        <button id="option" type="button" class="btn btn-right"><i class=" icon-info-sign"></i></button>
     </div>
     <div id="window-bookmark">
         <div class="btn-toolbar">
             <div>マップ上に表示するブックマークを選択</div>
-            <button class="btn btn-left">編集</button>
+            <button type="button" class="btn btn-left">編集</button>
             <h4 style="display: inline;">ブックマーク</h4>
-            <button id="bookmark-done" class="btn btn-right">完了</button>
+            <button id="bookmark-done" type="button" class="btn btn-right">完了</button>
         </div>
         <div id="pin-list-frame">
             <table id="pin-list" class="table">
@@ -151,9 +151,9 @@
         </div>
         <div id="nav-bookmark" class="btn-toolbar">
             <div class="btn-group">
-                <button class="btn btn-primary">ブックマーク</button>
-                <button class="btn">履歴</button>
-                <button class="btn">連絡先</button>
+                <button type="button" class="btn btn-primary">ブックマーク</button>
+                <button type="button" class="btn">履歴</button>
+                <button type="button" class="btn">連絡先</button>
             </div>
         </div>
     </div>
