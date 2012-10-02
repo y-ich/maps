@@ -227,3 +227,7 @@ width: 100px;
 #pin-list tr {
     height :37px;
 }
+
+#current-place {
+    color: blue;
+}
