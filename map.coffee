@@ -260,7 +260,8 @@ initializeDOM = ->
 #        .height(squareSize)
 #        .css('margin', - squareSize / 2 + 'px')
     $map.height innerHeight - $('#header').outerHeight(true) - $('#footer').outerHeight(true)
-        
+    $('#pin-list-frame').css 'height', innerHeight - mapSum($('#window-bookmark .btn-toolbar').toArray(), (e) -> $(e).outerHeight(true)) + 'px'
+
 
     # event handlers
 
@@ -399,6 +400,12 @@ initializeDOM = ->
     $(document).on 'click', '#street-view', (event) ->
         new google.maps.StreetViewService().getPanoramaByLocation droppedMarker.getPosition(), 49, getLocationHandler
 
+    $('#bookmark-button').on 'click', ->
+        $('#window-bookmark').css 'bottom', '0'
+    
+    $('#bookmark-done').on 'click', ->
+        $('#window-bookmark').css 'bottom', '-100%'
+    
     window.onpagehide = ->
         navigator.geolocation.clearWatch traceHandler.id unless traceHandler.id
         saveStatus()

@@ -312,6 +312,9 @@
     $('#option-container').css('bottom', $('#footer').outerHeight(true));
     $map = $('#map');
     $map.height(innerHeight - $('#header').outerHeight(true) - $('#footer').outerHeight(true));
+    $('#pin-list-frame').css('height', innerHeight - mapSum($('#window-bookmark .btn-toolbar').toArray(), function(e) {
+      return $(e).outerHeight(true);
+    }) + 'px');
     $gps = $('#gps');
     $gps.data('status', 'normal');
     $gps.on('click', function() {
@@ -458,6 +461,12 @@
     });
     $(document).on('click', '#street-view', function(event) {
       return new google.maps.StreetViewService().getPanoramaByLocation(droppedMarker.getPosition(), 49, getLocationHandler);
+    });
+    $('#bookmark-button').on('click', function() {
+      return $('#window-bookmark').css('bottom', '0');
+    });
+    $('#bookmark-done').on('click', function() {
+      return $('#window-bookmark').css('bottom', '-100%');
     });
     return window.onpagehide = function() {
       if (!traceHandler.id) {

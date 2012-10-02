@@ -113,11 +113,13 @@ img.icon {
 }
 
 .btn-toolbar {
+    width: 100%;
     background-color: rgb(250,250,250);
     margin: 0;
     padding-top: 8px;
     padding-bottom: 8px;
     text-align: center; /* for centering of center buttons */
+    font-size: inherit; /* font size of .btn-toolbar is 0 canceling here */
 }
 
 #navi {
@@ -130,10 +132,8 @@ img.icon {
 #navi-toolbar2 {
     display: none;
     position: absolute;
-    width: 100%;
     top: 0;
     background-color: transparent;
-    font-size: inherit; /* font size of .btn-toolbar is 0 canceling here */
 }
 
 #numbering {
@@ -197,4 +197,30 @@ width: 100px;
 
 #option-container > * {
     margin: 5px;
+}
+
+#window-bookmark {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    bottom: -100%;
+    -webkit-transition: bottom 1s;
+    z-index: 100000;
+}
+
+#nav-bookmark {
+    position: absolute;
+    bottom: 0;
+}
+
+#pin-list-frame {
+    height: 300px;
+    overflow: scroll;
+}
+#pin-list {
+    background-color: white;
+}
+
+#pin-list tr {
+    height :37px;
 }
