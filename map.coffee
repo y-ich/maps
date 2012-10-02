@@ -10,6 +10,7 @@ naviMarker = null
 directionsRenderer = null
 $origin = $('#origin')
 $destination = $('#destination')
+bookmarkContext = 'address'
 
 
 mapSum = (array, fn) ->
@@ -420,11 +421,23 @@ initializeDOM = ->
         new google.maps.StreetViewService().getPanoramaByLocation droppedMarker.getPosition(), 49, getLocationHandler
 
     $('.btn-bookmark').on 'click', ->
+        bookmarkContext = $(this).siblings('input').attr 'id'
         $('#window-bookmark').css 'bottom', '0'
     
     $('#bookmark-done').on 'click', ->
         $('#window-bookmark').css 'bottom', '-100%'
     
+    $('#pin-list td').on 'click', ->
+        name = $(this).data('object-name')
+        return unless name? and name isnt ''
+#        switch bookmarkContext
+#            when 'address'
+#                if name is 'pulsatingMarker'
+#                    startTrace()
+#            when 'origin'
+#            when 'destination'
+        $('#window-bookmark').css 'bottom', '-100%'
+            
     window.onpagehide = ->
         navigator.geolocation.clearWatch traceHandler.id unless traceHandler.id
         saveStatus()

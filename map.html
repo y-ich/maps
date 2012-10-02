@@ -85,7 +85,7 @@
                                 <div class="controls">
                                     <input id="origin" type="text" class="search-query">
                                     <button type="reset" class="btn btn-mini"><i class="icon-remove-sign"></i></button>
-                                    <button type="button" class="btn btn-mini btn-bookmark"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
+                                    <button type="button" class="btn btn-mini btn-bookmark disabled"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
                                 </div>
                             </div>
                         </form>
@@ -95,7 +95,7 @@
                                 <div class="controls">
                                     <input id="destination" type="text" class="search-query">
                                     <button type="reset" class="btn btn-mini"><i class="icon-remove-sign"></i></button>
-                                    <button type="button" class="btn btn-mini btn-bookmark"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
+                                    <button type="button" class="btn btn-mini btn-bookmark disabled"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
                                 </div>
                             </div>
                         </form>
@@ -116,14 +116,14 @@
     <div id="window-bookmark">
         <div class="btn-toolbar">
             <div>マップ上に表示するブックマークを選択</div>
-            <button type="button" class="btn btn-left">編集</button>
+            <button type="button" class="btn btn-left disabled">編集</button>
             <h4 style="display: inline;">ブックマーク</h4>
             <button id="bookmark-done" type="button" class="btn btn-right">完了</button>
         </div>
         <div id="pin-list-frame">
             <table id="pin-list" class="table">
-                <tr><td id="current-place">現在地</td></tr>
-                <tr><td>ドロップされたピン</td></tr>
+                <tr><td data-object-name="pulsatingMarker">現在地</td></tr>
+                <tr><td data-object-name="droppedMarker">ドロップされたピン</td></tr>
                 <tr><td></td></tr>
                 <tr><td></td></tr>
                 <tr><td></td></tr>
@@ -152,8 +152,8 @@
         <div id="nav-bookmark" class="btn-toolbar">
             <div class="btn-group">
                 <button type="button" class="btn btn-primary">ブックマーク</button>
-                <button type="button" class="btn">履歴</button>
-                <button type="button" class="btn">連絡先</button>
+                <button type="button" class="btn disabled">履歴</button>
+                <button type="button" class="btn disabled">連絡先</button>
             </div>
         </div>
     </div>
