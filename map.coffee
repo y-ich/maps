@@ -2,15 +2,74 @@
 # Copyright (C) ICHIKAWA, Yuji (New 3 Rs) 2012
 
 map = null
+traceState = 'normal'
 geocoder = null
 pulsatingMarker = null
 droppedMarker = null
 droppedInfo = null
 naviMarker = null
 directionsRenderer = null
+$map = null
+$gps = null
 $origin = $('#origin')
 $destination = $('#destination')
 bookmarkContext = 'address'
+
+
+# classes
+
+class MapState
+    constructor: ->
+    update: ->
+    gpsClicked: -> @
+    moved: -> @
+    bookmarkClicked: -> @
+    currentPositionClicked: -> @
+    @NORMAL: new MapState()
+    @TRACE_POSITION: new MapState()
+    @TRACE_HEADING: new MapState()
+
+MapState.NORMAL.update = ->
+    navigator.geolocation.clearWatch traceHandler.id if traceHandler.id?
+    traceHandler.id = null
+    $map.css '-webkit-transform', $map.css('-webkit-transform').replace(/\s*rotate(-?[\d.]+deg)/, '')
+    $gps.removeClass('btn-primary')
+    # need to restore icon
+MapState.NORMAL.gpsClicked = -> MapState.TRACE_POSITION
+MapState.NORMAL.currentPositionClicked = -> MapState.TRACE_POSITION
+MapState.TRACE_POSITION.update = ->
+    $gps.addClass 'btn-primary'            
+    traceHandler.heading = false
+    traceHandler.id = navigator.geolocation.watchPosition traceHandler
+        , (error) ->
+            console.log error.message
+        , { enableHighAccuracy: true, timeout: 30000 }
+MapState.TRACE_POSITION.gpsClicked = -> MapState.NORMAL # disabled TRACE_HEADING
+MapState.TRACE_POSITION.moved = -> MapState.NORMAL
+MapState.TRACE_HEADING.update = ->
+    traceHandler.heading = true
+    # need to change icon
+MapState.TRACE_HEADING.gpsClicked = -> MapState.NORMAL
+MapState.TRACE_HEADING.moved = -> MapState.NORMAL
+MapState.TRACE_HEADING.bookmarkClicked = -> MapState.TRACE_POSITION
+
+class MapFSM
+    constructor: (@state) ->
+
+    setState: (state) ->
+        return if @state is state
+        @state = state
+        @state.update()
+        
+    gpsClicked: -> @setState @state.gpsClicked()
+    
+    moved: -> @setState @state.moved()
+        
+    bookmarkClicked: -> @setState @state.bookmarkClicked()
+
+    currentPositionClicked: -> @setState @state.currentPositionClicked()   
+
+mapFSM = new MapFSM(MapState.NORMAL)
 
 
 mapSum = (array, fn) ->
@@ -240,6 +299,7 @@ initializeGoogleMaps = ->
                     'ドロップされたピン</br>情報がみつかりませんでした。'
             droppedInfo.setContent makeInfoMessage message
 
+    google.maps.event.addListener map, 'dragstart', -> mapFSM.moved()
     # This is a workaround for web app on home screen. There is no onpagehide event.
     google.maps.event.addListener map, 'center_changed', saveStatus
     google.maps.event.addListener map, 'zoom_changed', saveStatus
@@ -274,31 +334,7 @@ initializeDOM = ->
     # event handlers
 
     $gps = $('#gps')
-    $gps.data 'status', 'normal' 
-    $gps.on 'click', ->
-        switch $gps.data 'status'
-            when 'normal'
-                $gps.data 'status', 'trace-position'
-                $gps.addClass 'btn-primary'            
-                traceHandler.heading = false
-                traceHandler.id = navigator.geolocation.watchPosition traceHandler
-                    , (error) ->
-                        console.log error.message
-                    , { enableHighAccuracy: true, timeout: 30000 }
-            when 'trace-position'
-# disabled trace-heading
-#                $gps.data 'status', 'trace-heading'
-#                traceHandler.heading = true
-#                $gps.children('i').removeClass 'icon-globe'       
-#                $gps.children('i').addClass 'icon-hand-up'
-#            when 'trace-heading'
-                navigator.geolocation.clearWatch traceHandler.id
-                traceHandler.id = null
-                $gps.data 'status', 'normal'
-                $map.css '-webkit-transform', $map.css('-webkit-transform').replace(/\s*rotate(-?[\d.]+deg)/, '')
-                $gps.removeClass 'btn-primary'  
-                $gps.children('i').removeClass 'icon-hand-up'
-                $gps.children('i').addClass 'icon-globe'          
+    $gps.on 'click', -> mapFSM.gpsClicked()
             
     $('.search-query').parent().on 'submit', ->
         return false
@@ -422,6 +458,7 @@ initializeDOM = ->
 
     $('.btn-bookmark').on 'click', ->
         bookmarkContext = $(this).siblings('input').attr 'id'
+        mapFSM.bookmarkClicked() if bookmarkContext is 'address'
         $('#window-bookmark').css 'bottom', '0'
     
     $('#bookmark-done').on 'click', ->
@@ -430,10 +467,10 @@ initializeDOM = ->
     $('#pin-list td').on 'click', ->
         name = $(this).data('object-name')
         return unless name? and name isnt ''
-#        switch bookmarkContext
-#            when 'address'
-#                if name is 'pulsatingMarker'
-#                    startTrace()
+        switch bookmarkContext
+            when 'address'
+                if name is 'pulsatingMarker'
+                    mapFSM.currentPositionClicked()
 #            when 'origin'
 #            when 'destination'
         $('#window-bookmark').css 'bottom', '-100%'
