@@ -46,6 +46,7 @@ form {
     margin: 0 4px 0 4px;
     width: 270px;
     padding-left: 25px;
+    /* consistency between fixed padding and relative width is difficult. so fixed for iPhone. */
 }
 
 .navbar-search .icon-search {
@@ -190,6 +191,7 @@ width: 100px;
 }
 
 #option-container {
+    display: none;
     position: absolute;
     width: 100%;
     text-align: center;
@@ -216,6 +218,7 @@ width: 100px;
 #pin-list-frame {
     height: 300px;
     overflow: scroll;
+    -webkit-overflow-scrolling: touch;
 }
 #pin-list {
     background-color: white;

@@ -299,6 +299,12 @@
 
   initializeDOM = function() {
     var $edit, $gps, $map, $mapType, $navi, $option, $route, $routeSearchFrame, $search, $traffic, $travelMode, $versatile, backToMap, last, trafficLayer;
+    document.addEventListener('touchmove', function(event) {
+      return event.preventDefault();
+    });
+    $('#pin-list-frame').on('touchmove', function(event) {
+      return event.stopPropagation();
+    });
     if (localStorage['last'] != null) {
       last = JSON.parse(localStorage['last']);
       if (last.origin != null) {
@@ -419,6 +425,7 @@
     };
     $option = $('#option');
     $option.on('click', function() {
+      $('#option-container').css('display', 'block');
       if ($option.hasClass('btn-primary')) {
         return backToMap();
       } else {

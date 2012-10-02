@@ -243,6 +243,11 @@ initializeGoogleMaps = ->
 
 
 initializeDOM = ->
+    document.addEventListener 'touchmove', (event) ->
+        event.preventDefault()
+    $('#pin-list-frame').on 'touchmove', (event) ->
+        event.stopPropagation()
+    
     # restore
     if localStorage['last']?
         last = JSON.parse localStorage['last']
@@ -362,6 +367,8 @@ initializeDOM = ->
         
     $option = $('#option')
     $option.on 'click', ->
+        $('#option-container').css 'display', 'block' # option-container is not visible in order to let startup clear.
+
         if $option.hasClass 'btn-primary'
             backToMap()
         else
