@@ -170,6 +170,10 @@ img.icon {
     float: left;
 }
 
+#switch {
+    margin: 20px 4px 0 4px;
+}
+
 #footer {
     position: fixed;
     bottom: 0;

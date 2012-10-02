@@ -2,7 +2,7 @@
 # Copyright (C) ICHIKAWA, Yuji (New 3 Rs) 2012
 
 map = null
-deocoder = null
+geocoder = null
 pulsatingMarker = null
 droppedMarker = null
 droppedInfo = null
@@ -135,6 +135,7 @@ navigate.step = null
 # handlers
 
 geocodeHandler = ->
+    return if this.value is ''
     geocoder.geocode {address : this.value }, (result, status) ->
         if status is google.maps.GeocoderStatus.OK
             map.setCenter result[0].geometry.location
@@ -297,7 +298,17 @@ initializeDOM = ->
                 $gps.children('i').removeClass 'icon-hand-up'
                 $gps.children('i').addClass 'icon-globe'          
             
+    $('.search-query').parent().on 'submit', ->
+        return false
+        
     $('#address').on 'change', geocodeHandler
+    $('.search-query').on 'keyup', -> # textInput, keypress is before inputting a character.
+        $this = $(this)
+        if $this.val() is ''
+            $this.siblings('.btn-bookmark').css('display', 'block')
+        else
+            $this.siblings('.btn-bookmark').css('display', 'none')
+    
     
     $navi = $('#navi')
     $search = $('#search')
@@ -407,8 +418,11 @@ initializeDOM = ->
     $(document).on 'click', '#street-view', (event) ->
         new google.maps.StreetViewService().getPanoramaByLocation droppedMarker.getPosition(), 49, getLocationHandler
 
-    $('#bookmark-button').on 'click', ->
+    $('.btn-bookmark').on 'click', ->
         $('#window-bookmark').css 'bottom', '0'
+    
+    $('.btn-reset').on 'click', ->
+        $(this).parent()[0].reset()
     
     $('#bookmark-done').on 'click', ->
         $('#window-bookmark').css 'bottom', '-100%'
