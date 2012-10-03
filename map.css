@@ -226,6 +226,7 @@ width: 100px;
 }
 #pin-list {
     background-color: white;
+    margin-bottom: 0;
 }
 
 #pin-list tr {

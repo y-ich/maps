@@ -2,7 +2,6 @@
 # Copyright (C) ICHIKAWA, Yuji (New 3 Rs) 2012
 
 map = null
-traceState = 'normal'
 geocoder = null
 pulsatingMarker = null
 droppedMarker = null
@@ -13,21 +12,28 @@ $map = null
 $gps = null
 $origin = $('#origin')
 $destination = $('#destination')
+mapFSM = null
 bookmarkContext = 'address'
 
 
 # classes
 
+# abstract class for map's state
+# Concrete instances are class constant.
 class MapState
     constructor: (@name)-> 
+
+    # concrete instances
+    @NORMAL: new MapState('normal')
+    @TRACE_POSITION: new MapState('trace_position')
+    @TRACE_HEADING: new MapState('trace_heading')
+
+    # all methods should return a state for a kind of delegation
     update: -> @
     gpsClicked: -> @
     moved: -> @
     bookmarkClicked: -> @
     currentPositionClicked: -> @
-    @NORMAL: new MapState('normal')
-    @TRACE_POSITION: new MapState('trace_position')
-    @TRACE_HEADING: new MapState('trace_heading')
 
 MapState.NORMAL.update = ->
     navigator.geolocation.clearWatch traceHandler.id if traceHandler.id?
@@ -72,6 +78,8 @@ for name, method of MapState.prototype when typeof method is 'function'
 
 mapFSM = new MapFSM(MapState.NORMAL)
 
+
+# functions 
 
 mapSum = (array, fn) ->
     array.map(fn).reduce (a, b) -> a + b
