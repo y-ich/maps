@@ -19,24 +19,26 @@ bookmarkContext = 'address'
 # classes
 
 class MapState
-    constructor: ->
-    update: ->
+    constructor: (@name)-> 
+    update: -> @
     gpsClicked: -> @
     moved: -> @
     bookmarkClicked: -> @
     currentPositionClicked: -> @
-    @NORMAL: new MapState()
-    @TRACE_POSITION: new MapState()
-    @TRACE_HEADING: new MapState()
+    @NORMAL: new MapState('normal')
+    @TRACE_POSITION: new MapState('trace_position')
+    @TRACE_HEADING: new MapState('trace_heading')
 
 MapState.NORMAL.update = ->
     navigator.geolocation.clearWatch traceHandler.id if traceHandler.id?
     traceHandler.id = null
     $map.css '-webkit-transform', $map.css('-webkit-transform').replace(/\s*rotate(-?[\d.]+deg)/, '')
     $gps.removeClass('btn-primary')
-    # need to restore icon
+    # need to restore icon if implementing TRACE_HEADING
+    @
 MapState.NORMAL.gpsClicked = -> MapState.TRACE_POSITION
 MapState.NORMAL.currentPositionClicked = -> MapState.TRACE_POSITION
+
 MapState.TRACE_POSITION.update = ->
     $gps.addClass 'btn-primary'            
     traceHandler.heading = false
@@ -44,11 +46,14 @@ MapState.TRACE_POSITION.update = ->
         , (error) ->
             console.log error.message
         , { enableHighAccuracy: true, timeout: 30000 }
+    @
 MapState.TRACE_POSITION.gpsClicked = -> MapState.NORMAL # disabled TRACE_HEADING
 MapState.TRACE_POSITION.moved = -> MapState.NORMAL
+
 MapState.TRACE_HEADING.update = ->
     traceHandler.heading = true
     # need to change icon
+    @
 MapState.TRACE_HEADING.gpsClicked = -> MapState.NORMAL
 MapState.TRACE_HEADING.moved = -> MapState.NORMAL
 MapState.TRACE_HEADING.bookmarkClicked = -> MapState.TRACE_POSITION
@@ -60,14 +65,10 @@ class MapFSM
         return if @state is state
         @state = state
         @state.update()
-        
-    gpsClicked: -> @setState @state.gpsClicked()
-    
-    moved: -> @setState @state.moved()
-        
-    bookmarkClicked: -> @setState @state.bookmarkClicked()
 
-    currentPositionClicked: -> @setState @state.currentPositionClicked()   
+for name, method of MapState.prototype when typeof method is 'function'
+    MapFSM.prototype[name] = ((name) ->
+        -> this.setState this.state[name]())(name) # substantiation of name
 
 mapFSM = new MapFSM(MapState.NORMAL)
 
