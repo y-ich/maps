@@ -16,7 +16,7 @@ $origin = null
 $destination = null
 mapFSM = null
 bookmarkContext = null
-
+watchId = null
 
 # classes
 
@@ -38,8 +38,6 @@ class MapState
     currentPositionClicked: -> @
 
 MapState.NORMAL.update = ->
-    navigator.geolocation.clearWatch traceHandler.id if traceHandler.id?
-    traceHandler.id = null
     $map.css '-webkit-transform', $map.css('-webkit-transform').replace(/\s*rotate(-?[\d.]+deg)/, '')
     $gps.removeClass('btn-primary')
     # need to restore icon if implementing TRACE_HEADING
@@ -48,18 +46,12 @@ MapState.NORMAL.gpsClicked = -> MapState.TRACE_POSITION
 MapState.NORMAL.currentPositionClicked = -> MapState.TRACE_POSITION
 
 MapState.TRACE_POSITION.update = ->
-    $gps.addClass 'btn-primary'            
-    traceHandler.heading = false
-    traceHandler.id = navigator.geolocation.watchPosition traceHandler
-        , (error) ->
-            console.log error.message
-        , { enableHighAccuracy: true, timeout: 30000 }
+    $gps.addClass 'btn-primary'
     @
 MapState.TRACE_POSITION.gpsClicked = -> MapState.NORMAL # disabled TRACE_HEADING
 MapState.TRACE_POSITION.moved = -> MapState.NORMAL
 
 MapState.TRACE_HEADING.update = ->
-    traceHandler.heading = true
     # need to change icon
     @
 MapState.TRACE_HEADING.gpsClicked = -> MapState.NORMAL
@@ -68,6 +60,8 @@ MapState.TRACE_HEADING.bookmarkClicked = -> MapState.TRACE_POSITION
 
 class MapFSM
     constructor: (@state) ->
+
+    is: (state) -> @state is state
 
     setState: (state) ->
         return if @state is state
@@ -241,16 +235,14 @@ traceHandler = (position) ->
             position: latLng
             title: 'I might be here'
             visible: true
-    map.setCenter latLng
-    if traceHandler.heading and position.coords.heading?
+    map.setCenter latLng unless mapFSM.is MapState.NORMAL
+    if mapFSM.is MapState.TRACE_HEADING and position.coords.heading?
         transform = $map.css('-webkit-transform')
         if /rotate(-?[\d.]+deg)/.test(transform)
             transform = transform.replace(/rotate(-?[\d.]+deg)/, "rotate(#{-position.coords.heading}deg)")
         else
             transform = transform + " rotate(#{-position.coords.heading}deg)"
         $map.css('-webkit-transform', transform)
-traceHandler.heading = false
-traceHandler.id = null
 
 # initializations
 
@@ -488,8 +480,12 @@ initializeDOM = ->
 #            when 'destination'
         $('#window-bookmark').css 'bottom', '-100%'
             
+    watchId = navigator.geolocation.watchPosition traceHandler
+        , (error) -> console.log error.message
+        , { enableHighAccuracy: true, timeout: 30000 }
+
     window.onpagehide = ->
-        navigator.geolocation.clearWatch traceHandler.id unless traceHandler.id
+        navigator.geolocation.clearWatch watchId unless watchId
         saveStatus()
 
 initializeGoogleMaps()
