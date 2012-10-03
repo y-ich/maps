@@ -1,6 +1,8 @@
 # Google Maps Web App
 # Copyright (C) ICHIKAWA, Yuji (New 3 Rs) 2012
 
+# global variables
+
 map = null
 geocoder = null
 pulsatingMarker = null
@@ -10,10 +12,10 @@ naviMarker = null
 directionsRenderer = null
 $map = null
 $gps = null
-$origin = $('#origin')
-$destination = $('#destination')
+$origin = null
+$destination = null
 mapFSM = null
-bookmarkContext = 'address'
+bookmarkContext = null
 
 
 # classes
@@ -75,8 +77,6 @@ class MapFSM
 for name, method of MapState.prototype when typeof method is 'function'
     MapFSM.prototype[name] = ((name) ->
         -> this.setState this.state[name]())(name) # substantiation of name
-
-mapFSM = new MapFSM(MapState.NORMAL)
 
 
 # functions 
@@ -268,6 +268,7 @@ initializeGoogleMaps = ->
         mapOptions.zoom = 14
 
     map = new google.maps.Map document.getElementById("map"), mapOptions
+    mapFSM = new MapFSM(MapState.NORMAL)
     geocoder = new google.maps.Geocoder()
     directionsRenderer = new google.maps.DirectionsRenderer()
     directionsRenderer.setMap map
@@ -315,6 +316,9 @@ initializeGoogleMaps = ->
 
 
 initializeDOM = ->
+    $origin = $('#origin')
+    $destination = $('#destination')
+    
     document.addEventListener 'touchmove', (event) ->
         event.preventDefault()
     $('#pin-list-frame').on 'touchmove', (event) ->
@@ -490,3 +494,4 @@ initializeDOM = ->
 
 initializeGoogleMaps()
 initializeDOM()
+

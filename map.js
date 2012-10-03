@@ -20,13 +20,13 @@
 
   $gps = null;
 
-  $origin = $('#origin');
+  $origin = null;
 
-  $destination = $('#destination');
+  $destination = null;
 
   mapFSM = null;
 
-  bookmarkContext = 'address';
+  bookmarkContext = null;
 
   MapState = (function() {
 
@@ -148,8 +148,6 @@
       })(name);
     }
   }
-
-  mapFSM = new MapFSM(MapState.NORMAL);
 
   mapSum = function(array, fn) {
     return array.map(fn).reduce(function(a, b) {
@@ -386,6 +384,7 @@
       mapOptions.zoom = 14;
     }
     map = new google.maps.Map(document.getElementById("map"), mapOptions);
+    mapFSM = new MapFSM(MapState.NORMAL);
     geocoder = new google.maps.Geocoder();
     directionsRenderer = new google.maps.DirectionsRenderer();
     directionsRenderer.setMap(map);
@@ -436,6 +435,8 @@
 
   initializeDOM = function() {
     var $edit, $mapType, $navi, $option, $route, $routeSearchFrame, $search, $traffic, $travelMode, $versatile, backToMap, last, trafficLayer;
+    $origin = $('#origin');
+    $destination = $('#destination');
     document.addEventListener('touchmove', function(event) {
       return event.preventDefault();
     });
