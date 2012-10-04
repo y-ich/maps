@@ -375,7 +375,6 @@
     $('#info-name').text(title);
     $('#bookmark-name').val(dropped ? bookmark.address : title);
     $('#info-address').text(bookmark.address);
-    $('#delete-pin').css('display', dropped ? 'block' : 'none');
     return $('#send-place').attr('href', "mailto:?subject=" + title + "&body=<a href=\"https://maps.google.co.jp/maps?q=" + (position.lat()) + "," + (position.lng()) + "\">" + title + "</a>");
   };
 
@@ -708,8 +707,9 @@
       return $('#window-bookmark').css('bottom', '-100%');
     });
     $(document).on('click', '#pin-list td', function() {
-      var latLng;
+      var bookmarkOrMarker, latLng;
       name = $(this).data('object-name');
+      bookmarkOrMarker = eval(name);
       if (!((name != null) && name !== '')) {
         return;
       }
@@ -718,14 +718,15 @@
           if (name === 'pulsatingMarker') {
             mapFSM.currentPositionClicked();
           } else {
-            map.setCenter(eval(name).marker.getPosition());
+            map.setCenter(bookmarkOrMarker.marker.getPosition());
+            bookmarkOrMarker.showInfoWindow();
           }
           break;
         case 'origin':
-          $origin.val(name === 'pulsatingMarker' ? (latLng = eval(name).getPosition(), "" + (latLng.lat()) + ", " + (latLng.lng())) : eval(name).address);
+          $origin.val(name === 'pulsatingMarker' ? (latLng = bookmarkOrMarker.getPosition(), "" + (latLng.lat()) + ", " + (latLng.lng())) : bookmarkOrMarker.address);
           break;
         case 'destination':
-          $destination.val(name === 'pulsatingMarker' ? (latLng = eval(name).getPosition(), "" + (latLng.lat()) + ", " + (latLng.lng())) : eval(name).address);
+          $destination.val(name === 'pulsatingMarker' ? (latLng = bookmarkOrMarker.getPosition(), "" + (latLng.lat()) + ", " + (latLng.lng())) : bookmarkOrMarker.address);
       }
       return $('#window-bookmark').css('bottom', '-100%');
     });

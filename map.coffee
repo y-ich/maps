@@ -252,7 +252,7 @@ setInfoPage = (bookmark, dropped) ->
     $('#info-name').text title
     $('#bookmark-name').val if dropped then bookmark.address else title
     $('#info-address').text bookmark.address
-    $('#delete-pin').css 'display', if dropped then 'block' else 'none'
+    # $('#delete-pin').css 'display', if dropped then 'block' else 'none'
     $('#send-place').attr 'href', "mailto:?subject=#{title}&body=<a href=\"https://maps.google.co.jp/maps?q=#{position.lat()},#{position.lng()}\">#{title}</a>"
     
 # handlers
@@ -554,25 +554,27 @@ initializeDOM = ->
     
     $(document).on 'click', '#pin-list td', ->
         name = $(this).data('object-name')
+        bookmarkOrMarker = eval(name)
         return unless name? and name isnt ''
         switch bookmarkContext
             when 'address'
                 if name is 'pulsatingMarker'
                     mapFSM.currentPositionClicked()
                 else
-                    map.setCenter eval(name).marker.getPosition()
+                    map.setCenter bookmarkOrMarker.marker.getPosition()
+                    bookmarkOrMarker.showInfoWindow()
             when 'origin'
                 $origin.val if name is 'pulsatingMarker'
-                        latLng = eval(name).getPosition()
+                        latLng = bookmarkOrMarker.getPosition()
                         "#{latLng.lat()}, #{latLng.lng()}"
                     else
-                        eval(name).address            
+                        bookmarkOrMarker.address            
             when 'destination'
                 $destination.val if name is 'pulsatingMarker'
-                        latLng = eval(name).getPosition()
+                        latLng = bookmarkOrMarker.getPosition()
                         "#{latLng.lat()}, #{latLng.lng()}"
                     else
-                        eval(name).address            
+                        bookmarkOrMarker.address            
 
         $('#window-bookmark').css 'bottom', '-100%'
 
