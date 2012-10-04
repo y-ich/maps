@@ -229,8 +229,8 @@
     return google.maps.MapTypeId[$('#map-type').children('.btn-primary').attr('id').toUpperCase()];
   };
 
-  makeInfoMessage = function(message) {
-    return "<table id=\"info-window\"><tr>\n    <td><button id=\"street-view\" class=\"btn\"><i class=\"icon-user\"></i></button></td>\n    <td style=\"white-space: nowrap;\"><div>ドロップされたピン<br><span id=\"dropped-message\" style=\"font-size:10px\">" + message + "</span></div></td>\n    <td><button id=\"button-info\" class\"btn\"><i class=\"icon-chevron-right\"></i></button></td>\n</tr></table>";
+  makeInfoMessage = function(name, message) {
+    return "<table id=\"info-window\"><tr>\n    <td><button id=\"street-view\" class=\"btn\"><i class=\"icon-user\"></i></button></td>\n    <td style=\"white-space: nowrap;\"><div>" + name + "<br><span id=\"dropped-message\" style=\"font-size:10px\">" + message + "</span></div></td>\n    <td><button id=\"button-info\" class\"btn\"><i class=\"icon-chevron-right\"></i></button></td>\n</tr></table>";
   };
 
   searchDirections = function() {
@@ -450,14 +450,14 @@
     google.maps.event.addListener(map, 'click', function(event) {
       droppedMarker.setVisible(true);
       droppedMarker.setPosition(event.latLng);
-      infoWindow.setContent(makeInfoMessage(''));
+      infoWindow.setContent(makeInfoMessage(droppedMarker.getTitle(), ''));
       infoWindow.open(map, droppedMarker);
       return geocoder.geocode({
         latLng: event.latLng
       }, function(result, status) {
         var message;
-        message = status === google.maps.GeocoderStatus.OK ? (droppedGeocoderResult = result[0], result[0].formatted_address.replace(/日本, /, '').replace(/.*〒[\d-]+/, '')) : (droppedGeocoderResult = null, 'ドロップされたピン</br>情報がみつかりませんでした。');
-        return infoWindow.setContent(makeInfoMessage(message));
+        message = status === google.maps.GeocoderStatus.OK ? (droppedGeocoderResult = result[0], result[0].formatted_address.replace(/日本, /, '').replace(/.*〒[\d-]+/, '')) : (droppedGeocoderResult = null, '情報がみつかりませんでした。');
+        return infoWindow.setContent(makeInfoMessage(droppedMarker.getTitle(), message));
       });
     });
     google.maps.event.addListener(map, 'dragstart', function() {

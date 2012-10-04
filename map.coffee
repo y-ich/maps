@@ -33,7 +33,8 @@ searchHistory = []
 routeHistory = []
 
 # classes
-    
+
+# manages id for navigator.geolocation
 class WatchPosition
     start: () ->
         @id = navigator.geolocation.watchPosition.apply navigator.geolocation, Array.prototype.slice.call(arguments)
@@ -143,11 +144,11 @@ getTravelMode = -> google.maps.TravelMode[$('#travel-mode').children('.btn-prima
 getMapType = -> google.maps.MapTypeId[$('#map-type').children('.btn-primary').attr('id').toUpperCase()]
 
 
-makeInfoMessage = (message) ->
+makeInfoMessage = (name, message) ->
     """
     <table id="info-window"><tr>
         <td><button id="street-view" class="btn"><i class="icon-user"></i></button></td>
-        <td style="white-space: nowrap;"><div>ドロップされたピン<br><span id="dropped-message" style="font-size:10px">#{message}</span></div></td>
+        <td style="white-space: nowrap;"><div>#{name}<br><span id="dropped-message" style="font-size:10px">#{message}</span></div></td>
         <td><button id="button-info" class"btn"><i class="icon-chevron-right"></i></button></td>
     </tr></table>
     """
@@ -324,7 +325,7 @@ initializeGoogleMaps = ->
     google.maps.event.addListener map, 'click', (event) ->
         droppedMarker.setVisible true
         droppedMarker.setPosition event.latLng
-        infoWindow.setContent makeInfoMessage ''
+        infoWindow.setContent makeInfoMessage droppedMarker.getTitle(), ''
         infoWindow.open map, droppedMarker
         geocoder.geocode {latLng : event.latLng }, (result, status) ->
             message = if status is google.maps.GeocoderStatus.OK
@@ -332,8 +333,8 @@ initializeGoogleMaps = ->
                     result[0].formatted_address.replace(/日本, /, '').replace(/.*〒[\d-]+/, '')
                 else
                     droppedGeocoderResult = null
-                    'ドロップされたピン</br>情報がみつかりませんでした。'
-            infoWindow.setContent makeInfoMessage message
+                    '情報がみつかりませんでした。'
+            infoWindow.setContent makeInfoMessage droppedMarker.getTitle(), message
 
     google.maps.event.addListener map, 'dragstart', -> mapFSM.moved()
     # This is a workaround for web app on home screen. There is no onpagehide event.
