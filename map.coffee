@@ -24,6 +24,7 @@ $map = null
 $gps = null
 $origin = null
 $destination = null
+pinRowHeight = null
 
 mapFSM = null
 bookmarkContext = null
@@ -258,7 +259,25 @@ setInfoPage = (bookmark, dropped) ->
     $('#info-address').text bookmark.address
     # $('#delete-pin').css 'display', if dropped then 'block' else 'none'
     $('#send-place').attr 'href', "mailto:?subject=#{title}&body=<a href=\"https://maps.google.co.jp/maps?q=#{position.lat()},#{position.lng()}\">#{title}</a>"
+
+generateBookmarkList = ->
+    list = '<tr><td data-object-name="pulsatingMarker">現在地</td></tr>'
+    list += '<tr><td data-object-name="droppedBookmark">ドロップされたピン</td></tr>' if droppedBookmark.marker.getVisible()
+    list += "<tr><td data-object-name=\"bookmarks[#{i}]\">#{e.marker.getTitle()}</td></tr>" for e, i in bookmarks
+    list += Array(Math.floor(innerHeight / pinRowHeight) - bookmarks.length).join '<tr><td></td></tr>'
+    $('#pin-list').html list
     
+generateHistoryList = ->
+    print = (e) ->
+        switch e.type
+            when 'search'
+                "検索: #{e.address}"
+            when 'route'
+                "出発: #{e.origin}<br>到着: #{e.destination}"
+    list = ''
+    list += "<tr><td data-object-name=\"history[#{i}]\">#{print e}</td></tr>" for e, i in history
+    list += Array(Math.floor(innerHeight / pinRowHeight) - history.length).join '<tr><td></td></tr>'
+    $('#pin-list').html list
 # handlers
 
 # NOTE: This handler is a method, not a function.
@@ -550,11 +569,7 @@ initializeDOM = ->
         
     $('.btn-bookmark').on 'click', ->
         bookmarkContext = $(this).siblings('input').attr 'id'
-        list = '<tr><td data-object-name="pulsatingMarker">現在地</td></tr>'
-        list += '<tr><td data-object-name="droppedBookmark">ドロップされたピン</td></tr>' if droppedBookmark.marker.getVisible()
-        list += "<tr><td data-object-name=\"bookmarks[#{i}]\">#{e.marker.getTitle()}</td></tr>" for e, i in bookmarks
-        list += Array(Math.floor(innerHeight / pinRowHeight) - bookmarks.length).join '<tr><td></td></tr>'
-        $('#pin-list').html list
+        generateBookmarkList()
         $('#window-bookmark').css 'bottom', '0'
     
     $('#bookmark-done').on 'click', ->
@@ -562,27 +577,30 @@ initializeDOM = ->
     
     $(document).on 'click', '#pin-list td', ->
         name = $(this).data('object-name')
-        bookmarkOrMarker = eval(name)
         return unless name? and name isnt ''
-        switch bookmarkContext
-            when 'address'
-                if name is 'pulsatingMarker'
-                    mapFSM.currentPositionClicked()
-                else
-                    map.setCenter bookmarkOrMarker.marker.getPosition()
-                    bookmarkOrMarker.showInfoWindow()
-            when 'origin'
-                $origin.val if name is 'pulsatingMarker'
-                        latLng = bookmarkOrMarker.getPosition()
-                        "#{latLng.lat()}, #{latLng.lng()}"
+        if /history/.test name
+            null # need to implement
+        else
+            bookmarkOrMarker = eval(name)
+            switch bookmarkContext
+                when 'address'
+                    if name is 'pulsatingMarker'
+                        mapFSM.currentPositionClicked()
                     else
-                        bookmarkOrMarker.address            
-            when 'destination'
-                $destination.val if name is 'pulsatingMarker'
-                        latLng = bookmarkOrMarker.getPosition()
-                        "#{latLng.lat()}, #{latLng.lng()}"
-                    else
-                        bookmarkOrMarker.address            
+                        map.setCenter bookmarkOrMarker.marker.getPosition()
+                        bookmarkOrMarker.showInfoWindow()
+                when 'origin'
+                    $origin.val if name is 'pulsatingMarker'
+                            latLng = bookmarkOrMarker.getPosition()
+                            "#{latLng.lat()}, #{latLng.lng()}"
+                        else
+                            bookmarkOrMarker.address            
+                when 'destination'
+                    $destination.val if name is 'pulsatingMarker'
+                            latLng = bookmarkOrMarker.getPosition()
+                            "#{latLng.lat()}, #{latLng.lng()}"
+                        else
+                            bookmarkOrMarker.address            
 
         $('#window-bookmark').css 'bottom', '-100%'
 
@@ -613,6 +631,23 @@ initializeDOM = ->
         saveOtherStatus()
         $('#info-add-window').css 'top', ''
         $('#container').css 'right', ''
+
+
+    $('#nav-bookmark button').on 'click', ->
+        $this = $(this)
+        $('#nav-bookmark button').removeClass 'btn-primary'
+        $this.addClass 'btn-primary'
+        switch $this.attr 'id'
+            when 'bookmark'
+                $('#bookmark-message').text 'マップ上に表示するブックマークを選択'
+                $('#bookmark-edit').text('編集')
+                                   .addClass 'disabled'
+                generateBookmarkList()
+            when 'history'
+                $('#bookmark-message').text '検索履歴を選択'
+                $('#bookmark-edit').text('消去')
+                                   .removeClass 'disabled'
+                generateHistoryList()
             
     watchPosition = new WatchPosition().start traceHandler
         , (error) -> console.log error.message
