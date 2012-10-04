@@ -14,8 +14,8 @@ geocoder = null
 directionsRenderer = null
 
 pulsatingMarker = null
-droppedMarker = null
-droppedGeocoderResult = null
+droppedBookmark = null
+currentBookmark = null
 infoWindow = null
 naviMarker = null
 
@@ -98,6 +98,11 @@ for name, method of MapState.prototype when typeof method is 'function'
         -> this.setState this.state[name]())(name) # substantiation of name
 
 
+
+class Bookmark
+    constructor: (@marker, @address) ->
+
+        
 # functions 
 
 # saves current state into localStorage
@@ -221,11 +226,10 @@ navigate.leg = null
 navigate.step = null
 
 
-setInfoPage = (geocoderResult, deleteButton = false) ->
-    name = geocoderResult.formatted_address.replace(/日本, /, '').replace(/.*〒[\d-]+/, '')
-    $('#info-name').text name
-    $('#bookmark-name').val name
-    $('#info-address').text geocoderResult.formatted_address
+setInfoPage = (bookmark, deleteButton = false) ->
+    $('#info-name').text bookmark.marker.getTitle()
+    $('#bookmark-name').val bookmark.marker.getTitle()
+    $('#info-address').text bookmark.address
     $('#info-delete-pin').css 'display', if deleteButton then 'block' else 'none'
     
 # handlers
@@ -244,7 +248,7 @@ getLocationHandler = (data, status) ->
         when google.maps.StreetViewStatus.OK
             sv = map.getStreetView()
             sv.setPosition data.location.latLng
-            droppedMarker.setPosition data.location.latLng
+            droppedBookmark.marker.setPosition data.location.latLng # need to change
             sv.setPov
                 heading: map.getHeading() ? 0
                 pitch: 0
@@ -303,13 +307,14 @@ initializeGoogleMaps = ->
         $('#navi-toolbar2').css 'display', 'none'
         naviMarker.setVisible false
 
-    droppedMarker = new google.maps.Marker
+    droppedBookmark = new Bookmark new google.maps.Marker
         map: map
         position: mapOptions.center
         title: 'ドロップされたピン'
         visible: false
+    currentBookmark = droppedBookmark
+    
     infoWindow = new google.maps.InfoWindow
-        disableAutoPan: true
         maxWidth: innerWidth
         
     startMarker = null
@@ -323,23 +328,25 @@ initializeGoogleMaps = ->
         visible: false
 
     google.maps.event.addListener map, 'click', (event) ->
-        droppedMarker.setVisible true
-        droppedMarker.setPosition event.latLng
-        infoWindow.setContent makeInfoMessage droppedMarker.getTitle(), ''
-        infoWindow.open map, droppedMarker
+        droppedBookmark.marker.setVisible true
+        droppedBookmark.marker.setPosition event.latLng
+        infoWindow.setContent makeInfoMessage droppedBookmark.marker.getTitle(), ''
+        infoWindow.open map, droppedBookmark.marker
         geocoder.geocode {latLng : event.latLng }, (result, status) ->
-            message = if status is google.maps.GeocoderStatus.OK
-                    droppedGeocoderResult = result[0]
-                    result[0].formatted_address.replace(/日本, /, '').replace(/.*〒[\d-]+/, '')
+            droppedBookmark.address = if status is google.maps.GeocoderStatus.OK
+                    result[0].formatted_address.replace(/日本, /, '')
                 else
-                    droppedGeocoderResult = null
                     '情報がみつかりませんでした。'
-            infoWindow.setContent makeInfoMessage droppedMarker.getTitle(), message
+            infoWindow.setContent makeInfoMessage droppedBookmark.marker.getTitle(), droppedBookmark.address
 
     google.maps.event.addListener map, 'dragstart', -> mapFSM.moved()
     # This is a workaround for web app on home screen. There is no onpagehide event.
     google.maps.event.addListener map, 'center_changed', saveStatus
     google.maps.event.addListener map, 'zoom_changed', saveStatus
+
+    google.maps.event.addListener droppedBookmark.marker, 'click', (event) ->
+        infoWindow.setContent makeInfoMessage droppedBookmark.marker.getTitle(), ''        
+        infoWindow.open map, droppedBookmark.marker
 
 
 initializeDOM = ->
@@ -489,8 +496,8 @@ initializeDOM = ->
         backToMap()
 
     $('#replace-pin').on 'click', ->
-        droppedMarker.setPosition map.getCenter()
-        droppedMarker.setVisible true
+        droppedBookmark.marker.setPosition map.getCenter()
+        droppedBookmark.marker.setVisible true
         backToMap()
 
     $('#print').on 'click', ->
@@ -498,10 +505,10 @@ initializeDOM = ->
         backToMap()
         
     $(document).on 'click', '#street-view', (event) ->
-        new google.maps.StreetViewService().getPanoramaByLocation droppedMarker.getPosition(), 49, getLocationHandler
+        new google.maps.StreetViewService().getPanoramaByLocation droppedBookmark.marker.getPosition(), 49, getLocationHandler
 
     $(document).on 'click', '#button-info', (event) ->
-        setInfoPage(droppedGeocoderResult, true)
+        setInfoPage(currentBookmark, true)
         $('#container').css 'right', '100%'
 
     $('#button-map').on 'click', ->
@@ -511,7 +518,7 @@ initializeDOM = ->
         bookmarkContext = $(this).siblings('input').attr 'id'
         mapFSM.bookmarkClicked() if bookmarkContext is 'address'
         list = '<tr><td data-object-name="pulsatingMarker">現在地</td></tr>'
-        list += '<tr><td data-object-name="droppedMarker">ドロップされたピン</td></tr>' if droppedMarker.getVisible()
+        list += '<tr><td data-object-name="droppedBookmark.marker">ドロップされたピン</td></tr>' if droppedBookmark.marker.getVisible()
         list += Array(Math.floor(innerHeight / pinRowHeight) - bookmarks.length).join '<tr><td></td></tr>'
         $('#pin-list').html list
         $('#window-bookmark').css 'bottom', '0'
@@ -537,7 +544,7 @@ initializeDOM = ->
         $('#info-add-window').css 'top', ''
 
     $('#delete-pin').on 'click', ->
-        droppedMarker.setVisible false
+        droppedBookmark.marker.setVisible false
         infoWindow.close()
         $('#container').css 'right', ''
         
