@@ -331,7 +331,6 @@ initializeGoogleMaps = ->
         position: mapOptions.center
         title: 'ドロップされたピン'
         visible: false
-    currentBookmark = droppedBookmark
     
     infoWindow = new google.maps.InfoWindow
         maxWidth: innerWidth
@@ -347,6 +346,7 @@ initializeGoogleMaps = ->
         visible: false
 
     google.maps.event.addListener map, 'click', (event) ->
+        currentBookmark = droppedBookmark
         droppedBookmark.marker.setVisible true
         droppedBookmark.marker.setPosition event.latLng
         infoWindow.setContent makeInfoMessage droppedBookmark.marker.getTitle(), ''

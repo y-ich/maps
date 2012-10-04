@@ -473,7 +473,6 @@
       title: 'ドロップされたピン',
       visible: false
     }));
-    currentBookmark = droppedBookmark;
     infoWindow = new google.maps.InfoWindow({
       maxWidth: innerWidth
     });
@@ -487,6 +486,7 @@
       visible: false
     });
     google.maps.event.addListener(map, 'click', function(event) {
+      currentBookmark = droppedBookmark;
       droppedBookmark.marker.setVisible(true);
       droppedBookmark.marker.setPosition(event.latLng);
       infoWindow.setContent(makeInfoMessage(droppedBookmark.marker.getTitle(), ''));
