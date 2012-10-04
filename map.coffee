@@ -345,7 +345,7 @@ initializeGoogleMaps = ->
     google.maps.event.addListener map, 'zoom_changed', saveStatus
 
     google.maps.event.addListener droppedBookmark.marker, 'click', (event) ->
-        infoWindow.setContent makeInfoMessage droppedBookmark.marker.getTitle(), ''        
+        infoWindow.setContent makeInfoMessage droppedBookmark.marker.getTitle(), droppedBookmark.address        
         infoWindow.open map, droppedBookmark.marker
 
 

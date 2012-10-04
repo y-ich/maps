@@ -475,7 +475,7 @@
     google.maps.event.addListener(map, 'center_changed', saveStatus);
     google.maps.event.addListener(map, 'zoom_changed', saveStatus);
     return google.maps.event.addListener(droppedBookmark.marker, 'click', function(event) {
-      infoWindow.setContent(makeInfoMessage(droppedBookmark.marker.getTitle(), ''));
+      infoWindow.setContent(makeInfoMessage(droppedBookmark.marker.getTitle(), droppedBookmark.address));
       return infoWindow.open(map, droppedBookmark.marker);
     });
   };
