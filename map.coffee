@@ -103,7 +103,6 @@ class Bookmark
     constructor: (@marker, @address) ->
         google.maps.event.addListener @marker, 'click', (event) =>
             currentBookmark = @
-            console.log currentBookmark
             @showInfoWindow()
 
     showInfoWindow: () ->
@@ -388,11 +387,11 @@ initializeDOM = ->
             $destination.val(otherStatus.destination)
                         .siblings('.btn-bookmark').css('display', 'none')
         for e in otherStatus.bookmarks
-            bookmarks.push new Bookmark new google.maps.Marker
+            bookmarks.push new Bookmark new google.maps.Marker(
                     map: map
                     position: new google.maps.LatLng e.lat, e.lng
                     title: e.title
-                , e.address
+                ), e.address
 
     # layouts
     
@@ -531,7 +530,6 @@ initializeDOM = ->
         new google.maps.StreetViewService().getPanoramaByLocation currentBookmark.marker.getPosition(), 49, getPanoramaHandler
 
     $(document).on 'click', '#button-info', (event) ->
-        console.log currentBookmark
         setInfoPage(currentBookmark, true)
         $('#container').css 'right', '100%'
 
@@ -564,7 +562,6 @@ initializeDOM = ->
                         latLng = eval(name).getPosition()
                         "#{latLng.lat()}, #{latLng.lng()}"
                     else
-                        console.log eval(name).address
                         eval(name).address            
             when 'destination'
                 $destination.val if name is 'pulsatingMarker'

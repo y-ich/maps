@@ -182,7 +182,6 @@
       this.address = address;
       google.maps.event.addListener(this.marker, 'click', function(event) {
         currentBookmark = _this;
-        console.log(currentBookmark);
         return _this.showInfoWindow();
       });
     }
@@ -533,7 +532,7 @@
           map: map,
           position: new google.maps.LatLng(e.lat, e.lng),
           title: e.title
-        }, e.address)));
+        }), e.address));
       }
     }
     $('#option-container').css('bottom', $('#footer').outerHeight(true));
@@ -682,7 +681,6 @@
       return new google.maps.StreetViewService().getPanoramaByLocation(currentBookmark.marker.getPosition(), 49, getPanoramaHandler);
     });
     $(document).on('click', '#button-info', function(event) {
-      console.log(currentBookmark);
       setInfoPage(currentBookmark, true);
       return $('#container').css('right', '100%');
     });
@@ -722,7 +720,7 @@
           }
           break;
         case 'origin':
-          $origin.val(name === 'pulsatingMarker' ? (latLng = eval(name).getPosition(), "" + (latLng.lat()) + ", " + (latLng.lng())) : (console.log(eval(name).address), eval(name).address));
+          $origin.val(name === 'pulsatingMarker' ? (latLng = eval(name).getPosition(), "" + (latLng.lat()) + ", " + (latLng.lng())) : eval(name).address);
           break;
         case 'destination':
           $destination.val(name === 'pulsatingMarker' ? (latLng = eval(name).getPosition(), "" + (latLng.lat()) + ", " + (latLng.lng())) : eval(name).address);
