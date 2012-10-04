@@ -29,8 +29,7 @@ mapFSM = null
 bookmarkContext = null
 
 bookmarks = []
-searchHistory = []
-routeHistory = []
+history = []
 
 # classes
 
@@ -133,6 +132,7 @@ saveOtherStatus = () ->
         origin: $origin.val()
         destination: $destination.val()
         bookmarks: bookmarks.map (e) -> e.toObject()
+        history: history
 
 # sums after some transformation
 mapSum = (array, fn) ->
@@ -180,6 +180,10 @@ makeInfoMessage = (name, message) ->
 
 # invokes to search directions and displays a result.
 searchDirections = ->
+    history.unshift
+        type: 'route'
+        origin: $('#origin').val()
+        destination: $('#destination').val() 
     searchDirections.service.route
             destination: $('#destination').val()
             origin: $('#origin').val()
@@ -260,6 +264,9 @@ setInfoPage = (bookmark, dropped) ->
 # NOTE: This handler is a method, not a function.
 geocodeHandler = ->
     return if this.value is ''
+    history.unshift
+        type: 'search'
+        address: this.value
     geocoder.geocode {address : this.value }, (result, status) ->
         if status is google.maps.GeocoderStatus.OK
             map.setCenter result[0].geometry.location
@@ -390,12 +397,13 @@ initializeDOM = ->
         if otherStatus.destination? and otherStatus.destination isnt ''
             $destination.val(otherStatus.destination)
                         .siblings('.btn-bookmark').css('display', 'none')
-        for e in otherStatus.bookmarks
+        for e in otherStatus.bookmarks ? []
             bookmarks.push new Bookmark new google.maps.Marker(
                     map: map
                     position: new google.maps.LatLng e.lat, e.lng
                     title: e.title
                 ), e.address
+        history = otherStatus.history ? []
 
     # layouts
     
