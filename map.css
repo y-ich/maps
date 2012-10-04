@@ -365,3 +365,7 @@ width: 100px;
     top: 100%;
     -webkit-transition: top 1s;
 }
+
+#add-into-contact {
+    color: lightgray;
+}

@@ -245,11 +245,15 @@ navigate.leg = null
 navigate.step = null
 
 
-setInfoPage = (bookmark, deleteButton = false) ->
-    $('#info-name').text bookmark.marker.getTitle()
-    $('#bookmark-name').val if deleteButton then bookmark.address else bookmark.marker.getTitle()
+setInfoPage = (bookmark, dropped) ->
+    console.log dropped
+    title = bookmark.marker.getTitle()
+    position = bookmark.marker.getPosition()
+    $('#info-name').text title
+    $('#bookmark-name').val if dropped then bookmark.address else title
     $('#info-address').text bookmark.address
-    $('#info-delete-pin').css 'display', if deleteButton then 'block' else 'none'
+    $('#delete-pin').css 'display', if dropped then 'block' else 'none'
+    $('#send-place').attr 'href', "mailto:?subject=#{title}&body=<a href=\"https://maps.google.co.jp/maps?q=#{position.lat()},#{position.lng()}\">#{title}</a>"
     
 # handlers
 
@@ -530,7 +534,7 @@ initializeDOM = ->
         new google.maps.StreetViewService().getPanoramaByLocation currentBookmark.marker.getPosition(), 49, getPanoramaHandler
 
     $(document).on 'click', '#button-info', (event) ->
-        setInfoPage(currentBookmark, true)
+        setInfoPage(currentBookmark, currentBookmark is droppedBookmark)
         $('#container').css 'right', '100%'
 
     $('#button-map').on 'click', ->

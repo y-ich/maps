@@ -367,14 +367,16 @@
 
   navigate.step = null;
 
-  setInfoPage = function(bookmark, deleteButton) {
-    if (deleteButton == null) {
-      deleteButton = false;
-    }
-    $('#info-name').text(bookmark.marker.getTitle());
-    $('#bookmark-name').val(deleteButton ? bookmark.address : bookmark.marker.getTitle());
+  setInfoPage = function(bookmark, dropped) {
+    var position, title;
+    console.log(dropped);
+    title = bookmark.marker.getTitle();
+    position = bookmark.marker.getPosition();
+    $('#info-name').text(title);
+    $('#bookmark-name').val(dropped ? bookmark.address : title);
     $('#info-address').text(bookmark.address);
-    return $('#info-delete-pin').css('display', deleteButton ? 'block' : 'none');
+    $('#delete-pin').css('display', dropped ? 'block' : 'none');
+    return $('#send-place').attr('href', "mailto:?subject=" + title + "&body=<a href=\"https://maps.google.co.jp/maps?q=" + (position.lat()) + "," + (position.lng()) + "\">" + title + "</a>");
   };
 
   geocodeHandler = function() {
@@ -681,7 +683,7 @@
       return new google.maps.StreetViewService().getPanoramaByLocation(currentBookmark.marker.getPosition(), 49, getPanoramaHandler);
     });
     $(document).on('click', '#button-info', function(event) {
-      setInfoPage(currentBookmark, true);
+      setInfoPage(currentBookmark, currentBookmark === droppedBookmark);
       return $('#container').css('right', '100%');
     });
     $('#button-map').on('click', function() {
