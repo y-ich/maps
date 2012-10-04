@@ -101,19 +101,35 @@ for name, method of MapState.prototype when typeof method is 'function'
 
 class Bookmark
     constructor: (@marker, @address) ->
+        google.maps.event.addListener @marker, 'click', (event) =>
+            currentBookmark = @
+            infoWindow.setContent makeInfoMessage @marker.getTitle(), @address        
+            infoWindow.open map, @marker
+    
+    toObject: () ->
+        pos = @marker.getPosition()
+        {
+            lat: pos.lat()
+            lng: pos.lng()
+            title: @marker.getTitle()
+            address: @address
+        }
 
-        
 # functions 
 
 # saves current state into localStorage
-saveStatus = () ->
+saveMapStatus = () ->
     pos = map.getCenter()
-    localStorage['last'] = JSON.stringify
+    localStorage['maps-map-status'] = JSON.stringify
         lat: pos.lat()
         lng: pos.lng()
         zoom: map.getZoom()
+
+saveOtherStatus = () ->
+    localStorage['maps-other-status'] = JSON.stringify
         origin: $origin.val()
         destination: $destination.val()
+        bookmarks: bookmarks.map (e) -> e.toObject()
 
 # sums after some transformation
 mapSum = (array, fn) ->
@@ -228,7 +244,7 @@ navigate.step = null
 
 setInfoPage = (bookmark, deleteButton = false) ->
     $('#info-name').text bookmark.marker.getTitle()
-    $('#bookmark-name').val bookmark.marker.getTitle()
+    $('#bookmark-name').val if deleteButton then bookmark.address else bookmark.marker.getTitle()
     $('#info-address').text bookmark.address
     $('#info-delete-pin').css 'display', if deleteButton then 'block' else 'none'
     
@@ -288,10 +304,10 @@ initializeGoogleMaps = ->
         mapTypeId: getMapType()
         disableDefaultUI: true
     # if previous position data exists, then restore it, otherwise default value.
-    if localStorage['last']?
-        last = JSON.parse localStorage['last']
-        mapOptions.center = new google.maps.LatLng last.lat, last.lng
-        mapOptions.zoom = last.zoom
+    if localStorage['maps-map-status']?
+        mapStatus = JSON.parse localStorage['maps-map-status']
+        mapOptions.center = new google.maps.LatLng mapStatus.lat, mapStatus.lng
+        mapOptions.zoom = mapStatus.zoom
     else
         mapOptions.center = new google.maps.LatLng 35.660389, 139.729225
         mapOptions.zoom = 14
@@ -341,12 +357,9 @@ initializeGoogleMaps = ->
 
     google.maps.event.addListener map, 'dragstart', -> mapFSM.moved()
     # This is a workaround for web app on home screen. There is no onpagehide event.
-    google.maps.event.addListener map, 'center_changed', saveStatus
-    google.maps.event.addListener map, 'zoom_changed', saveStatus
+    google.maps.event.addListener map, 'center_changed', saveMapStatus
+    google.maps.event.addListener map, 'zoom_changed', saveMapStatus
 
-    google.maps.event.addListener droppedBookmark.marker, 'click', (event) ->
-        infoWindow.setContent makeInfoMessage droppedBookmark.marker.getTitle(), droppedBookmark.address        
-        infoWindow.open map, droppedBookmark.marker
 
 
 initializeDOM = ->
@@ -362,14 +375,20 @@ initializeDOM = ->
         event.stopPropagation()
     
     # restore
-    if localStorage['last']?
-        last = JSON.parse localStorage['last']
-        if last.origin? and last.origin isnt ''
-            $origin.val(last.origin) 
+    if localStorage['maps-other-status']?
+        otherStatus = JSON.parse localStorage['maps-other-status']
+        if otherStatus.origin? and otherStatus.origin isnt ''
+            $origin.val(otherStatus.origin) 
                    .siblings('.btn-bookmark').css('display', 'none')
-        if last.destination? and last.destination isnt ''
-            $destination.val(last.destination)
+        if otherStatus.destination? and otherStatus.destination isnt ''
+            $destination.val(otherStatus.destination)
                         .siblings('.btn-bookmark').css('display', 'none')
+        for e in otherStatus.bookmarks
+            bookmarks.push new Bookmark new google.maps.Marker
+                    map: map
+                    position: new google.maps.LatLng e.lat, e.lng
+                    title: e.title
+                , e.address
 
     # layouts
     
@@ -436,9 +455,9 @@ initializeDOM = ->
         tmp = $('#destination').val()
         $('#destination').val $('#origin').val()
         $('#origin').val tmp
-        saveStatus()
+        saveOtherStatus()
 
-    $('#origin, #destination').on 'changed', saveStatus
+    $('#origin, #destination').on 'changed', saveOtherStatus
 
     $travelMode = $('#travel-mode')
     $travelMode.children(':not(#transit)').on 'click', -> # disabled transit
@@ -516,9 +535,9 @@ initializeDOM = ->
         
     $('.btn-bookmark').on 'click', ->
         bookmarkContext = $(this).siblings('input').attr 'id'
-        mapFSM.bookmarkClicked() if bookmarkContext is 'address'
         list = '<tr><td data-object-name="pulsatingMarker">現在地</td></tr>'
-        list += '<tr><td data-object-name="droppedBookmark.marker">ドロップされたピン</td></tr>' if droppedBookmark.marker.getVisible()
+        list += '<tr><td data-object-name="droppedBookmark">ドロップされたピン</td></tr>' if droppedBookmark.marker.getVisible()
+        list += "<tr><td data-object-name=\"bookmarks[#{i}]\">#{e.marker.getTitle()}</td></tr>" for e, i in bookmarks
         list += Array(Math.floor(innerHeight / pinRowHeight) - bookmarks.length).join '<tr><td></td></tr>'
         $('#pin-list').html list
         $('#window-bookmark').css 'bottom', '0'
@@ -526,15 +545,29 @@ initializeDOM = ->
     $('#bookmark-done').on 'click', ->
         $('#window-bookmark').css 'bottom', '-100%'
     
-    $('#pin-list td').on 'click', ->
+    $(document).on 'click', '#pin-list td', ->
         name = $(this).data('object-name')
         return unless name? and name isnt ''
         switch bookmarkContext
             when 'address'
                 if name is 'pulsatingMarker'
                     mapFSM.currentPositionClicked()
-#            when 'origin'
-#            when 'destination'
+                else
+                    map.setCenter eval(name).marker.getPosition()
+            when 'origin'
+                $origin.val if name is 'pulsatingMarker'
+                        latLng = eval(name).getPosition()
+                        "#{latLng.lat()}, #{latLng.lng()}"
+                    else
+                        console.log eval(name).address
+                        eval(name).address            
+            when 'destination'
+                $destination.val if name is 'pulsatingMarker'
+                        latLng = eval(name).getPosition()
+                        "#{latLng.lat()}, #{latLng.lng()}"
+                    else
+                        eval(name).address            
+
         $('#window-bookmark').css 'bottom', '-100%'
 
     $('#add-bookmark').on 'click', ->
@@ -548,16 +581,23 @@ initializeDOM = ->
         infoWindow.close()
         $('#container').css 'right', ''
         
-    $('save-bookmark').on 'click', ->
-        
-    
+    $('#save-bookmark').on 'click', ->
+        bookmarks.push new Bookmark new google.maps.Marker
+                map: map
+                position: currentBookmark.marker.getPosition()
+                title: $('#bookmark-name').val()
+            , $('#info-address').text()
+        saveOtherStatus()
+        $('#container').css 'right', ''
+            
     watchPosition = new WatchPosition().start traceHandler
         , (error) -> console.log error.message
         , { enableHighAccuracy: true, timeout: 30000 }
 
     window.onpagehide = ->
         watchPosition.stop()
-        saveStatus()
+        saveMapStatus()
+        saveOtherStatus()
 
 initializeGoogleMaps()
 initializeDOM()
