@@ -299,7 +299,6 @@ initializeGoogleMaps = ->
     infoWindow = new google.maps.InfoWindow
         disableAutoPan: true
         maxWidth: innerWidth
-    infoWindow.open map, droppedMarker
         
     startMarker = null
     destinationMarker = null
@@ -315,6 +314,7 @@ initializeGoogleMaps = ->
         droppedMarker.setVisible true
         droppedMarker.setPosition event.latLng
         infoWindow.setContent makeInfoMessage ''
+        infoWindow.open map, droppedMarker
         geocoder.geocode {latLng : event.latLng }, (result, status) ->
             message = if status is google.maps.GeocoderStatus.OK
                     droppedGeocoderResult = result[0]
@@ -514,7 +514,13 @@ initializeDOM = ->
 
     $('#add-bookmark').on 'click', ->
         $('#info-add-window').css 'top', '0'
-    
+
+    $('#delete-pin').on 'click', ->
+        droppedMarker.setVisible false
+        infoWindow.close()
+        $('#container').css 'right', ''
+        
+        
     watchId = navigator.geolocation.watchPosition traceHandler
         , (error) -> console.log error.message
         , { enableHighAccuracy: true, timeout: 30000 }

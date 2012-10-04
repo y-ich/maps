@@ -417,7 +417,6 @@
       disableAutoPan: true,
       maxWidth: innerWidth
     });
-    infoWindow.open(map, droppedMarker);
     startMarker = null;
     destinationMarker = null;
     naviMarker = new google.maps.Marker({
@@ -431,6 +430,7 @@
       droppedMarker.setVisible(true);
       droppedMarker.setPosition(event.latLng);
       infoWindow.setContent(makeInfoMessage(''));
+      infoWindow.open(map, droppedMarker);
       return geocoder.geocode({
         latLng: event.latLng
       }, function(result, status) {
@@ -643,6 +643,11 @@
     });
     $('#add-bookmark').on('click', function() {
       return $('#info-add-window').css('top', '0');
+    });
+    $('#delete-pin').on('click', function() {
+      droppedMarker.setVisible(false);
+      infoWindow.close();
+      return $('#container').css('right', '');
     });
     watchId = navigator.geolocation.watchPosition(traceHandler, function(error) {
       return console.log(error.message, {
