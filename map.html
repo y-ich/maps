@@ -49,7 +49,7 @@
             <div id="header" class="navbar">
                 <div class="navbar-inner">
                     <div class="navbar-search">
-                        <form>
+                        <form class="with-reset-button">
                             <input id="address" type="text" class="search-query" placeholder="検索または住所">
                             <div class="icon-search"></div>
                             <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
@@ -84,7 +84,7 @@
                                 </td>
                                 <td>
                                     <div id="route-search">
-                                        <form class="form-horizontal">
+                                        <form class="form-horizontal with-reset-button">
                                             <div class="control-group">
                                                 <label class="control-label">出発: </label>
                                                 <div class="controls">
@@ -94,7 +94,8 @@
                                                 </div>
                                             </div>
                                         </form>
-                                        <form class="form-horizontal">
+                                        <div class="clearfix"></div>
+                                        <form class="form-horizontal with-reset-button">
                                             <div class="control-group">
                                                 <label class="control-label">到着: </label>
                                                 <div class="controls">
@@ -178,9 +179,9 @@
                     <h4>追加</h4>
                     <button class="btn btn-right">保存</button>
                 </div>
-                <form>
-                    <input id="bookmark-name" type="text">
-                    <button type="reset" class="btn btn-mini"><i class="icon-remove-sign"></i></button>
+                <form class="with-reset-button">
+                    <input id="bookmark-name" type="text" class="search-query">
+                    <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
                 </form>
             </div>
         </div>

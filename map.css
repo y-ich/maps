@@ -60,6 +60,11 @@ form {
     position: relative; /* in order to give a basis to children (reset and bookmark button) */
 }
 
+form.with-reset-button {
+    position: relative;
+    float: left;
+}
+
 .btn-reset, .btn-bookmark {
     border-radius: 20px;
     position: absolute;
