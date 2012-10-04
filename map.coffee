@@ -476,9 +476,11 @@ initializeDOM = ->
         new google.maps.StreetViewService().getPanoramaByLocation droppedMarker.getPosition(), 49, getLocationHandler
 
     $(document).on 'click', '#button-info', (event) ->
-        console.log 'pass'
-        $('document.body').css 'right', '0'
+        $('#container').css 'right', '100%'
 
+    $('#button-map').on 'click', ->
+        $('#container').css 'right', ''
+        
     $('.btn-bookmark').on 'click', ->
         bookmarkContext = $(this).siblings('input').attr 'id'
         mapFSM.bookmarkClicked() if bookmarkContext is 'address'

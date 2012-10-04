@@ -601,8 +601,10 @@
       return new google.maps.StreetViewService().getPanoramaByLocation(droppedMarker.getPosition(), 49, getLocationHandler);
     });
     $(document).on('click', '#button-info', function(event) {
-      console.log('pass');
-      return $('document.body').css('right', '0');
+      return $('#container').css('right', '100%');
+    });
+    $('#button-map').on('click', function() {
+      return $('#container').css('right', '');
     });
     $('.btn-bookmark').on('click', function() {
       bookmarkContext = $(this).siblings('input').attr('id');
