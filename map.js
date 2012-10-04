@@ -182,10 +182,14 @@
       this.address = address;
       google.maps.event.addListener(this.marker, 'click', function(event) {
         currentBookmark = _this;
-        infoWindow.setContent(makeInfoMessage(_this.marker.getTitle(), _this.address));
-        return infoWindow.open(map, _this.marker);
+        return _this.showInfoWindow();
       });
     }
+
+    Bookmark.prototype.showInfoWindow = function() {
+      infoWindow.setContent(makeInfoMessage(this.marker.getTitle(), this.address));
+      return infoWindow.open(map, this.marker);
+    };
 
     Bookmark.prototype.toObject = function() {
       var pos;
@@ -730,16 +734,26 @@
       return $('#info-add-window').css('top', '');
     });
     $('#delete-pin').on('click', function() {
-      droppedBookmark.marker.setVisible(false);
+      var index;
+      if (currentBookmark === droppedBookmark) {
+        droppedBookmark.marker.setVisible(false);
+      } else {
+        index = bookmarks.indexOf(currentBookmark);
+        bookmarks.splice(index, 1);
+        currentBookmark.setMap(null);
+      }
       infoWindow.close();
       return $('#container').css('right', '');
     });
     $('#save-bookmark').on('click', function() {
-      bookmarks.push(new Bookmark(new google.maps.Marker({
+      var bookmark;
+      bookmark = new Bookmark(new google.maps.Marker({
         map: map,
         position: currentBookmark.marker.getPosition(),
         title: $('#bookmark-name').val()
-      }, $('#info-address').text())));
+      }), $('#info-address').text());
+      bookmarks.push(bookmark);
+      bookmark.showInfoWindow();
       saveOtherStatus();
       return $('#container').css('right', '');
     });

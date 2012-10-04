@@ -103,9 +103,12 @@ class Bookmark
     constructor: (@marker, @address) ->
         google.maps.event.addListener @marker, 'click', (event) =>
             currentBookmark = @
-            infoWindow.setContent makeInfoMessage @marker.getTitle(), @address        
-            infoWindow.open map, @marker
-    
+            @showInfoWindow()
+
+    showInfoWindow: () ->
+        infoWindow.setContent makeInfoMessage @marker.getTitle(), @address        
+        infoWindow.open map, @marker
+        
     toObject: () ->
         pos = @marker.getPosition()
         {
@@ -577,16 +580,23 @@ initializeDOM = ->
         $('#info-add-window').css 'top', ''
 
     $('#delete-pin').on 'click', ->
-        droppedBookmark.marker.setVisible false
+        if currentBookmark is droppedBookmark
+            droppedBookmark.marker.setVisible false
+        else
+            index = bookmarks.indexOf currentBookmark
+            bookmarks.splice index, 1
+            currentBookmark.setMap null
         infoWindow.close()
         $('#container').css 'right', ''
         
     $('#save-bookmark').on 'click', ->
-        bookmarks.push new Bookmark new google.maps.Marker
+        bookmark = new Bookmark new google.maps.Marker(
                 map: map
                 position: currentBookmark.marker.getPosition()
                 title: $('#bookmark-name').val()
-            , $('#info-address').text()
+            ), $('#info-address').text() 
+        bookmarks.push bookmark
+        bookmark.showInfoWindow()
         saveOtherStatus()
         $('#container').css 'right', ''
             
