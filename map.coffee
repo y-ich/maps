@@ -103,6 +103,7 @@ class Bookmark
     constructor: (@marker, @address) ->
         google.maps.event.addListener @marker, 'click', (event) =>
             currentBookmark = @
+            console.log currentBookmark
             @showInfoWindow()
 
     showInfoWindow: () ->
@@ -530,6 +531,7 @@ initializeDOM = ->
         new google.maps.StreetViewService().getPanoramaByLocation currentBookmark.marker.getPosition(), 49, getPanoramaHandler
 
     $(document).on 'click', '#button-info', (event) ->
+        console.log currentBookmark
         setInfoPage(currentBookmark, true)
         $('#container').css 'right', '100%'
 
@@ -585,7 +587,7 @@ initializeDOM = ->
         else
             index = bookmarks.indexOf currentBookmark
             bookmarks.splice index, 1
-            currentBookmark.setMap null
+            currentBookmark.marker.setMap null
         infoWindow.close()
         $('#container').css 'right', ''
         
@@ -598,6 +600,7 @@ initializeDOM = ->
         bookmarks.push bookmark
         bookmark.showInfoWindow()
         saveOtherStatus()
+        $('#info-add-window').css 'top', ''
         $('#container').css 'right', ''
             
     watchPosition = new WatchPosition().start traceHandler

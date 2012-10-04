@@ -182,6 +182,7 @@
       this.address = address;
       google.maps.event.addListener(this.marker, 'click', function(event) {
         currentBookmark = _this;
+        console.log(currentBookmark);
         return _this.showInfoWindow();
       });
     }
@@ -681,6 +682,7 @@
       return new google.maps.StreetViewService().getPanoramaByLocation(currentBookmark.marker.getPosition(), 49, getPanoramaHandler);
     });
     $(document).on('click', '#button-info', function(event) {
+      console.log(currentBookmark);
       setInfoPage(currentBookmark, true);
       return $('#container').css('right', '100%');
     });
@@ -740,7 +742,7 @@
       } else {
         index = bookmarks.indexOf(currentBookmark);
         bookmarks.splice(index, 1);
-        currentBookmark.setMap(null);
+        currentBookmark.marker.setMap(null);
       }
       infoWindow.close();
       return $('#container').css('right', '');
@@ -755,6 +757,7 @@
       bookmarks.push(bookmark);
       bookmark.showInfoWindow();
       saveOtherStatus();
+      $('#info-add-window').css('top', '');
       return $('#container').css('right', '');
     });
     watchPosition = new WatchPosition().start(traceHandler, function(error) {
