@@ -447,10 +447,11 @@
   };
 
   initializeDOM = function() {
-    var $edit, $mapType, $navi, $option, $route, $routeSearchFrame, $search, $traffic, $travelMode, $versatile, backToMap, last, trafficLayer;
+    var $edit, $mapType, $navi, $option, $route, $routeSearchFrame, $search, $traffic, $travelMode, $versatile, backToMap, last, pinRowHeight, trafficLayer;
     $origin = $('#origin');
     $destination = $('#destination');
     $routeSearchFrame = $('#route-search-frame');
+    pinRowHeight = $('#pin-list tr').height();
     document.addEventListener('touchmove', function(event) {
       return event.preventDefault();
     });
@@ -619,10 +620,17 @@
       return $('#container').css('right', '');
     });
     $('.btn-bookmark').on('click', function() {
+      var list;
       bookmarkContext = $(this).siblings('input').attr('id');
       if (bookmarkContext === 'address') {
         mapFSM.bookmarkClicked();
       }
+      list = '<tr><td data-object-name="pulsatingMarker">現在地</td></tr>';
+      if (droppedMarker.getVisible()) {
+        list += '<tr><td data-object-name="droppedMarker">ドロップされたピン</td></tr>';
+      }
+      list += Array(Math.floor(innerHeight / pinRowHeight) - bookmarks.length).join('<tr><td></td></tr>');
+      $('#pin-list').html(list);
       return $('#window-bookmark').css('bottom', '0');
     });
     $('#bookmark-done').on('click', function() {

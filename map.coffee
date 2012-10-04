@@ -335,6 +335,8 @@ initializeDOM = ->
     $destination = $('#destination')
     $routeSearchFrame = $('#route-search-frame')
     
+    pinRowHeight = $('#pin-list tr').height()
+
     document.addEventListener 'touchmove', (event) ->
         event.preventDefault()
     $('#pin-list-frame').on 'touchmove', (event) ->
@@ -496,6 +498,10 @@ initializeDOM = ->
     $('.btn-bookmark').on 'click', ->
         bookmarkContext = $(this).siblings('input').attr 'id'
         mapFSM.bookmarkClicked() if bookmarkContext is 'address'
+        list = '<tr><td data-object-name="pulsatingMarker">現在地</td></tr>'
+        list += '<tr><td data-object-name="droppedMarker">ドロップされたピン</td></tr>' if droppedMarker.getVisible()
+        list += Array(Math.floor(innerHeight / pinRowHeight) - bookmarks.length).join '<tr><td></td></tr>'
+        $('#pin-list').html list
         $('#window-bookmark').css 'bottom', '0'
     
     $('#bookmark-done').on 'click', ->
