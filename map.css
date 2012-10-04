@@ -20,6 +20,10 @@ form {
     margin-left: 40px; /* 180px */
 }
 
+.form-horizontal .control-group {
+    margin-bottom: 0; /* 20px */
+}
+
 .form-horizontal .control-label {
     width: auto; /* 160px */
 }
@@ -35,7 +39,6 @@ form {
 }
 
 /* end of cancel */
-
 
 .controls input {
     width: 160px;
@@ -208,12 +211,8 @@ img.icon {
     -webkit-transition: top 0.5s;
 }
 
-#switch, #route-search {
-    float: left;
-}
-
-#switch {
-    margin: 20px 4px 0 4px;
+#route-search-frame .form-horizontal {
+    margin: 10px;
 }
 
 #footer {

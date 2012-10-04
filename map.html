@@ -78,30 +78,35 @@
                     <div id="navi-etc">
                         <div id="message"></div>
                         <div id="route-search-frame">
-                            <button id="switch" type="button" class="btn"><i class="icon-random"></i></button>
-                            <div id="route-search">
-                                <form class="form-horizontal">
-                                    <div class="control-group">
-                                        <label class="control-label">出発: </label>
-                                        <div class="controls">
-                                            <input id="origin" type="text" class="search-query">
-                                            <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
-                                            <button type="button" class="btn btn-mini btn-bookmark disabled"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
-                                        </div>
+                            <table><tr>
+                                <td>
+                                    <button id="switch" type="button" class="btn"><i class="icon-random"></i></button>
+                                </td>
+                                <td>
+                                    <div id="route-search">
+                                        <form class="form-horizontal">
+                                            <div class="control-group">
+                                                <label class="control-label">出発: </label>
+                                                <div class="controls">
+                                                    <input id="origin" type="text" class="search-query">
+                                                    <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
+                                                    <button type="button" class="btn btn-mini btn-bookmark disabled"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                        <form class="form-horizontal">
+                                            <div class="control-group">
+                                                <label class="control-label">到着: </label>
+                                                <div class="controls">
+                                                    <input id="destination" type="text" class="search-query">
+                                                    <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
+                                                    <button type="button" class="btn btn-mini btn-bookmark disabled"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
+                                                </div>
+                                            </div>
+                                        </form>
                                     </div>
-                                </form>
-                                <form class="form-horizontal">
-                                    <div class="control-group">
-                                        <label class="control-label">到着: </label>
-                                        <div class="controls">
-                                            <input id="destination" type="text" class="search-query">
-                                            <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
-                                            <button type="button" class="btn btn-mini btn-bookmark disabled"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                            <div class="clearfix"></div> <!-- to realize a height of #route-search-frame -->
+                                </td>
+                            </tr></table>
                         </div>
                     </div>
                 </div>
