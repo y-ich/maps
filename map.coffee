@@ -243,7 +243,7 @@ geocodeHandler = ->
         else
             alert status
 
-getLocationHandler = (data, status) ->
+getPanoramaHandler = (data, status) ->
     switch status
         when google.maps.StreetViewStatus.OK
             sv = map.getStreetView()
@@ -505,7 +505,7 @@ initializeDOM = ->
         backToMap()
         
     $(document).on 'click', '#street-view', (event) ->
-        new google.maps.StreetViewService().getPanoramaByLocation droppedBookmark.marker.getPosition(), 49, getLocationHandler
+        new google.maps.StreetViewService().getPanoramaByLocation currentBookmark.marker.getPosition(), 49, getPanoramaHandler
 
     $(document).on 'click', '#button-info', (event) ->
         setInfoPage(currentBookmark, true)
