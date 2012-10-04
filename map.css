@@ -207,7 +207,7 @@ img.icon {
     background-color: rgb(250,250,250);
     width: 100%;
     position: absolute;
-    top: -100px; /* should be same as height */
+    top: -92px; /* should be same as height. Setting this initial value by JavaScript causes a little complicated implementation because ancester is not displayed and it has transition effect. */
     -webkit-transition: top 0.5s;
 }
 

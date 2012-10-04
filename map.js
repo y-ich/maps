@@ -450,6 +450,7 @@
     var $edit, $mapType, $navi, $option, $route, $routeSearchFrame, $search, $traffic, $travelMode, $versatile, backToMap, last, trafficLayer;
     $origin = $('#origin');
     $destination = $('#destination');
+    $routeSearchFrame = $('#route-search-frame');
     document.addEventListener('touchmove', function(event) {
       return event.preventDefault();
     });
@@ -506,7 +507,6 @@
     });
     $edit = $('#edit');
     $versatile = $('#versatile');
-    $routeSearchFrame = $('#route-search-frame');
     $edit.on('click', function() {
       if ($edit.text() === '編集') {
         $edit.text('キャンセル');

@@ -333,6 +333,7 @@ initializeGoogleMaps = ->
 initializeDOM = ->
     $origin = $('#origin')
     $destination = $('#destination')
+    $routeSearchFrame = $('#route-search-frame')
     
     document.addEventListener 'touchmove', (event) ->
         event.preventDefault()
@@ -360,7 +361,6 @@ initializeDOM = ->
 #        .css('margin', - squareSize / 2 + 'px')
     $map.height innerHeight - $('#header').outerHeight(true) - $('#footer').outerHeight(true)
     $('#pin-list-frame').css 'height', innerHeight - mapSum($('#window-bookmark .btn-toolbar').toArray(), (e) -> $(e).outerHeight(true)) + 'px'
-
 
     # event handlers
 
@@ -396,7 +396,6 @@ initializeDOM = ->
 
     $edit = $('#edit')
     $versatile = $('#versatile')
-    $routeSearchFrame = $('#route-search-frame')
     $edit.on 'click', ->
         if $edit.text() == '編集'
             $edit.text 'キャンセル'
