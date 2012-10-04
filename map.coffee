@@ -27,13 +27,22 @@ $destination = null
 
 mapFSM = null
 bookmarkContext = null
-watchId = null
 
 bookmarks = []
 searchHistory = []
 routeHistory = []
 
 # classes
+    
+class WatchPosition
+    start: () ->
+        @id = navigator.geolocation.watchPosition.apply navigator.geolocation, Array.prototype.slice.call(arguments)
+        @
+
+    stop: () ->
+        navigator.geolocation.clearWatch @id unless @id
+        @id = null
+        @
 
 # abstract class for map's state
 # Concrete instances are class constant.
@@ -531,13 +540,15 @@ initializeDOM = ->
         infoWindow.close()
         $('#container').css 'right', ''
         
+    $('save-bookmark').on 'click', ->
         
-    watchId = navigator.geolocation.watchPosition traceHandler
+    
+    watchPosition = new WatchPosition().start traceHandler
         , (error) -> console.log error.message
         , { enableHighAccuracy: true, timeout: 30000 }
 
     window.onpagehide = ->
-        navigator.geolocation.clearWatch watchId unless watchId
+        watchPosition.stop()
         saveStatus()
 
 initializeGoogleMaps()
