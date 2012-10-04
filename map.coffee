@@ -212,7 +212,9 @@ navigate.step = null
 
 
 setInfoPage = (geocoderResult, deleteButton = false) ->
-    $('#info-name').text geocoderResult.formatted_address.replace(/日本, /, '').replace(/.*〒[\d-]+/, '')
+    name = geocoderResult.formatted_address.replace(/日本, /, '').replace(/.*〒[\d-]+/, '')
+    $('#info-name').text name
+    $('#bookmark-name').val name
     $('#info-address').text geocoderResult.formatted_address
     $('#info-delete-pin').css 'display', if deleteButton then 'block' else 'none'
     
@@ -520,6 +522,9 @@ initializeDOM = ->
 
     $('#add-bookmark').on 'click', ->
         $('#info-add-window').css 'top', '0'
+
+    $('#cancel-add-bookmark').on 'click', ->
+        $('#info-add-window').css 'top', ''
 
     $('#delete-pin').on 'click', ->
         droppedMarker.setVisible false

@@ -312,7 +312,9 @@
     if (deleteButton == null) {
       deleteButton = false;
     }
-    $('#info-name').text(geocoderResult.formatted_address.replace(/日本, /, '').replace(/.*〒[\d-]+/, ''));
+    name = geocoderResult.formatted_address.replace(/日本, /, '').replace(/.*〒[\d-]+/, '');
+    $('#info-name').text(name);
+    $('#bookmark-name').val(name);
     $('#info-address').text(geocoderResult.formatted_address);
     return $('#info-delete-pin').css('display', deleteButton ? 'block' : 'none');
   };
@@ -651,6 +653,9 @@
     });
     $('#add-bookmark').on('click', function() {
       return $('#info-add-window').css('top', '0');
+    });
+    $('#cancel-add-bookmark').on('click', function() {
+      return $('#info-add-window').css('top', '');
     });
     $('#delete-pin').on('click', function() {
       droppedMarker.setVisible(false);
