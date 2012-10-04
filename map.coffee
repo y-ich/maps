@@ -1,22 +1,36 @@
 # Google Maps Web App
 # Copyright (C) ICHIKAWA, Yuji (New 3 Rs) 2012
 
+# constants
+
+PURPLE_DOT_IMAGE = 'http://maps.google.co.jp/mapfiles/ms/icons/purple-dot.png'
+RED_DOT_IMAGE = 'http://maps.google.co.jp/mapfiles/ms/icons/red-dot.png'
+
 # global variables
 
+# Google Maps services
 map = null
 geocoder = null
+directionsRenderer = null
+
 pulsatingMarker = null
 droppedMarker = null
 droppedInfo = null
 naviMarker = null
-directionsRenderer = null
+
+# jQuery instances
 $map = null
 $gps = null
 $origin = null
 $destination = null
+
 mapFSM = null
 bookmarkContext = null
 watchId = null
+
+bookmarks = null
+searchHistory = null
+routeHistory = null
 
 # classes
 
@@ -75,6 +89,17 @@ for name, method of MapState.prototype when typeof method is 'function'
 
 # functions 
 
+# saves current state into localStorage
+saveStatus = () ->
+    pos = map.getCenter()
+    localStorage['last'] = JSON.stringify
+        lat: pos.lat()
+        lng: pos.lng()
+        zoom: map.getZoom()
+        origin: $origin.val()
+        destination: $destination.val()
+
+# sums after some transformation
 mapSum = (array, fn) ->
     array.map(fn).reduce (a, b) -> a + b
 
@@ -113,7 +138,7 @@ makeInfoMessage = (message) ->
     <table id="info-window"><tr>
         <td><button id="street-view" class="btn"><i class="icon-user"></i></button></td>
         <td style="white-space: nowrap;"><div>ドロップされたピン<br><span id="dropped-message" style="font-size:10px">#{message}</span></div></td>
-        <td><button id="info" class"btn disabled"><i class="icon-chevron-right"></i></button></td>
+        <td><button id="button-info" class"btn"><i class="icon-chevron-right"></i></button></td>
     </tr></table>
     """
 
@@ -149,16 +174,6 @@ searchDirections = ->
                     directionsRenderer.setMap null
                     console.log status
 searchDirections.service = new google.maps.DirectionsService()
-
-saveStatus = () ->
-    pos = map.getCenter()
-    localStorage['last'] = JSON.stringify
-        lat: pos.lat()
-        lng: pos.lng()
-        zoom: map.getZoom()
-        origin: $origin.val()
-        destination: $destination.val()
-
 
 navigate = (str) ->
     route = directionsRenderer.getDirections()?.routes[directionsRenderer.getRouteIndex()]
@@ -324,7 +339,6 @@ initializeDOM = ->
 
     # layouts
     
-    $(document.body).css 'padding-top', $('#header').outerHeight(true) # padding corespondent with header
     $('#option-container').css 'bottom', $('#footer').outerHeight(true)
     $map = $('#map')
 # disabled heading trace
@@ -460,6 +474,10 @@ initializeDOM = ->
         
     $(document).on 'click', '#street-view', (event) ->
         new google.maps.StreetViewService().getPanoramaByLocation droppedMarker.getPosition(), 49, getLocationHandler
+
+    $(document).on 'click', '#button-info', (event) ->
+        console.log 'pass'
+        $('document.body').css 'right', '0'
 
     $('.btn-bookmark').on 'click', ->
         bookmarkContext = $(this).siblings('input').attr 'id'

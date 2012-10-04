@@ -175,7 +175,7 @@ img.icon {
 }
 
 #footer {
-    position: fixed;
+    position: absolute;
     bottom: 0;
     width: 100%;
 }
@@ -235,4 +235,68 @@ width: 100px;
 
 #current-place {
     color: blue;
+}
+
+#info {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    right: -100%;
+    background-color: lightgray;
+}
+
+#info-name-row td {
+    vertical-align: middle;
+}
+
+#info-marker {
+    margin: 10px;
+    float: left;
+}
+
+#info-marker div {
+    width: 64px;
+    height: 64px;
+    background-color: white;
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
+    position: relative;
+}
+
+#info-marker div img:last-child {
+    display: block;
+    position: absolute;
+    left: 15px;
+    bottom: 15px;
+}
+
+#info-name {
+}
+
+#info-buttons {
+    width: 100%;
+    table-layout: fixed; 
+}
+
+.info-clickable {
+    text-align: center;
+    border: 1px solid gray;
+    border-radius: 10px;
+    padding: 10px;
+    margin: 10px;
+    background-color: white;
+}
+
+.info-group div:first-child {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    margin-bottom: 0;
+}
+.info-group div:last-child {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-top: 0;
+    margin-top: 0;
 }
