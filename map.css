@@ -3,37 +3,29 @@
 # Copyright (C) ICHIKAWA, Yuji (New 3 Rs) 2012
 */
 
-@-webkit-keyframes pulsate {
-	from {
-		-webkit-transform: scale(0.25);
-		opacity: 1.0;
-	}
-	95% {
-		-webkit-transform: scale(1.3);
-		opacity: 0;
-	}
-	to {
-		-webkit-transform: scale(0.3);
-		opacity: 0;
-	}
-}
-
-
 html, body {
     width: 100%;
     height: 100%;
 }
 
+/*
+ * Twitter Bootstrap canceling
+ */
+
 form {
-    margin: 0;
+    margin: 0; /* 0 0 20px */
+}
+
+.controls {
+    margin-left: 40px !important;
 }
 
 .control-label {
     width: auto !important;
 }
-.controls {
-    margin-left: 40px !important;
-}
+
+/* end of cancel */
+
 .controls input {
     width: 160px;
 }
@@ -47,15 +39,31 @@ form {
     margin-bottom: 0;
 }
 
+.controls {
+    position: relative; /* in order to give a basis to children (reset and bookmark button) */
+}
+
+.btn-reset, .btn-bookmark {
+    border-radius: 20px;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+}
+
 .navbar .btn, .btn-group {
     margin-top: 0 !important;
 }
+
 .navbar-inner {
     padding: 0;
 }
 
+.navbar-search {
+    padding-left: 4px;
+}
+
 .navbar-search .search-query {
-    margin: 0 4px 0 4px;
+    margin: 0;
     width: 270px;
     padding-left: 25px;
     /* consistency between fixed padding and relative width is difficult. so fixed for iPhone. */
@@ -66,13 +74,6 @@ form {
     top: 7px;
     left: 11px;
     background-image: url("http://twitter.github.com/bootstrap/assets/img/glyphicons-halflings-white.png");
-}
-
-.navbar-search button {
-    position: absolute;
-    border-radius: 20px;
-    top: -1px;
-    right: 8px;
 }
 
 .search-query:focus + .icon-search {
@@ -104,6 +105,24 @@ img.icon {
 
 #map img {
     max-width: none; /* work around against a coherence between Google Maps and Bootstrap */
+}
+
+
+/* Pulsating marker */
+
+@-webkit-keyframes pulsate {
+	from {
+		-webkit-transform: scale(0.25);
+		opacity: 1.0;
+	}
+	95% {
+		-webkit-transform: scale(1.3);
+		opacity: 0;
+	}
+	to {
+		-webkit-transform: scale(0.3);
+		opacity: 0;
+	}
 }
 
 #map div.gmnoprint[title="I might be here"] {
@@ -211,6 +230,10 @@ img.icon {
 .btn-right {
     position: absolute;
     right: 6px;
+}
+
+.btn-bookmark {
+    margin-top: 4px;
 }
 
 #search, #route {
