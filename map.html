@@ -175,21 +175,33 @@
             <div class="info-clickable">
                 <table><tr>
                     <td>住所</td>
-                    <td></td>
+                    <td id="info-address"></td>
                 </tr></table>
             </div>
             <div class="info-group">
                 <div class="info-clickable">ここへの道順</div>
                 <div class="info-clickable">ここからの道順</div>
             </div>
-            <div class="info-clickable">ピンを削除</div>
+            <div id="info-delete-pin" class="info-clickable">ピンを削除</div>
             <table id="info-buttons">
                 <tr>
                     <td><div class="info-clickable">連絡先に追加</div></td>
                     <td><div class="info-clickable">場所を送信</div></td>
-                    <td><div class="info-clickable">ブックマークに追加</div></td>
+                    <td><div id="add-bookmark" class="info-clickable">ブックマークに追加</div></td>
                 </tr>
             </table>
+            <div id="info-add-window">
+                <div class="navbar">ブックマークの名前を入力</div>
+                <div class="btn-toolbar">
+                    <button class="btn btn-left">キャンセル</button>
+                    <h4>追加</h4>
+                    <button class="btn btn-right">保存</button>
+                </div>
+                <form>
+                    <input type="text">
+                    <button type="reset" class="btn btn-mini"><i class="icon-remove-sign"></i></button>
+                </form>
+            </div>
         </div>
     </div>
     <script src="js/jquery-1.8.2.min.js"></script>

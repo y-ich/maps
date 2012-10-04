@@ -15,7 +15,8 @@ directionsRenderer = null
 
 pulsatingMarker = null
 droppedMarker = null
-droppedInfo = null
+droppedGeocoderResult = null
+infoWindow = null
 naviMarker = null
 
 # jQuery instances
@@ -28,9 +29,9 @@ mapFSM = null
 bookmarkContext = null
 watchId = null
 
-bookmarks = null
-searchHistory = null
-routeHistory = null
+bookmarks = []
+searchHistory = []
+routeHistory = []
 
 # classes
 
@@ -210,6 +211,11 @@ navigate.leg = null
 navigate.step = null
 
 
+setInfoPage = (geocoderResult, deleteButton = false) ->
+    $('#info-name').text geocoderResult.formatted_address.replace(/日本, /, '').replace(/.*〒[\d-]+/, '')
+    $('#info-address').text geocoderResult.formatted_address
+    $('#info-delete-pin').css 'display', if deleteButton then 'block' else 'none'
+    
 # handlers
 
 # NOTE: This handler is a method, not a function.
@@ -290,10 +296,10 @@ initializeGoogleMaps = ->
         position: mapOptions.center
         title: 'ドロップされたピン'
         visible: false
-    droppedInfo = new google.maps.InfoWindow
+    infoWindow = new google.maps.InfoWindow
         disableAutoPan: true
         maxWidth: innerWidth
-    droppedInfo.open map, droppedMarker
+    infoWindow.open map, droppedMarker
         
     startMarker = null
     destinationMarker = null
@@ -308,13 +314,15 @@ initializeGoogleMaps = ->
     google.maps.event.addListener map, 'click', (event) ->
         droppedMarker.setVisible true
         droppedMarker.setPosition event.latLng
-        droppedInfo.setContent makeInfoMessage ''
+        infoWindow.setContent makeInfoMessage ''
         geocoder.geocode {latLng : event.latLng }, (result, status) ->
             message = if status is google.maps.GeocoderStatus.OK
+                    droppedGeocoderResult = result[0]
                     result[0].formatted_address.replace(/日本, /, '').replace(/.*〒[\d-]+/, '')
                 else
+                    droppedGeocoderResult = null
                     'ドロップされたピン</br>情報がみつかりませんでした。'
-            droppedInfo.setContent makeInfoMessage message
+            infoWindow.setContent makeInfoMessage message
 
     google.maps.event.addListener map, 'dragstart', -> mapFSM.moved()
     # This is a workaround for web app on home screen. There is no onpagehide event.
@@ -476,6 +484,7 @@ initializeDOM = ->
         new google.maps.StreetViewService().getPanoramaByLocation droppedMarker.getPosition(), 49, getLocationHandler
 
     $(document).on 'click', '#button-info', (event) ->
+        setInfoPage(droppedGeocoderResult, true)
         $('#container').css 'right', '100%'
 
     $('#button-map').on 'click', ->
@@ -499,7 +508,10 @@ initializeDOM = ->
 #            when 'origin'
 #            when 'destination'
         $('#window-bookmark').css 'bottom', '-100%'
-            
+
+    $('#add-bookmark').on 'click', ->
+        $('#info-add-window').css 'top', '0'
+    
     watchId = navigator.geolocation.watchPosition traceHandler
         , (error) -> console.log error.message
         , { enableHighAccuracy: true, timeout: 30000 }
