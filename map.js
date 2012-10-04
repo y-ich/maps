@@ -458,11 +458,11 @@
     });
     if (localStorage['last'] != null) {
       last = JSON.parse(localStorage['last']);
-      if (last.origin != null) {
-        $('#origin').val(last.origin);
+      if ((last.origin != null) && last.origin !== '') {
+        $origin.val(last.origin).siblings('.btn-bookmark').css('display', 'none');
       }
-      if (last.destination != null) {
-        $('#destination').val(last.destination);
+      if ((last.destination != null) && last.destination !== '') {
+        $destination.val(last.destination).siblings('.btn-bookmark').css('display', 'none');
       }
     }
     $('#option-container').css('bottom', $('#footer').outerHeight(true));

@@ -342,8 +342,12 @@ initializeDOM = ->
     # restore
     if localStorage['last']?
         last = JSON.parse localStorage['last']
-        $('#origin').val(last.origin) if last.origin?
-        $('#destination').val(last.destination) if last.destination?
+        if last.origin? and last.origin isnt ''
+            $origin.val(last.origin) 
+                   .siblings('.btn-bookmark').css('display', 'none')
+        if last.destination? and last.destination isnt ''
+            $destination.val(last.destination)
+                        .siblings('.btn-bookmark').css('display', 'none')
 
     # layouts
     
