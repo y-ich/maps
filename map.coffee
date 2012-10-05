@@ -16,17 +16,19 @@ map = null
 geocoder = null
 directionsRenderer = null
 
-pulsatingMarker = null
-naviMarker = null
-infoWindow = null
-droppedBookmark = null
-currentBookmark = null
+pulsatingMarker = null # is a pin of current position
+naviMarker = null # is a pin navigating a route.
+infoWindow = null # general purpose singlton of InfoWindow
+
+droppedBookmark = null # combination of dropped marker and address information
+currentBookmark = null # context bookmark
 
 # jQuery instances
 $map = null
 $gps = null
 $originField = null
 $destinationField = null
+$pinList = null
 
 # layout parameter
 pinRowHeight = null
@@ -34,8 +36,8 @@ pinRowHeight = null
 # state variables
 mapFSM = null
 bookmarkContext = null
-bookmarks = []
-history = []
+bookmarks = [] # an array of Bookmark instances
+history = [] # an array of Object instances. two formats. { type: 'search', address: }, { type: 'route', origin: ,destination: }
 
 
 #
@@ -71,8 +73,9 @@ class MapState
     currentPositionClicked: -> @
 
 MapState.NORMAL.update = ->
-    $map.css '-webkit-transform', $map.css('-webkit-transform').replace(/\s*rotate(-?[\d.]+deg)/, '')
     $gps.removeClass('btn-primary')
+    # disabled trace heading
+    # $map.css '-webkit-transform', $map.css('-webkit-transform').replace(/\s*rotate(-?[\d.]+deg)/, '')
     # need to restore icon if implementing TRACE_HEADING
     @
 MapState.NORMAL.gpsClicked = -> MapState.TRACE_POSITION
@@ -90,6 +93,7 @@ MapState.TRACE_HEADING.update = ->
 MapState.TRACE_HEADING.gpsClicked = -> MapState.NORMAL
 MapState.TRACE_HEADING.moved = -> MapState.NORMAL
 MapState.TRACE_HEADING.bookmarkClicked = -> MapState.TRACE_POSITION
+
 
 # state machine for map
 class MapFSM
@@ -271,7 +275,7 @@ navigate = (str) ->
 navigate.leg = null
 navigate.step = null
 
-
+# prepare page of bookmark information
 setInfoPage = (bookmark, dropped) ->
     $('#info-marker img:first-child').attr 'src', bookmark.marker.getIcon().url
     title = bookmark.marker.getTitle()
@@ -287,7 +291,7 @@ generateBookmarkList = ->
     list += '<tr><td data-object-name="droppedBookmark">ドロップされたピン</td></tr>' if droppedBookmark.marker.getVisible()
     list += "<tr><td data-object-name=\"bookmarks[#{i}]\">#{e.marker.getTitle()}</td></tr>" for e, i in bookmarks
     list += Array(Math.max(1, Math.floor(innerHeight / pinRowHeight) - bookmarks.length)).join '<tr><td></td></tr>'
-    $('#pin-list').html list
+    $pinList.html list
     
 generateHistoryList = ->
     print = (e) ->
@@ -299,11 +303,10 @@ generateHistoryList = ->
     list = ''
     list += "<tr><td data-object-name=\"history[#{i}]\">#{print e}</td></tr>" for e, i in history
     list += Array(Math.max(1, Math.floor(innerHeight / pinRowHeight) - history.length)).join '<tr><td></td></tr>'
-    $('#pin-list').html list
-# handlers
+    $pinList.html list
 
-# NOTE: This handler is a method, not a function.
-searchAddress = (fromHistory)->
+# search and display a place
+searchAddress = (fromHistory) ->
     address = $addressField.val()
     return unless address? and address isnt ''
     if not fromHistory
@@ -316,6 +319,10 @@ searchAddress = (fromHistory)->
             map.setCenter result[0].geometry.location
         else
             alert status
+
+#
+# handlers
+#
 
 getPanoramaHandler = (data, status) ->
     switch status
@@ -360,7 +367,8 @@ initializeGoogleMaps = ->
     mapOptions =
         mapTypeId: getMapType()
         disableDefaultUI: true
-    # if previous position data exists, then restore it, otherwise default value.
+
+    # restore map status
     if localStorage['maps-map-status']?
         mapStatus = JSON.parse localStorage['maps-map-status']
         mapOptions.center = new google.maps.LatLng mapStatus.lat, mapStatus.lng
@@ -391,9 +399,6 @@ initializeGoogleMaps = ->
     infoWindow = new google.maps.InfoWindow
         maxWidth: innerWidth
         
-    startMarker = null
-    destinationMarker = null
-
     naviMarker = new google.maps.Marker
         flat: true
         icon: new google.maps.MarkerImage('img/bluedot.png', null, null, new google.maps.Point(8, 8), new google.maps.Size(17, 17))
@@ -422,18 +427,22 @@ initializeGoogleMaps = ->
 
 
 initializeDOM = ->
+    # initializes global variables
+    $map = $('#map')
+    $gps = $('#gps')
     $originField = $('#origin input[name="origin"]')
     $destinationField = $('#destination input[name="destination"]')
-    $routeSearchFrame = $('#route-search-frame')
-    
+    $pinList = $('#pin-list')
     pinRowHeight = $('#pin-list tr').height()
 
+
+    # prevents default page scroll, but scroll bookmark/history list.
     document.addEventListener 'touchmove', (event) ->
         event.preventDefault()
     $('#pin-list-frame').on 'touchmove', (event) ->
         event.stopPropagation()
     
-    # restore
+    # restores from localStorage
     if localStorage['maps-other-status']?
         otherStatus = JSON.parse localStorage['maps-other-status']
         if otherStatus.origin? and otherStatus.origin isnt ''
@@ -450,21 +459,24 @@ initializeDOM = ->
                 ), e.address
         history = otherStatus.history ? []
 
-    # layouts
-    
+
+    # layouts dynamically
     $('#option-container').css 'bottom', $('#footer').outerHeight(true)
-    $map = $('#map')
 # disabled heading trace
+#    # makes map large square for rotation of heading
 #    squareSize = Math.floor(Math.sqrt(Math.pow(innerWidth, 2) + Math.pow(innerHeight, 2)))
 #    $map.width(squareSize)
 #        .height(squareSize)
 #        .css('margin', - squareSize / 2 + 'px')
+    # fits map between header and footer
     $map.height innerHeight - $('#header').outerHeight(true) - $('#footer').outerHeight(true)
+    # fits list frame between header and footer. should be rewritten.
     $('#pin-list-frame').css 'height', innerHeight - mapSum($('#window-bookmark .btn-toolbar').toArray(), (e) -> $(e).outerHeight(true)) + 'px'
 
+    #
     # event handlers
+    #
 
-    $gps = $('#gps')
     $gps.on 'click', -> mapFSM.gpsClicked()
             
     $('#address').on 'submit', ->
@@ -498,6 +510,7 @@ initializeDOM = ->
 
     $edit = $('#edit')
     $versatile = $('#versatile')
+    $routeSearchFrame = $('#route-search-frame')
     openRouteForm = () ->
         $edit.text 'キャンセル'
         $versatile.text '経路'
