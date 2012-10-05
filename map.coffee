@@ -1,13 +1,15 @@
 # Google Maps Web App
 # Copyright (C) ICHIKAWA, Yuji (New 3 Rs) 2012
 
-# constants
+#
+# global variables
+#
 
+# constants
 PURPLE_DOT_IMAGE = 'http://maps.google.co.jp/mapfiles/ms/icons/purple-dot.png'
 RED_DOT_IMAGE = 'http://maps.google.co.jp/mapfiles/ms/icons/red-dot.png'
 MSMARKER_SHADOW = 'http://maps.google.co.jp/mapfiles/ms/icons/msmarker.shadow.png'
 
-# global variables
 
 # Google Maps services
 map = null
@@ -15,33 +17,38 @@ geocoder = null
 directionsRenderer = null
 
 pulsatingMarker = null
+naviMarker = null
+infoWindow = null
 droppedBookmark = null
 currentBookmark = null
-infoWindow = null
-naviMarker = null
 
 # jQuery instances
 $map = null
 $gps = null
 $originField = null
 $destinationField = null
+
+# layout parameter
 pinRowHeight = null
 
+# state variables
 mapFSM = null
 bookmarkContext = null
-
 bookmarks = []
 history = []
 
+
+#
 # classes
+#
 
 # manages id for navigator.geolocation
 class WatchPosition
-    start: () ->
+    start: (dummy) ->
         @id = navigator.geolocation.watchPosition.apply navigator.geolocation, Array.prototype.slice.call(arguments)
         @
 
-    stop: () ->
+    stop: ->
         navigator.geolocation.clearWatch @id unless @id
         @id = null
         @
@@ -84,6 +91,7 @@ MapState.TRACE_HEADING.gpsClicked = -> MapState.NORMAL
 MapState.TRACE_HEADING.moved = -> MapState.NORMAL
 MapState.TRACE_HEADING.bookmarkClicked = -> MapState.TRACE_POSITION
 
+# state machine for map
 class MapFSM
     constructor: (@state) ->
 
@@ -93,13 +101,13 @@ class MapFSM
         return if @state is state
         @state = state
         @state.update()
-
+# delegate
 for name, method of MapState.prototype when typeof method is 'function'
     MapFSM.prototype[name] = ((name) ->
         -> this.setState this.state[name]())(name) # substantiation of name
 
 
-
+# bookmark
 class Bookmark
     constructor: (@marker, @address) ->
         google.maps.event.addListener @marker, 'click', (event) =>
@@ -119,9 +127,12 @@ class Bookmark
             address: @address
         }
 
+#
 # functions 
+#
 
 # saves current state into localStorage
+# saves frequently changing state
 saveMapStatus = () ->
     pos = map.getCenter()
     localStorage['maps-map-status'] = JSON.stringify
@@ -129,6 +140,7 @@ saveMapStatus = () ->
         lng: pos.lng()
         zoom: map.getZoom()
 
+# saves others
 saveOtherStatus = () ->
     localStorage['maps-other-status'] = JSON.stringify
         origin: $originField.val()
@@ -136,6 +148,9 @@ saveOtherStatus = () ->
         bookmarks: bookmarks.map (e) -> e.toObject()
         history: history
 
+sum = (array) ->
+    array.reduce (a, b) -> a + b
+    
 # sums after some transformation
 mapSum = (array, fn) ->
     array.map(fn).reduce (a, b) -> a + b
@@ -153,7 +168,6 @@ secondToString = (sec) ->
     result += hour + '時間' if hour > 0 and day < 10
     result += min + '分' if min > 0 and day == 0 and hour < 10
     result
-    
 
 # returns formatted string '?km' or '?m' from sec(number)
 meterToString = (meter) ->
@@ -162,34 +176,35 @@ meterToString = (meter) ->
     else
         parseFloat((meter / 1000).toPrecision(2)) + 'km'
 
-
 # returns current travel mode on display
 getTravelMode = -> google.maps.TravelMode[$('#travel-mode').children('.btn-primary').attr('id').toUpperCase()]
 
 # returns current map type on display
 getMapType = -> google.maps.MapTypeId[$('#map-type').children('.btn-primary').attr('id').toUpperCase()]
 
-
-makeInfoMessage = (name, message) ->
+# 
+makeInfoMessage = (title, message) ->
     """
     <table id="info-window"><tr>
         <td><button id="street-view" class="btn"><i class="icon-user"></i></button></td>
-        <td style="white-space: nowrap;"><div>#{name}<br><span id="dropped-message" style="font-size:10px">#{message}</span></div></td>
+        <td style="white-space: nowrap;"><div>#{title}<br><span id="dropped-message" style="font-size:10px">#{message}</span></div></td>
         <td><button id="button-info" class"btn"><i class="icon-chevron-right"></i></button></td>
     </tr></table>
     """
 
 
 # invokes to search directions and displays a result.
-searchDirections = (fromHistory) ->
+searchDirections = (fromHistory = false) ->
     origin = $originField.val()
     destination = $destinationField.val()
     return unless (origin? and origin isnt '') and (destination? and destination isnt '')
+
     if fromHistory
         history.unshift
             type: 'route'
             origin: origin
             destination: destination
+
     searchDirections.service.route
             destination: destination
             origin: origin
@@ -198,7 +213,6 @@ searchDirections = (fromHistory) ->
         , (result, status) ->
             $message = $('#message')
             message = ''
-            window.result = result
             switch status
                 when google.maps.DirectionsStatus.OK
                     directionsRenderer.setMap map
@@ -218,8 +232,11 @@ searchDirections = (fromHistory) ->
                 else
                     directionsRenderer.setMap null
                     console.log status
+
 searchDirections.service = new google.maps.DirectionsService()
 
+
+# navigate current direction step by step
 navigate = (str) ->
     route = directionsRenderer.getDirections()?.routes[directionsRenderer.getRouteIndex()]
     return unless route?
@@ -246,9 +263,9 @@ navigate = (str) ->
     step = route.legs[navigate.leg].steps[navigate.step]
     naviMarker.setPosition step.start_location
     map.setCenter step.start_location
-    lengths = (route.legs.map (e) -> e.steps.length)
-    steps = if navigate.leg == 0 then navigate.step else lengths[0...navigate.leg].reduce (a, b) -> a + b
-    $('#numbering').text (steps + 1) + '/' + (route.legs.map (e) -> e.steps.length).reduce (a, b) -> a + b
+    lengths = route.legs.map (e) -> e.steps.length
+    steps = navigate.step + if navigate.leg == 0 then 0 else sum lengths[0...navigate.leg]
+    $('#numbering').text (steps + 1) + '/' + mapSum route.legs, (e) -> e.steps.length
     $('#message').html step.instructions
 
 navigate.leg = null
