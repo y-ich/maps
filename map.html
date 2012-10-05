@@ -49,12 +49,10 @@
             <div id="header" class="navbar">
                 <div class="navbar-inner">
                     <div class="navbar-search">
-                        <form class="with-reset-button">
-                            <input id="address" type="text" class="search-query" placeholder="検索または住所">
-                            <div class="icon-search"></div>
-                            <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
-                            <button type="button" class="btn btn-mini btn-bookmark"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
-                        </form>
+                        <input id="address" type="text" class="search-query" placeholder="検索または住所">
+                        <div class="icon-search"></div>
+                        <button type="button" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
+                        <button type="button" class="btn btn-mini btn-bookmark"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
                     </div>
                 </div>
                 <div id="navi">
@@ -84,26 +82,18 @@
                                 </td>
                                 <td>
                                     <div id="route-search">
-                                        <form class="form-horizontal with-reset-button">
-                                            <div class="control-group">
-                                                <label class="control-label">出発: </label>
-                                                <div class="controls">
-                                                    <input id="origin" type="text" class="search-query">
-                                                    <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
-                                                    <button type="button" class="btn btn-mini btn-bookmark disabled"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
-                                                </div>
-                                            </div>
+                                        <form class="form-inline with-reset-button">
+                                            <label class="control-label">出発: </label>
+                                            <input id="origin" type="text" class="search-query">
+                                            <button type="button" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
+                                            <button type="button" class="btn btn-mini btn-bookmark disabled"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
                                         </form>
                                         <div class="clearfix"></div>
-                                        <form class="form-horizontal with-reset-button">
-                                            <div class="control-group">
-                                                <label class="control-label">到着: </label>
-                                                <div class="controls">
-                                                    <input id="destination" type="text" class="search-query">
-                                                    <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
-                                                    <button type="button" class="btn btn-mini btn-bookmark disabled"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
-                                                </div>
-                                            </div>
+                                        <form class="form-inline with-reset-button">
+                                            <label class="control-label">到着: </label>
+                                            <input id="destination" type="text" class="search-query">
+                                            <button type="button" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
+                                            <button type="button" class="btn btn-mini btn-bookmark disabled"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
                                         </form>
                                     </div>
                                 </td>
@@ -181,9 +171,9 @@
                     <h4>追加</h4>
                     <button id="save-bookmark" class="btn btn-right">保存</button>
                 </div>
-                <form class="with-reset-button">
+                <form class="form-inline with-reset-button">
                     <input id="bookmark-name" type="text" class="search-query">
-                    <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
+                    <button type="button" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
                 </form>
             </div>
         </div>

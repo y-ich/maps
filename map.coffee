@@ -443,6 +443,9 @@ initializeDOM = ->
             
     $('.search-query').parent().on 'submit', ->
         return false
+
+    $('.btn-reset').on 'click', ->
+        $(this).siblings('input').val ''
         
     $('#address').on 'change', geocodeHandler
     $('.search-query').on 'keyup', -> # textInput, keypress is before inputting a character.

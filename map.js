@@ -593,6 +593,9 @@
     $('.search-query').parent().on('submit', function() {
       return false;
     });
+    $('.btn-reset').on('click', function() {
+      return $(this).siblings('input').val('');
+    });
     $('#address').on('change', geocodeHandler);
     $('.search-query').on('keyup', function() {
       var $this;
