@@ -181,13 +181,16 @@ makeInfoMessage = (name, message) ->
 
 # invokes to search directions and displays a result.
 searchDirections = ->
+    origin = $originField.val()
+    destination = $destinationField.val()
+    return if origin is '' or destination is ''
     history.unshift
         type: 'route'
-        origin: $originField.val()
-        destination: $destinationField.val() 
+        origin: origin
+        destination: destination
     searchDirections.service.route
-            destination: $destinationField.val()
-            origin: $originField.val()
+            destination: destination
+            origin: origin
             provideRouteAlternatives: getTravelMode() isnt google.maps.TravelMode.WALKING
             travelMode: getTravelMode()
         , (result, status) ->
@@ -264,7 +267,7 @@ generateBookmarkList = ->
     list = '<tr><td data-object-name="pulsatingMarker">現在地</td></tr>'
     list += '<tr><td data-object-name="droppedBookmark">ドロップされたピン</td></tr>' if droppedBookmark.marker.getVisible()
     list += "<tr><td data-object-name=\"bookmarks[#{i}]\">#{e.marker.getTitle()}</td></tr>" for e, i in bookmarks
-    list += Array(Math.floor(innerHeight / pinRowHeight) - bookmarks.length).join '<tr><td></td></tr>'
+    list += Array(Math.max(1, Math.floor(innerHeight / pinRowHeight) - bookmarks.length)).join '<tr><td></td></tr>'
     $('#pin-list').html list
     
 generateHistoryList = ->
@@ -276,7 +279,7 @@ generateHistoryList = ->
                 "出発: #{e.origin}<br>到着: #{e.destination}"
     list = ''
     list += "<tr><td data-object-name=\"history[#{i}]\">#{print e}</td></tr>" for e, i in history
-    list += Array(Math.floor(innerHeight / pinRowHeight) - history.length).join '<tr><td></td></tr>'
+    list += Array(Math.max(1, Math.floor(innerHeight / pinRowHeight) - history.length)).join '<tr><td></td></tr>'
     $('#pin-list').html list
 # handlers
 

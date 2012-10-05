@@ -275,14 +275,20 @@
   };
 
   searchDirections = function() {
+    var destination, origin;
+    origin = $originField.val();
+    destination = $destinationField.val();
+    if (origin === '' || destination === '') {
+      return;
+    }
     history.unshift({
       type: 'route',
-      origin: $originField.val(),
-      destination: $destinationField.val()
+      origin: origin,
+      destination: destination
     });
     return searchDirections.service.route({
-      destination: $destinationField.val(),
-      origin: $originField.val(),
+      destination: destination,
+      origin: origin,
       provideRouteAlternatives: getTravelMode() !== google.maps.TravelMode.WALKING,
       travelMode: getTravelMode()
     }, function(result, status) {
@@ -394,7 +400,7 @@
       e = bookmarks[i];
       list += "<tr><td data-object-name=\"bookmarks[" + i + "]\">" + (e.marker.getTitle()) + "</td></tr>";
     }
-    list += Array(Math.floor(innerHeight / pinRowHeight) - bookmarks.length).join('<tr><td></td></tr>');
+    list += Array(Math.max(1, Math.floor(innerHeight / pinRowHeight) - bookmarks.length)).join('<tr><td></td></tr>');
     return $('#pin-list').html(list);
   };
 
@@ -413,7 +419,7 @@
       e = history[i];
       list += "<tr><td data-object-name=\"history[" + i + "]\">" + (print(e)) + "</td></tr>";
     }
-    list += Array(Math.floor(innerHeight / pinRowHeight) - history.length).join('<tr><td></td></tr>');
+    list += Array(Math.max(1, Math.floor(innerHeight / pinRowHeight) - history.length)).join('<tr><td></td></tr>');
     return $('#pin-list').html(list);
   };
 
