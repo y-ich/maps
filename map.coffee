@@ -26,6 +26,7 @@ currentBookmark = null # context bookmark
 # jQuery instances
 $map = null
 $gps = null
+$addressField = null
 $originField = null
 $destinationField = null
 $pinList = null
@@ -425,6 +426,7 @@ initializeDOM = ->
     # initializes global variables
     $map = $('#map')
     $gps = $('#gps')
+    $addressField = $('#address input[name="address"]')
     $originField = $('#origin input[name="origin"]')
     $destinationField = $('#destination input[name="destination"]')
     $pinList = $('#pin-list')
@@ -641,6 +643,8 @@ initializeDOM = ->
                         mapFSM.setState(MapState.TRACE_POSITION)
                     else
                         mapFSM.setState(MapState.NORMAL)
+                        console.log bookmarkOrMarker.address
+                        console.log bookmarkOrMarker isnt droppedBookmark
                         $addressField.val bookmarkOrMarker.address if bookmarkOrMarker isnt droppedBookmark
                         map.setCenter bookmarkOrMarker.marker.getPosition()
                         currentBookmark = bookmarkOrMarker
