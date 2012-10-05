@@ -591,10 +591,11 @@ initializeDOM = ->
                 when 'address'
                     map.getStreetView().setVisible(false)
                     if name is 'pulsatingMarker'
-                        mapFSM.currentPositionClicked()
+                        mapFSM.setState(MapState.TRACE_POSITION)
                     else
-                        currentBookmark = bookmarkOrMarker
+                        mapFSM.setState(MapState.NORMAL)
                         map.setCenter bookmarkOrMarker.marker.getPosition()
+                        currentBookmark = bookmarkOrMarker
                         bookmarkOrMarker.showInfoWindow()
                 when 'origin'
                     $originField.val if name is 'pulsatingMarker'
