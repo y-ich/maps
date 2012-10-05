@@ -85,15 +85,7 @@
       return this;
     };
 
-    MapState.prototype.moved = function() {
-      return this;
-    };
-
     MapState.prototype.bookmarkClicked = function() {
-      return this;
-    };
-
-    MapState.prototype.currentPositionClicked = function() {
       return this;
     };
 
@@ -110,10 +102,6 @@
     return MapState.TRACE_POSITION;
   };
 
-  MapState.NORMAL.currentPositionClicked = function() {
-    return MapState.TRACE_POSITION;
-  };
-
   MapState.TRACE_POSITION.update = function() {
     $gps.addClass('btn-primary');
     return this;
@@ -123,19 +111,11 @@
     return MapState.NORMAL;
   };
 
-  MapState.TRACE_POSITION.moved = function() {
-    return MapState.NORMAL;
-  };
-
   MapState.TRACE_HEADING.update = function() {
     return this;
   };
 
   MapState.TRACE_HEADING.gpsClicked = function() {
-    return MapState.NORMAL;
-  };
-
-  MapState.TRACE_HEADING.moved = function() {
     return MapState.NORMAL;
   };
 
@@ -562,7 +542,7 @@
       });
     });
     google.maps.event.addListener(map, 'dragstart', function() {
-      return mapFSM.moved();
+      return mapFSM.setState(MapState.NORMAL);
     });
     google.maps.event.addListener(map, 'center_changed', saveMapStatus);
     return google.maps.event.addListener(map, 'zoom_changed', saveMapStatus);
@@ -760,6 +740,7 @@
       return $('#container').css('right', '');
     });
     $('.btn-bookmark').on('click', function() {
+      mapFSM.bookmarkClicked();
       bookmarkContext = $(this).parent().attr('id');
       generateBookmarkList();
       return $('#window-bookmark').css('bottom', '0');

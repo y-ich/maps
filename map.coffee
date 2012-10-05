@@ -55,7 +55,7 @@ class WatchPosition
         @id = null
         @
 
-# abstract class for map's state
+# abstract class for map's trace state
 # Concrete instances are class constant.
 class MapState
     constructor: (@name)-> 
@@ -68,9 +68,7 @@ class MapState
     # all methods should return a state for a kind of delegation
     update: -> @
     gpsClicked: -> @
-    moved: -> @
     bookmarkClicked: -> @
-    currentPositionClicked: -> @
 
 MapState.NORMAL.update = ->
     $gps.removeClass('btn-primary')
@@ -79,19 +77,16 @@ MapState.NORMAL.update = ->
     # need to restore icon if implementing TRACE_HEADING
     @
 MapState.NORMAL.gpsClicked = -> MapState.TRACE_POSITION
-MapState.NORMAL.currentPositionClicked = -> MapState.TRACE_POSITION
 
 MapState.TRACE_POSITION.update = ->
     $gps.addClass 'btn-primary'
     @
 MapState.TRACE_POSITION.gpsClicked = -> MapState.NORMAL # disabled TRACE_HEADING
-MapState.TRACE_POSITION.moved = -> MapState.NORMAL
 
 MapState.TRACE_HEADING.update = ->
     # need to change icon
     @
 MapState.TRACE_HEADING.gpsClicked = -> MapState.NORMAL
-MapState.TRACE_HEADING.moved = -> MapState.NORMAL
 MapState.TRACE_HEADING.bookmarkClicked = -> MapState.TRACE_POSITION
 
 
@@ -419,7 +414,7 @@ initializeGoogleMaps = ->
                     '情報がみつかりませんでした。'
             infoWindow.setContent makeInfoMessage droppedBookmark.marker.getTitle(), droppedBookmark.address
 
-    google.maps.event.addListener map, 'dragstart', -> mapFSM.moved()
+    google.maps.event.addListener map, 'dragstart', -> mapFSM.setState MapState.NORMAL
     # This is a workaround for web app on home screen. There is no onpagehide event.
     google.maps.event.addListener map, 'center_changed', saveMapStatus
     google.maps.event.addListener map, 'zoom_changed', saveMapStatus
@@ -613,6 +608,7 @@ initializeDOM = ->
         $('#container').css 'right', ''
         
     $('.btn-bookmark').on 'click', ->
+        mapFSM.bookmarkClicked()
         bookmarkContext = $(this).parent().attr 'id'
         generateBookmarkList()
         $('#window-bookmark').css 'bottom', '0'
