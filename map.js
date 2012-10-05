@@ -444,7 +444,6 @@
       case google.maps.StreetViewStatus.OK:
         sv = map.getStreetView();
         sv.setPosition(data.location.latLng);
-        currentBookmark.marker.setPosition(data.location.latLng);
         sv.setPov({
           heading: (_ref1 = map.getHeading()) != null ? _ref1 : 0,
           pitch: 0,

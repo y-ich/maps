@@ -298,7 +298,6 @@ getPanoramaHandler = (data, status) ->
         when google.maps.StreetViewStatus.OK
             sv = map.getStreetView()
             sv.setPosition data.location.latLng
-            currentBookmark.marker.setPosition data.location.latLng
             sv.setPov
                 heading: map.getHeading() ? 0
                 pitch: 0
