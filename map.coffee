@@ -21,6 +21,7 @@ naviMarker = null # is a pin navigating a route.
 infoWindow = null # general purpose singlton of InfoWindow
 
 droppedBookmark = null # combination of dropped marker and address information
+searchBookmark = null # search result
 currentBookmark = null # context bookmark
 
 # jQuery instances
@@ -319,6 +320,12 @@ searchAddress = (fromHistory) ->
         if status is google.maps.GeocoderStatus.OK
             mapFSM.setState MapState.NORMAL
             map.setCenter result[0].geometry.location
+            searchBookmark.marker.setPosition result[0].geometry.location
+            searchBookmark.marker.setTitle address
+            searchBookmark.marker.setVisible true
+            searchBookmark.address = result[0].formatted_address
+            searchBookmark.showInfoWindow()
+            currentBookmark = searchBookmark
         else
             alert status
 
@@ -390,13 +397,20 @@ initializeGoogleMaps = ->
         $('#navi-toolbar2').css 'display', 'none'
         naviMarker.setVisible false
 
-    droppedBookmark = new Bookmark new google.maps.Marker
-        map: map
-        icon: new google.maps.MarkerImage(PURPLE_DOT_IMAGE)
-        shadow: new google.maps.MarkerImage(MSMARKER_SHADOW, null, null, new google.maps.Point(16, 32))
-        position: mapOptions.center
-        title: 'ドロップされたピン'
-        visible: false
+    droppedBookmark = new Bookmark new google.maps.Marker(
+            map: map
+            icon: new google.maps.MarkerImage(PURPLE_DOT_IMAGE)
+            shadow: new google.maps.MarkerImage(MSMARKER_SHADOW, null, null, new google.maps.Point(16, 32))
+            position: mapOptions.center
+            title: 'ドロップされたピン'
+            visible: false
+        ), ''
+
+    searchBookmark = new Bookmark new google.maps.Marker(
+            map: map
+            position: mapOptions.center
+            visible: false
+        ), ''
     
     infoWindow = new google.maps.InfoWindow
         maxWidth: Math.floor innerWidth*0.9
@@ -492,8 +506,12 @@ initializeDOM = ->
             $this.siblings('.btn-bookmark').css('display', 'none')
 
     $('.btn-reset').on 'click', ->
-        $(this).siblings('.btn-bookmark').css('display', 'block')        
+        $(this).siblings('.btn-bookmark').css('display', 'block')
     
+    $('#address .btn-reset').on 'click', ->
+        searchBookmark.marker.setVisible false
+        infoWindow.setVisible false if currentBookmark is searchBookmark
+        
     $navi = $('#navi')
     $search = $('#search')
     $search.on 'click', ->
