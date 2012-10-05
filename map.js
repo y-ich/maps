@@ -274,18 +274,20 @@
     return "<table id=\"info-window\"><tr>\n    <td><button id=\"street-view\" class=\"btn\"><i class=\"icon-user\"></i></button></td>\n    <td style=\"white-space: nowrap;\"><div>" + name + "<br><span id=\"dropped-message\" style=\"font-size:10px\">" + message + "</span></div></td>\n    <td><button id=\"button-info\" class\"btn\"><i class=\"icon-chevron-right\"></i></button></td>\n</tr></table>";
   };
 
-  searchDirections = function() {
+  searchDirections = function(fromHistory) {
     var destination, origin;
     origin = $originField.val();
     destination = $destinationField.val();
-    if (origin === '' || destination === '') {
+    if (!(((origin != null) && origin !== '') && ((destination != null) && destination !== ''))) {
       return;
     }
-    history.unshift({
-      type: 'route',
-      origin: origin,
-      destination: destination
-    });
+    if (fromHistory) {
+      history.unshift({
+        type: 'route',
+        origin: origin,
+        destination: destination
+      });
+    }
     return searchDirections.service.route({
       destination: destination,
       origin: origin,
@@ -422,15 +424,23 @@
     return $('#pin-list').html(list);
   };
 
-  searchAddress = function(address) {
-    history.unshift({
-      type: 'search',
-      address: address
-    });
+  searchAddress = function(fromHistory) {
+    var address;
+    address = $addressField.val();
+    if (!((address != null) && address !== '')) {
+      return;
+    }
+    if (!fromHistory) {
+      history.unshift({
+        type: 'search',
+        address: address
+      });
+    }
     return geocoder.geocode({
       address: address
     }, function(result, status) {
       if (status === google.maps.GeocoderStatus.OK) {
+        mapFSM.setState(MapState.NORMAL);
         return map.setCenter(result[0].geometry.location);
       } else {
         return alert(status);
@@ -592,11 +602,7 @@
       return mapFSM.gpsClicked();
     });
     $('#address').on('submit', function() {
-      var address;
-      address = $(this).children('input').val();
-      if ((address != null) && address !== '') {
-        searchAddress(address);
-      }
+      searchAddress(false);
       return false;
     });
     $('.search-query').on('keyup', function() {
@@ -665,7 +671,7 @@
       }
       $travelMode.children().removeClass('btn-primary');
       $this.addClass('btn-primary');
-      return searchDirections();
+      return searchDirections(false);
     });
     $versatile.on('click', function() {
       switch ($versatile.text()) {
@@ -673,7 +679,7 @@
           $edit.text('編集');
           $versatile.text('出発');
           $routeSearchFrame.css('top', '');
-          return searchDirections();
+          return searchDirections(false);
         case '出発':
           return navigate('start');
       }
@@ -750,13 +756,23 @@
       return $('#window-bookmark').css('bottom', '-100%');
     });
     $(document).on('click', '#pin-list td', function() {
-      var bookmarkOrMarker, latLng;
+      var bookmarkOrMarker, item, latLng;
       name = $(this).data('object-name');
       if (!((name != null) && name !== '')) {
         return;
       }
       if (/history/.test(name)) {
-        null;
+        item = eval(name);
+        switch (item.type) {
+          case 'search':
+            $addressField.val(item.address);
+            searchAddress(true);
+            break;
+          case 'route':
+            $originField.val(item.origin);
+            $destinationField.val(item.destination);
+            searchDirections(true);
+        }
       } else {
         bookmarkOrMarker = eval(name);
         switch (bookmarkContext) {
@@ -766,6 +782,9 @@
               mapFSM.setState(MapState.TRACE_POSITION);
             } else {
               mapFSM.setState(MapState.NORMAL);
+              if (bookmarkOrMarker !== droppedBookmark) {
+                $addressField.val(bookmarkOrMarker.address);
+              }
               map.setCenter(bookmarkOrMarker.marker.getPosition());
               currentBookmark = bookmarkOrMarker;
               bookmarkOrMarker.showInfoWindow();

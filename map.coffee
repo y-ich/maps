@@ -180,14 +180,15 @@ makeInfoMessage = (name, message) ->
 
 
 # invokes to search directions and displays a result.
-searchDirections = ->
+searchDirections = (fromHistory) ->
     origin = $originField.val()
     destination = $destinationField.val()
-    return if origin is '' or destination is ''
-    history.unshift
-        type: 'route'
-        origin: origin
-        destination: destination
+    return unless (origin? and origin isnt '') and (destination? and destination isnt '')
+    if fromHistory
+        history.unshift
+            type: 'route'
+            origin: origin
+            destination: destination
     searchDirections.service.route
             destination: destination
             origin: origin
@@ -283,12 +284,16 @@ generateHistoryList = ->
 # handlers
 
 # NOTE: This handler is a method, not a function.
-searchAddress = (address)->
-    history.unshift
-        type: 'search'
-        address: address
+searchAddress = (fromHistory)->
+    address = $addressField.val()
+    return unless address? and address isnt ''
+    if not fromHistory
+        history.unshift
+            type: 'search'
+            address: address
     geocoder.geocode {address : address }, (result, status) ->
         if status is google.maps.GeocoderStatus.OK
+            mapFSM.setState MapState.NORMAL
             map.setCenter result[0].geometry.location
         else
             alert status
@@ -442,8 +447,7 @@ initializeDOM = ->
     $gps.on 'click', -> mapFSM.gpsClicked()
             
     $('#address').on 'submit', ->
-        address = $(this).children('input').val()
-        searchAddress address if address? and address isnt ''
+        searchAddress(false)
         return false 
 
     $('.search-query').on 'keyup', -> # textInput, keypress is before inputting a character.
@@ -503,7 +507,7 @@ initializeDOM = ->
         return if $this.hasClass 'btn-primary'
         $travelMode.children().removeClass 'btn-primary'
         $this.addClass 'btn-primary'
-        searchDirections()
+        searchDirections false
         
     $versatile.on 'click', ->
         switch $versatile.text()
@@ -511,7 +515,7 @@ initializeDOM = ->
                 $edit.text '編集'
                 $versatile.text '出発'
                 $routeSearchFrame.css 'top', ''
-                searchDirections()
+                searchDirections false
             when '出発'
                 navigate 'start'
 
@@ -583,7 +587,16 @@ initializeDOM = ->
         name = $(this).data('object-name')
         return unless name? and name isnt ''
         if /history/.test name # history list
-            null # need to implement
+            item = eval(name)
+            switch item.type
+                when 'search'
+                    $addressField.val item.address
+                    searchAddress true
+                when 'route'
+                    $originField.val item.origin
+                    $destinationField.val item.destination
+                    searchDirections true
+                
         else # bookmark list
             bookmarkOrMarker = eval(name)
             switch bookmarkContext
@@ -593,6 +606,7 @@ initializeDOM = ->
                         mapFSM.setState(MapState.TRACE_POSITION)
                     else
                         mapFSM.setState(MapState.NORMAL)
+                        $addressField.val bookmarkOrMarker.address if bookmarkOrMarker isnt droppedBookmark
                         map.setCenter bookmarkOrMarker.marker.getPosition()
                         currentBookmark = bookmarkOrMarker
                         bookmarkOrMarker.showInfoWindow()
