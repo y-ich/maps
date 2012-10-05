@@ -762,9 +762,11 @@
         bookmarkOrMarker = eval(name);
         switch (bookmarkContext) {
           case 'address':
+            map.getStreetView().setVisible(false);
             if (name === 'pulsatingMarker') {
               mapFSM.currentPositionClicked();
             } else {
+              currentBookmark = bookmarkOrMarker;
               map.setCenter(bookmarkOrMarker.marker.getPosition());
               bookmarkOrMarker.showInfoWindow();
             }

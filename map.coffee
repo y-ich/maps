@@ -583,15 +583,17 @@ initializeDOM = ->
     $(document).on 'click', '#pin-list td', ->
         name = $(this).data('object-name')
         return unless name? and name isnt ''
-        if /history/.test name
+        if /history/.test name # history list
             null # need to implement
-        else
+        else # bookmark list
             bookmarkOrMarker = eval(name)
             switch bookmarkContext
                 when 'address'
+                    map.getStreetView().setVisible(false)
                     if name is 'pulsatingMarker'
                         mapFSM.currentPositionClicked()
                     else
+                        currentBookmark = bookmarkOrMarker
                         map.setCenter bookmarkOrMarker.marker.getPosition()
                         bookmarkOrMarker.showInfoWindow()
                 when 'origin'
