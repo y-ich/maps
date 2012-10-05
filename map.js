@@ -105,6 +105,7 @@
   };
 
   MapState.TRACE_POSITION.update = function() {
+    map.setCenter(pulsatingMarker.getPosition());
     $gps.addClass('btn-primary');
     return this;
   };

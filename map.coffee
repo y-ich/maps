@@ -80,6 +80,7 @@ MapState.NORMAL.update = ->
 MapState.NORMAL.gpsClicked = -> MapState.TRACE_POSITION
 
 MapState.TRACE_POSITION.update = ->
+    map.setCenter pulsatingMarker.getPosition()
     $gps.addClass 'btn-primary'
     @
 MapState.TRACE_POSITION.gpsClicked = -> MapState.NORMAL # disabled TRACE_HEADING
