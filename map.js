@@ -375,8 +375,9 @@
   navigate.step = null;
 
   setInfoPage = function(bookmark, dropped) {
-    var position, title;
-    $('#info-marker img:first-child').attr('src', bookmark.marker.getIcon().url);
+    var position, title, _ref1, _ref2;
+    console.log(bookmark.marker.getIcon());
+    $('#info-marker img:first-child').attr('src', (_ref1 = (_ref2 = bookmark.marker.getIcon()) != null ? _ref2.url : void 0) != null ? _ref1 : 'http://maps.google.co.jp/mapfiles/ms/icons/red-dot.png');
     title = bookmark.marker.getTitle();
     position = bookmark.marker.getPosition();
     $('#info-name').text(title);

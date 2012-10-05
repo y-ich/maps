@@ -277,7 +277,8 @@ navigate.step = null
 
 # prepare page of bookmark information
 setInfoPage = (bookmark, dropped) ->
-    $('#info-marker img:first-child').attr 'src', bookmark.marker.getIcon().url
+    console.log bookmark.marker.getIcon()
+    $('#info-marker img:first-child').attr 'src', bookmark.marker.getIcon()?.url ? 'http://maps.google.co.jp/mapfiles/ms/icons/red-dot.png'
     title = bookmark.marker.getTitle()
     position = bookmark.marker.getPosition()
     $('#info-name').text title
