@@ -187,7 +187,7 @@ makeInfoMessage = (title, message) ->
     """
     <table id="info-window"><tr>
         <td><button id="street-view" class="btn"><i class="icon-user"></i></button></td>
-        <td style="white-space: nowrap;"><div>#{title}<br><span id="dropped-message" style="font-size:10px">#{message}</span></div></td>
+        <td style="white-space: nowrap;"><div style="max-width:160px;overflow:hidden;">#{title}<br><span id="dropped-message" style="font-size:10px">#{message}</span></div></td>
         <td><button id="button-info" class"btn"><i class="icon-chevron-right"></i></button></td>
     </tr></table>
     """
@@ -397,7 +397,7 @@ initializeGoogleMaps = ->
         visible: false
     
     infoWindow = new google.maps.InfoWindow
-        maxWidth: innerWidth
+        maxWidth: Math.floor innerWidth*0.9
         
     naviMarker = new google.maps.Marker
         flat: true

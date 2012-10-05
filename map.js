@@ -262,7 +262,7 @@
   };
 
   makeInfoMessage = function(title, message) {
-    return "<table id=\"info-window\"><tr>\n    <td><button id=\"street-view\" class=\"btn\"><i class=\"icon-user\"></i></button></td>\n    <td style=\"white-space: nowrap;\"><div>" + title + "<br><span id=\"dropped-message\" style=\"font-size:10px\">" + message + "</span></div></td>\n    <td><button id=\"button-info\" class\"btn\"><i class=\"icon-chevron-right\"></i></button></td>\n</tr></table>";
+    return "<table id=\"info-window\"><tr>\n    <td><button id=\"street-view\" class=\"btn\"><i class=\"icon-user\"></i></button></td>\n    <td style=\"white-space: nowrap;\"><div style=\"max-width:160px;overflow:hidden;\">" + title + "<br><span id=\"dropped-message\" style=\"font-size:10px\">" + message + "</span></div></td>\n    <td><button id=\"button-info\" class\"btn\"><i class=\"icon-chevron-right\"></i></button></td>\n</tr></table>";
   };
 
   updateField = function($field, str) {
@@ -525,7 +525,7 @@
       visible: false
     }));
     infoWindow = new google.maps.InfoWindow({
-      maxWidth: innerWidth
+      maxWidth: Math.floor(innerWidth * 0.9)
     });
     naviMarker = new google.maps.Marker({
       flat: true,
