@@ -561,7 +561,7 @@
   };
 
   initializeDOM = function() {
-    var $edit, $mapType, $navi, $option, $route, $routeSearchFrame, $search, $traffic, $travelMode, $versatile, backToMap, e, otherStatus, trafficLayer, watchPosition, _i, _len, _ref1, _ref2, _ref3;
+    var $edit, $mapType, $navi, $option, $route, $routeSearchFrame, $search, $traffic, $travelMode, $versatile, backToMap, e, openRouteForm, otherStatus, trafficLayer, watchPosition, _i, _len, _ref1, _ref2, _ref3;
     $originField = $('#origin input[name="origin"]');
     $destinationField = $('#destination input[name="destination"]');
     $routeSearchFrame = $('#route-search-frame');
@@ -635,12 +635,15 @@
     });
     $edit = $('#edit');
     $versatile = $('#versatile');
+    openRouteForm = function() {
+      $edit.text('キャンセル');
+      $versatile.text('経路');
+      $('#navi-toolbar2').css('display', 'none');
+      return $routeSearchFrame.css('top', '0px');
+    };
     $edit.on('click', function() {
       if ($edit.text() === '編集') {
-        $edit.text('キャンセル');
-        $versatile.text('経路');
-        $('#navi-toolbar2').css('display', 'none');
-        return $routeSearchFrame.css('top', '0px');
+        return openRouteForm();
       } else {
         $edit.text('編集');
         $versatile.text('出発');
@@ -847,6 +850,18 @@
           $('#bookmark-edit').text('消去').removeClass('disabled');
           return generateHistoryList();
       }
+    });
+    $('#to-here').on('click', function() {
+      $destinationField.val(currentBookmark.address);
+      $route.trigger('click');
+      $('#container').css('right', '');
+      return openRouteForm();
+    });
+    $('#from-here').on('click', function() {
+      $originField.val(currentBookmark.address);
+      $route.trigger('click');
+      $('#container').css('right', '');
+      return openRouteForm();
     });
     watchPosition = new WatchPosition().start(traceHandler, function(error) {
       return console.log(error.message, {

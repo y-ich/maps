@@ -477,12 +477,15 @@ initializeDOM = ->
 
     $edit = $('#edit')
     $versatile = $('#versatile')
+    openRouteForm = () ->
+        $edit.text 'キャンセル'
+        $versatile.text '経路'
+        $('#navi-toolbar2').css 'display', 'none'
+        $routeSearchFrame.css 'top', '0px'
+        
     $edit.on 'click', ->
         if $edit.text() == '編集'
-            $edit.text 'キャンセル'
-            $versatile.text '経路'
-            $('#navi-toolbar2').css 'display', 'none'
-            $routeSearchFrame.css 'top', '0px'
+            openRouteForm()
         else
             $edit.text '編集'
             $versatile.text '出発'
@@ -671,6 +674,18 @@ initializeDOM = ->
                 $('#bookmark-edit').text('消去')
                                    .removeClass 'disabled'
                 generateHistoryList()
+
+    $('#to-here').on 'click', ->
+        $destinationField.val currentBookmark.address
+        $route.trigger 'click'
+        $('#container').css 'right', ''
+        openRouteForm()
+        
+    $('#from-here').on 'click', ->
+        $originField.val currentBookmark.address
+        $route.trigger 'click'
+        $('#container').css 'right', ''
+        openRouteForm()
             
     watchPosition = new WatchPosition().start traceHandler
         , (error) -> console.log error.message
