@@ -22,8 +22,8 @@ naviMarker = null
 # jQuery instances
 $map = null
 $gps = null
-$origin = null
-$destination = null
+$originField = null
+$destinationField = null
 pinRowHeight = null
 
 mapFSM = null
@@ -130,8 +130,8 @@ saveMapStatus = () ->
 
 saveOtherStatus = () ->
     localStorage['maps-other-status'] = JSON.stringify
-        origin: $origin.val()
-        destination: $destination.val()
+        origin: $originField.val()
+        destination: $destinationField.val()
         bookmarks: bookmarks.map (e) -> e.toObject()
         history: history
 
@@ -183,11 +183,11 @@ makeInfoMessage = (name, message) ->
 searchDirections = ->
     history.unshift
         type: 'route'
-        origin: $('#origin').val()
-        destination: $('#destination').val() 
+        origin: $originField.val()
+        destination: $destinationField.val() 
     searchDirections.service.route
-            destination: $('#destination').val()
-            origin: $('#origin').val()
+            destination: $destinationField.val()
+            origin: $originField.val()
             provideRouteAlternatives: getTravelMode() isnt google.maps.TravelMode.WALKING
             travelMode: getTravelMode()
         , (result, status) ->
@@ -255,7 +255,7 @@ setInfoPage = (bookmark, dropped) ->
     title = bookmark.marker.getTitle()
     position = bookmark.marker.getPosition()
     $('#info-name').text title
-    $('#bookmark-name').val if dropped then bookmark.address else title
+    $('#bookmark-name input[name="bookmark-name"]').val if dropped then bookmark.address else title
     $('#info-address').text bookmark.address
     # $('#delete-pin').css 'display', if dropped then 'block' else 'none'
     $('#send-place').attr 'href', "mailto:?subject=#{title}&body=<a href=\"https://maps.google.co.jp/maps?q=#{position.lat()},#{position.lng()}\">#{title}</a>"
@@ -281,12 +281,11 @@ generateHistoryList = ->
 # handlers
 
 # NOTE: This handler is a method, not a function.
-geocodeHandler = ->
-    return if this.value is ''
+searchAddress = (address)->
     history.unshift
         type: 'search'
-        address: this.value
-    geocoder.geocode {address : this.value }, (result, status) ->
+        address: address
+    geocoder.geocode {address : address }, (result, status) ->
         if status is google.maps.GeocoderStatus.OK
             map.setCenter result[0].geometry.location
         else
@@ -396,8 +395,8 @@ initializeGoogleMaps = ->
 
 
 initializeDOM = ->
-    $origin = $('#origin')
-    $destination = $('#destination')
+    $originField = $('#origin input[name="origin"]')
+    $destinationField = $('#destination input[name="destination"]')
     $routeSearchFrame = $('#route-search-frame')
     
     pinRowHeight = $('#pin-list tr').height()
@@ -411,11 +410,11 @@ initializeDOM = ->
     if localStorage['maps-other-status']?
         otherStatus = JSON.parse localStorage['maps-other-status']
         if otherStatus.origin? and otherStatus.origin isnt ''
-            $origin.val(otherStatus.origin) 
-                   .siblings('.btn-bookmark').css('display', 'none')
-        if otherStatus.destination? and otherStatus.destination isnt ''
-            $destination.val(otherStatus.destination)
+            $originField.val(otherStatus.origin) 
                         .siblings('.btn-bookmark').css('display', 'none')
+        if otherStatus.destination? and otherStatus.destination isnt ''
+            $destinationField.val(otherStatus.destination)
+                             .siblings('.btn-bookmark').css('display', 'none')
         for e in otherStatus.bookmarks ? []
             bookmarks.push new Bookmark new google.maps.Marker(
                     map: map
@@ -441,20 +440,20 @@ initializeDOM = ->
     $gps = $('#gps')
     $gps.on 'click', -> mapFSM.gpsClicked()
             
-    $('.search-query').parent().on 'submit', ->
-        return false
+    $('#address').on 'submit', ->
+        address = $(this).children('input').val()
+        searchAddress address if address? and address isnt ''
+        return false 
 
-    $('.btn-reset').on 'click', ->
-        $(this).siblings('input').val ''
-        
-    $('#address').on 'change', geocodeHandler
     $('.search-query').on 'keyup', -> # textInput, keypress is before inputting a character.
         $this = $(this)
         if $this.val() is ''
             $this.siblings('.btn-bookmark').css('display', 'block')
         else
             $this.siblings('.btn-bookmark').css('display', 'none')
-    
+
+    $('.btn-reset').on 'click', ->
+        $(this).siblings('.btn-bookmark').css('display', 'block')        
     
     $navi = $('#navi')
     $search = $('#search')
@@ -490,11 +489,12 @@ initializeDOM = ->
 
     $('#switch').on 'click', ->
         tmp = $('#destination').val()
-        $('#destination').val $('#origin').val()
-        $('#origin').val tmp
+        $destinationField.val $originField.val()
+        $originField.val tmp
         saveOtherStatus()
 
-    $('#origin, #destination').on 'changed', saveOtherStatus
+    $originField.on 'change', saveOtherStatus
+    $destinationField.on 'change', saveOtherStatus
 
     $travelMode = $('#travel-mode')
     $travelMode.children(':not(#transit)').on 'click', -> # disabled transit
@@ -571,7 +571,7 @@ initializeDOM = ->
         $('#container').css 'right', ''
         
     $('.btn-bookmark').on 'click', ->
-        bookmarkContext = $(this).siblings('input').attr 'id'
+        bookmarkContext = $(this).parent().attr 'id'
         generateBookmarkList()
         $('#window-bookmark').css 'bottom', '0'
     
@@ -593,13 +593,13 @@ initializeDOM = ->
                         map.setCenter bookmarkOrMarker.marker.getPosition()
                         bookmarkOrMarker.showInfoWindow()
                 when 'origin'
-                    $origin.val if name is 'pulsatingMarker'
+                    $originField.val if name is 'pulsatingMarker'
                             latLng = bookmarkOrMarker.getPosition()
                             "#{latLng.lat()}, #{latLng.lng()}"
                         else
                             bookmarkOrMarker.address            
                 when 'destination'
-                    $destination.val if name is 'pulsatingMarker'
+                    $destinationField.val if name is 'pulsatingMarker'
                             latLng = bookmarkOrMarker.getPosition()
                             "#{latLng.lat()}, #{latLng.lng()}"
                         else
@@ -627,7 +627,7 @@ initializeDOM = ->
         bookmark = new Bookmark new google.maps.Marker(
                 map: map
                 position: currentBookmark.marker.getPosition()
-                title: $('#bookmark-name').val()
+                title: $('#bookmark-name input[name="bookmark-name"]').val()
             ), $('#info-address').text() 
         bookmarks.push bookmark
         bookmark.showInfoWindow()

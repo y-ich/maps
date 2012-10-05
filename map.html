@@ -49,10 +49,12 @@
             <div id="header" class="navbar">
                 <div class="navbar-inner">
                     <div class="navbar-search">
-                        <input id="address" type="text" class="search-query" placeholder="検索または住所">
-                        <div class="icon-search"></div>
-                        <button type="button" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
-                        <button type="button" class="btn btn-mini btn-bookmark"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
+                        <form id="address" class="form-inline with-reset-button">
+                            <input type="text" name="address" class="search-query" placeholder="検索または住所">
+                            <div class="icon-search"></div>
+                            <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
+                            <button type="button" class="btn btn-mini btn-bookmark"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
+                        </form>
                     </div>
                 </div>
                 <div id="navi">
@@ -82,17 +84,17 @@
                                 </td>
                                 <td>
                                     <div id="route-search">
-                                        <form class="form-inline with-reset-button">
+                                        <form id="origin" class="form-inline with-reset-button">
                                             <label class="control-label">出発: </label>
-                                            <input id="origin" type="text" class="search-query">
-                                            <button type="button" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
+                                            <input type="text" name="origin" class="search-query">
+                                            <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
                                             <button type="button" class="btn btn-mini btn-bookmark disabled"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
                                         </form>
                                         <div class="clearfix"></div>
-                                        <form class="form-inline with-reset-button">
+                                        <form id="destination" class="form-inline with-reset-button">
                                             <label class="control-label">到着: </label>
-                                            <input id="destination" type="text" class="search-query">
-                                            <button type="button" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
+                                            <input type="text" name="destination" class="search-query">
+                                            <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
                                             <button type="button" class="btn btn-mini btn-bookmark disabled"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
                                         </form>
                                     </div>
@@ -171,9 +173,9 @@
                     <h4>追加</h4>
                     <button id="save-bookmark" class="btn btn-right">保存</button>
                 </div>
-                <form class="form-inline with-reset-button">
-                    <input id="bookmark-name" type="text" class="search-query">
-                    <button type="button" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
+                <form id="bookmark-name" class="form-inline with-reset-button">
+                    <input type="text" name="bookmark-name" class="search-query">
+                    <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
                 </form>
             </div>
         </div>
