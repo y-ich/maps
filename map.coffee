@@ -192,6 +192,10 @@ makeInfoMessage = (title, message) ->
     </tr></table>
     """
 
+updateField = ($field, str) ->
+    $field.val(str)
+          .siblings('.btn-bookmark').css 'display', if str is '' then 'block' else 'none'
+
 
 # invokes to search directions and displays a result.
 searchDirections = (fromHistory = false) ->
@@ -443,11 +447,9 @@ initializeDOM = ->
     if localStorage['maps-other-status']?
         otherStatus = JSON.parse localStorage['maps-other-status']
         if otherStatus.origin? and otherStatus.origin isnt ''
-            $originField.val(otherStatus.origin) 
-                        .siblings('.btn-bookmark').css('display', 'none')
+            updateField $originField, otherStatus.origin
         if otherStatus.destination? and otherStatus.destination isnt ''
-            $destinationField.val(otherStatus.destination)
-                             .siblings('.btn-bookmark').css('display', 'none')
+            updateField $destinationField, otherStatus.destination
         for e in otherStatus.bookmarks ? []
             bookmarks.push new Bookmark new google.maps.Marker(
                     map: map
@@ -527,9 +529,9 @@ initializeDOM = ->
         $edit.trigger 'click'
 
     $('#switch').on 'click', ->
-        tmp = $('#destination').val()
-        $destinationField.val $originField.val()
-        $originField.val tmp
+        tmp = $destinationField.val()
+        updateField $destinationField, $originField.val()
+        updateField $originField, tmp
         saveOtherStatus()
 
     $originField.on 'change', saveOtherStatus
@@ -625,12 +627,12 @@ initializeDOM = ->
             item = eval(name)
             switch item.type
                 when 'search'
-                    $addressField.val item.address
+                    updateField $addressField, item.address
                     $search.trigger 'click'
                     searchAddress true
                 when 'route'
-                    $originField.val item.origin
-                    $destinationField.val item.destination
+                    updateField $originField, item.origin
+                    updateField $destinationField, item.destination
                     $route.trigger 'click'
                     searchDirections true
                 
@@ -645,18 +647,18 @@ initializeDOM = ->
                         mapFSM.setState(MapState.NORMAL)
                         console.log bookmarkOrMarker.address
                         console.log bookmarkOrMarker isnt droppedBookmark
-                        $addressField.val bookmarkOrMarker.address if bookmarkOrMarker isnt droppedBookmark
+                        updateField $addressField, bookmarkOrMarker.address if bookmarkOrMarker isnt droppedBookmark
                         map.setCenter bookmarkOrMarker.marker.getPosition()
                         currentBookmark = bookmarkOrMarker
                         bookmarkOrMarker.showInfoWindow()
                 when 'origin'
-                    $originField.val if name is 'pulsatingMarker'
+                    updateField $originField, if name is 'pulsatingMarker'
                             latLng = bookmarkOrMarker.getPosition()
                             "#{latLng.lat()}, #{latLng.lng()}"
                         else
                             bookmarkOrMarker.address            
                 when 'destination'
-                    $destinationField.val if name is 'pulsatingMarker'
+                    updateField $destinationField, if name is 'pulsatingMarker'
                             latLng = bookmarkOrMarker.getPosition()
                             "#{latLng.lat()}, #{latLng.lng()}"
                         else
@@ -710,13 +712,13 @@ initializeDOM = ->
                 generateHistoryList()
 
     $('#to-here').on 'click', ->
-        $destinationField.val currentBookmark.address
+        updateField $destinationField, currentBookmark.address
         $route.trigger 'click'
         $('#container').css 'right', ''
         openRouteForm()
         
     $('#from-here').on 'click', ->
-        $originField.val currentBookmark.address
+        updateField $originField, currentBookmark.address
         $route.trigger 'click'
         $('#container').css 'right', ''
         openRouteForm()
