@@ -103,6 +103,10 @@ form.with-reset-button {
     /* consistency between fixed padding and relative width is difficult. so fixed for iPhone. */
 }
 
+#route-search .search-query {
+width: 200px;
+}
+
 .navbar-search .icon-search {
     position: absolute;
     top: 7px;
