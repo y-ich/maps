@@ -381,7 +381,6 @@
 
   setInfoPage = function(bookmark, dropped) {
     var position, title;
-    console.log(dropped);
     title = bookmark.marker.getTitle();
     position = bookmark.marker.getPosition();
     $('#info-name').text(title);
@@ -445,7 +444,7 @@
       case google.maps.StreetViewStatus.OK:
         sv = map.getStreetView();
         sv.setPosition(data.location.latLng);
-        droppedBookmark.marker.setPosition(data.location.latLng);
+        currentBookmark.marker.setPosition(data.location.latLng);
         sv.setPov({
           heading: (_ref1 = map.getHeading()) != null ? _ref1 : 0,
           pitch: 0,

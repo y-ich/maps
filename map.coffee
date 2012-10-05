@@ -254,7 +254,6 @@ navigate.step = null
 
 
 setInfoPage = (bookmark, dropped) ->
-    console.log dropped
     title = bookmark.marker.getTitle()
     position = bookmark.marker.getPosition()
     $('#info-name').text title
@@ -299,7 +298,7 @@ getPanoramaHandler = (data, status) ->
         when google.maps.StreetViewStatus.OK
             sv = map.getStreetView()
             sv.setPosition data.location.latLng
-            droppedBookmark.marker.setPosition data.location.latLng # need to change
+            currentBookmark.marker.setPosition data.location.latLng
             sv.setPov
                 heading: map.getHeading() ? 0
                 pitch: 0
