@@ -467,12 +467,12 @@ initializeDOM = ->
         naviMarker.setVisible false
         $route.removeClass 'btn-primary'
         $search.addClass 'btn-primary'
-        $navi.toggle()
+        $navi.css 'display', 'none'
     $route = $('#route')
     $route.on 'click', ->
         $search.removeClass 'btn-primary'
         $route.addClass 'btn-primary'
-        $navi.toggle()
+        $navi.css 'display', 'block'
         directionsRenderer.setMap map
 
     $edit = $('#edit')
@@ -591,10 +591,12 @@ initializeDOM = ->
             switch item.type
                 when 'search'
                     $addressField.val item.address
+                    $search.trigger 'click'
                     searchAddress true
                 when 'route'
                     $originField.val item.origin
                     $destinationField.val item.destination
+                    $route.trigger 'click'
                     searchDirections true
                 
         else # bookmark list

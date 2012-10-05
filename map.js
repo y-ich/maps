@@ -624,13 +624,13 @@
       naviMarker.setVisible(false);
       $route.removeClass('btn-primary');
       $search.addClass('btn-primary');
-      return $navi.toggle();
+      return $navi.css('display', 'none');
     });
     $route = $('#route');
     $route.on('click', function() {
       $search.removeClass('btn-primary');
       $route.addClass('btn-primary');
-      $navi.toggle();
+      $navi.css('display', 'block');
       return directionsRenderer.setMap(map);
     });
     $edit = $('#edit');
@@ -766,11 +766,13 @@
         switch (item.type) {
           case 'search':
             $addressField.val(item.address);
+            $search.trigger('click');
             searchAddress(true);
             break;
           case 'route':
             $originField.val(item.origin);
             $destinationField.val(item.destination);
+            $route.trigger('click');
             searchDirections(true);
         }
       } else {
