@@ -5,6 +5,7 @@
 
 PURPLE_DOT_IMAGE = 'http://maps.google.co.jp/mapfiles/ms/icons/purple-dot.png'
 RED_DOT_IMAGE = 'http://maps.google.co.jp/mapfiles/ms/icons/red-dot.png'
+MSMARKER_SHADOW = 'http://maps.google.co.jp/mapfiles/ms/icons/msmarker.shadow.png'
 
 # global variables
 
@@ -255,6 +256,7 @@ navigate.step = null
 
 
 setInfoPage = (bookmark, dropped) ->
+    $('#info-marker img:first-child').attr 'src', bookmark.marker.getIcon().url
     title = bookmark.marker.getTitle()
     position = bookmark.marker.getPosition()
     $('#info-name').text title
@@ -363,6 +365,8 @@ initializeGoogleMaps = ->
 
     droppedBookmark = new Bookmark new google.maps.Marker
         map: map
+        icon: new google.maps.MarkerImage(PURPLE_DOT_IMAGE)
+        shadow: new google.maps.MarkerImage(MSMARKER_SHADOW, null, null, new google.maps.Point(16, 32))
         position: mapOptions.center
         title: 'ドロップされたピン'
         visible: false
