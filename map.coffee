@@ -54,18 +54,30 @@ class MobileInfoWindow extends google.maps.OverlayView
     getPosition: -> @position
     getZIndex: -> @zIndex
     open: (map, @anchor) ->
-        @setPosition anchor.getPosition() if anchor?
+        if anchor?
+            @setPosition anchor.getPosition()
+            icon = @anchor.getIcon()
+            markerAnchor = icon.anchor ? new google.maps.Point Math.floor(icon.size.width / 2), icon.size.height
+            markerSize = @anchor.getIcon().size
+            @pixelOffset = new google.maps.Size Math.floor(markerSize.width / 2) - markerAnchor.x, - markerAnchor.y, 'px', 'px'            
         @setMap map
         
     setContent: (@content) ->
         unless @element?
             @element = document.createElement 'div'
+            @element.style['max-width'] = @maxWidth + 'px' if @maxWidth
             @element.className = 'info-window'
-        @element.innerHTML = @content
+        if typeof @content is 'string'
+            @element.innerHTML = @content
+        else
+            @element.appendChild @content
         google.maps.event.trigger this, 'content_changed'
         
     setOptions: (options) ->
+        @maxWidth = options.maxWidth ? null
         @setContent options.content ? ''
+        @disableAutoPan = options.disableAutoPan ? null
+        @pixelOffset = options.pixelOffset ? google.maps.Size 0, 0, 'px', 'px'
         @setPosition options.position ? null
         @setZIndex options.zIndex ? 0
         
@@ -85,15 +97,13 @@ class MobileInfoWindow extends google.maps.OverlayView
 
     draw: ->
         xy = @getProjection().fromLatLngToDivPixel @getPosition()
-        $element = $(@element)
-        @element.style.left = xy.x - $element.width() / 2 + 'px'
-        @element.style.top = xy.y - $element.height() - @anchor.getIcon().size.height + 'px'
+        @element.style.left = xy.x + @pixelOffset.width - @element.offsetWidth / 2 + 'px'
+        @element.style.top = xy.y + @pixelOffset.height - @element.offsetHeight + 'px'
 
     onRemove: ->
         google.maps.event.removeListener @clickListener
         @element.parentNode.removeChild @element
         @element = null
-        
 
 # manages id for navigator.geolocation
 class WatchPosition

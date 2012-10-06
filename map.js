@@ -75,9 +75,14 @@
     };
 
     MobileInfoWindow.prototype.open = function(map, anchor) {
+      var icon, markerAnchor, markerSize, _ref;
       this.anchor = anchor;
       if (anchor != null) {
         this.setPosition(anchor.getPosition());
+        icon = this.anchor.getIcon();
+        markerAnchor = (_ref = icon.anchor) != null ? _ref : new google.maps.Point(Math.floor(icon.size.width / 2), icon.size.height);
+        markerSize = this.anchor.getIcon().size;
+        this.pixelOffset = new google.maps.Size(Math.floor(markerSize.width / 2) - markerAnchor.x, -markerAnchor.y, 'px', 'px');
       }
       return this.setMap(map);
     };
@@ -86,17 +91,27 @@
       this.content = content;
       if (this.element == null) {
         this.element = document.createElement('div');
+        if (this.maxWidth) {
+          this.element.style['max-width'] = this.maxWidth + 'px';
+        }
         this.element.className = 'info-window';
       }
-      this.element.innerHTML = this.content;
+      if (typeof this.content === 'string') {
+        this.element.innerHTML = this.content;
+      } else {
+        this.element.appendChild(this.content);
+      }
       return google.maps.event.trigger(this, 'content_changed');
     };
 
     MobileInfoWindow.prototype.setOptions = function(options) {
-      var _ref, _ref1, _ref2;
-      this.setContent((_ref = options.content) != null ? _ref : '');
-      this.setPosition((_ref1 = options.position) != null ? _ref1 : null);
-      return this.setZIndex((_ref2 = options.zIndex) != null ? _ref2 : 0);
+      var _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
+      this.maxWidth = (_ref = options.maxWidth) != null ? _ref : null;
+      this.setContent((_ref1 = options.content) != null ? _ref1 : '');
+      this.disableAutoPan = (_ref2 = options.disableAutoPan) != null ? _ref2 : null;
+      this.pixelOffset = (_ref3 = options.pixelOffset) != null ? _ref3 : google.maps.Size(0, 0, 'px', 'px');
+      this.setPosition((_ref4 = options.position) != null ? _ref4 : null);
+      return this.setZIndex((_ref5 = options.zIndex) != null ? _ref5 : 0);
     };
 
     MobileInfoWindow.prototype.setPosition = function(position) {
@@ -119,11 +134,10 @@
     };
 
     MobileInfoWindow.prototype.draw = function() {
-      var $element, xy;
+      var xy;
       xy = this.getProjection().fromLatLngToDivPixel(this.getPosition());
-      $element = $(this.element);
-      this.element.style.left = xy.x - $element.width() / 2 + 'px';
-      return this.element.style.top = xy.y - $element.height() - this.anchor.getIcon().size.height + 'px';
+      this.element.style.left = xy.x + this.pixelOffset.width - this.element.offsetWidth / 2 + 'px';
+      return this.element.style.top = xy.y + this.pixelOffset.height - this.element.offsetHeight + 'px';
     };
 
     MobileInfoWindow.prototype.onRemove = function() {
