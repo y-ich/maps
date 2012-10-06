@@ -398,6 +398,7 @@ initializeGoogleMaps = ->
         naviMarker.setVisible false
 
     droppedBookmark = new Bookmark new google.maps.Marker(
+            animation: google.maps.Animation.DROP
             map: map
             icon: new google.maps.MarkerImage(PURPLE_DOT_IMAGE)
             shadow: new google.maps.MarkerImage(MSMARKER_SHADOW, null, null, new google.maps.Point(16, 32))
@@ -423,17 +424,21 @@ initializeGoogleMaps = ->
         visible: false
 
     google.maps.event.addListener map, 'click', (event) ->
+        infoWindow.close()
         currentBookmark = droppedBookmark
+        droppedBookmark.marker.setAnimation google.maps.Animation.DROP
         droppedBookmark.marker.setVisible true
         droppedBookmark.marker.setPosition event.latLng
         infoWindow.setContent makeInfoMessage droppedBookmark.marker.getTitle(), ''
-        infoWindow.open map, droppedBookmark.marker
         geocoder.geocode {latLng : event.latLng }, (result, status) ->
             droppedBookmark.address = if status is google.maps.GeocoderStatus.OK
                     result[0].formatted_address.replace(/日本, /, '')
                 else
                     '情報がみつかりませんでした。'
             infoWindow.setContent makeInfoMessage droppedBookmark.marker.getTitle(), droppedBookmark.address
+
+    google.maps.event.addListener droppedBookmark.marker, 'animation_changed', ->
+        infoWindow.open map, droppedBookmark.marker if not this.getAnimation()? # animation property becomes undefined after animation ends
 
     google.maps.event.addListener map, 'dragstart', -> mapFSM.setState MapState.NORMAL
     # This is a workaround for web app on home screen. There is no onpagehide event.

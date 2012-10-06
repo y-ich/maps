@@ -527,6 +527,7 @@
       return naviMarker.setVisible(false);
     });
     droppedBookmark = new Bookmark(new google.maps.Marker({
+      animation: google.maps.Animation.DROP,
       map: map,
       icon: new google.maps.MarkerImage(PURPLE_DOT_IMAGE),
       shadow: new google.maps.MarkerImage(MSMARKER_SHADOW, null, null, new google.maps.Point(16, 32)),
@@ -550,17 +551,23 @@
       visible: false
     });
     google.maps.event.addListener(map, 'click', function(event) {
+      infoWindow.close();
       currentBookmark = droppedBookmark;
+      droppedBookmark.marker.setAnimation(google.maps.Animation.DROP);
       droppedBookmark.marker.setVisible(true);
       droppedBookmark.marker.setPosition(event.latLng);
       infoWindow.setContent(makeInfoMessage(droppedBookmark.marker.getTitle(), ''));
-      infoWindow.open(map, droppedBookmark.marker);
       return geocoder.geocode({
         latLng: event.latLng
       }, function(result, status) {
         droppedBookmark.address = status === google.maps.GeocoderStatus.OK ? result[0].formatted_address.replace(/日本, /, '') : '情報がみつかりませんでした。';
         return infoWindow.setContent(makeInfoMessage(droppedBookmark.marker.getTitle(), droppedBookmark.address));
       });
+    });
+    google.maps.event.addListener(droppedBookmark.marker, 'animation_changed', function() {
+      if (!(this.getAnimation() != null)) {
+        return infoWindow.open(map, droppedBookmark.marker);
+      }
     });
     google.maps.event.addListener(map, 'dragstart', function() {
       return mapFSM.setState(MapState.NORMAL);
