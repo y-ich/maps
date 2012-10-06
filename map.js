@@ -428,6 +428,8 @@
     if (!((address != null) && address !== '')) {
       return;
     }
+    infoWindow.close();
+    searchBookmark.marker.setVisible(false);
     if (!fromHistory) {
       history.unshift({
         type: 'search',
@@ -440,11 +442,11 @@
       if (status === google.maps.GeocoderStatus.OK) {
         mapFSM.setState(MapState.NORMAL);
         map.setCenter(result[0].geometry.location);
+        searchBookmark.address = result[0].formatted_address;
+        searchBookmark.marker.setAnimation(google.maps.Animation.DROP);
         searchBookmark.marker.setPosition(result[0].geometry.location);
         searchBookmark.marker.setTitle(address);
         searchBookmark.marker.setVisible(true);
-        searchBookmark.address = result[0].formatted_address;
-        searchBookmark.showInfoWindow();
         return currentBookmark = searchBookmark;
       } else {
         return alert(status);
@@ -536,6 +538,7 @@
       visible: false
     }), '');
     searchBookmark = new Bookmark(new google.maps.Marker({
+      animation: google.maps.Animation.DROP,
       map: map,
       position: mapOptions.center,
       visible: false
@@ -552,11 +555,11 @@
     });
     google.maps.event.addListener(map, 'click', function(event) {
       infoWindow.close();
-      currentBookmark = droppedBookmark;
+      droppedBookmark.address = '';
       droppedBookmark.marker.setAnimation(google.maps.Animation.DROP);
       droppedBookmark.marker.setVisible(true);
       droppedBookmark.marker.setPosition(event.latLng);
-      infoWindow.setContent(makeInfoMessage(droppedBookmark.marker.getTitle(), ''));
+      currentBookmark = droppedBookmark;
       return geocoder.geocode({
         latLng: event.latLng
       }, function(result, status) {
@@ -566,7 +569,12 @@
     });
     google.maps.event.addListener(droppedBookmark.marker, 'animation_changed', function() {
       if (!(this.getAnimation() != null)) {
-        return infoWindow.open(map, droppedBookmark.marker);
+        return droppedBookmark.showInfoWindow();
+      }
+    });
+    google.maps.event.addListener(searchBookmark.marker, 'animation_changed', function() {
+      if (!(this.getAnimation() != null)) {
+        return searchBookmark.showInfoWindow();
       }
     });
     google.maps.event.addListener(map, 'dragstart', function() {

@@ -312,6 +312,8 @@ generateHistoryList = ->
 searchAddress = (fromHistory) ->
     address = $addressField.val()
     return unless address? and address isnt ''
+    infoWindow.close()
+    searchBookmark.marker.setVisible false
     if not fromHistory
         history.unshift
             type: 'search'
@@ -320,11 +322,11 @@ searchAddress = (fromHistory) ->
         if status is google.maps.GeocoderStatus.OK
             mapFSM.setState MapState.NORMAL
             map.setCenter result[0].geometry.location
+            searchBookmark.address = result[0].formatted_address
+            searchBookmark.marker.setAnimation google.maps.Animation.DROP
             searchBookmark.marker.setPosition result[0].geometry.location
             searchBookmark.marker.setTitle address
             searchBookmark.marker.setVisible true
-            searchBookmark.address = result[0].formatted_address
-            searchBookmark.showInfoWindow()
             currentBookmark = searchBookmark
         else
             alert status
@@ -408,6 +410,7 @@ initializeGoogleMaps = ->
         ), ''
 
     searchBookmark = new Bookmark new google.maps.Marker(
+            animation: google.maps.Animation.DROP
             map: map
             position: mapOptions.center
             visible: false
@@ -425,11 +428,11 @@ initializeGoogleMaps = ->
 
     google.maps.event.addListener map, 'click', (event) ->
         infoWindow.close()
-        currentBookmark = droppedBookmark
+        droppedBookmark.address = ''
         droppedBookmark.marker.setAnimation google.maps.Animation.DROP
         droppedBookmark.marker.setVisible true
         droppedBookmark.marker.setPosition event.latLng
-        infoWindow.setContent makeInfoMessage droppedBookmark.marker.getTitle(), ''
+        currentBookmark = droppedBookmark
         geocoder.geocode {latLng : event.latLng }, (result, status) ->
             droppedBookmark.address = if status is google.maps.GeocoderStatus.OK
                     result[0].formatted_address.replace(/日本, /, '')
@@ -438,7 +441,10 @@ initializeGoogleMaps = ->
             infoWindow.setContent makeInfoMessage droppedBookmark.marker.getTitle(), droppedBookmark.address
 
     google.maps.event.addListener droppedBookmark.marker, 'animation_changed', ->
-        infoWindow.open map, droppedBookmark.marker if not this.getAnimation()? # animation property becomes undefined after animation ends
+        droppedBookmark.showInfoWindow() if not this.getAnimation()? # animation property becomes undefined after animation ends
+
+    google.maps.event.addListener searchBookmark.marker, 'animation_changed', ->
+        searchBookmark.showInfoWindow() if not this.getAnimation()? # animation property becomes undefined after animation ends
 
     google.maps.event.addListener map, 'dragstart', -> mapFSM.setState MapState.NORMAL
     # This is a workaround for web app on home screen. There is no onpagehide event.
