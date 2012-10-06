@@ -40,13 +40,6 @@ form {
 
 /* end of cancel */
 
-.info-window {
-    position: absolute;
-    color: white;
-    background-color: rgba(0,0,0,0.5);
-    border-radius: 5px;
-}
-
 .controls input {
     width: 160px;
 }
@@ -109,6 +102,17 @@ form {
     width: 270px;
     padding-left: 25px;
     /* consistency between fixed padding and relative width is difficult. so fixed for iPhone. */
+}
+
+.info-window {
+    position: absolute;
+    color: white;
+    background-color: rgba(0,0,0,0.5);
+    border-radius: 5px;
+}
+
+.info-window button {
+    border-radius: 30px;
 }
 
 #route-search .search-query {
