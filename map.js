@@ -88,7 +88,8 @@
         this.element = document.createElement('div');
         this.element.className = 'info-window';
       }
-      return this.element.innerHTML = this.content;
+      this.element.innerHTML = this.content;
+      return google.maps.event.trigger(this, 'content_changed');
     };
 
     MobileInfoWindow.prototype.setOptions = function(options) {
@@ -100,15 +101,21 @@
 
     MobileInfoWindow.prototype.setPosition = function(position) {
       this.position = position;
+      return google.maps.event.trigger(this, 'position_changed');
     };
 
     MobileInfoWindow.prototype.setZIndex = function(zIndex) {
       this.zIndex = zIndex;
-      return this.element.style['z-index'] = this.zIndex.toString();
+      this.element.style['z-index'] = this.zIndex.toString();
+      return google.maps.event.trigger(this, 'zindex_changed');
     };
 
     MobileInfoWindow.prototype.onAdd = function() {
-      return this.getPanes().floatPane.appendChild(this.element);
+      this.getPanes().floatPane.appendChild(this.element);
+      this.clickListener = google.maps.event.addDomListener(this.element, 'click', function(event) {
+        return event.stopPropagation();
+      });
+      return google.maps.event.trigger(this, 'domready');
     };
 
     MobileInfoWindow.prototype.draw = function() {
@@ -120,6 +127,7 @@
     };
 
     MobileInfoWindow.prototype.onRemove = function() {
+      google.maps.event.removeListener(this.clickListener);
       this.element.parentNode.removeChild(this.element);
       return this.element = null;
     };
@@ -626,6 +634,15 @@
     infoWindow = new MobileInfoWindow({
       maxWidth: Math.floor(innerWidth * 0.9)
     });
+    google.maps.event.addListener(infoWindow, 'domready', function() {
+      $('#street-view').on('click', function(event) {
+        return new google.maps.StreetViewService().getPanoramaByLocation(currentBookmark.marker.getPosition(), 49, getPanoramaHandler);
+      });
+      return $('#button-info').on('click', function(event) {
+        setInfoPage(currentBookmark, currentBookmark === droppedBookmark);
+        return $('#container').css('right', '100%');
+      });
+    });
     naviMarker = new google.maps.Marker({
       flat: true,
       icon: new google.maps.MarkerImage('img/bluedot.png', null, null, new google.maps.Point(8, 8), new google.maps.Size(17, 17)),
@@ -870,13 +887,6 @@
     $('#print').on('click', function() {
       setTimeout(window.print, 0);
       return backToMap();
-    });
-    $(document).on('click', '#street-view', function(event) {
-      return new google.maps.StreetViewService().getPanoramaByLocation(currentBookmark.marker.getPosition(), 49, getPanoramaHandler);
-    });
-    $(document).on('click', '#button-info', function(event) {
-      setInfoPage(currentBookmark, currentBookmark === droppedBookmark);
-      return $('#container').css('right', '100%');
     });
     $('#button-map').on('click', function() {
       return $('#container').css('right', '');

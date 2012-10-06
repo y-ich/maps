@@ -62,22 +62,35 @@ class MobileInfoWindow extends google.maps.OverlayView
             @element = document.createElement 'div'
             @element.className = 'info-window'
         @element.innerHTML = @content
+        google.maps.event.trigger this, 'content_changed'
+        
     setOptions: (options) ->
         @setContent options.content ? ''
         @setPosition options.position ? null
         @setZIndex options.zIndex ? 0
+        
     setPosition: (@position) ->
+        google.maps.event.trigger this, 'position_changed'
+        
     setZIndex: (@zIndex) ->
         @element.style['z-index'] = @zIndex.toString()
+        google.maps.event.trigger this, 'zindex_changed'
+
     # overlayview
     onAdd: ->
         @getPanes().floatPane.appendChild @element
+        @clickListener = google.maps.event.addDomListener @element, 'click', (event) ->
+            event.stopPropagation();
+        google.maps.event.trigger this, 'domready'
+
     draw: ->
         xy = @getProjection().fromLatLngToDivPixel @getPosition()
         $element = $(@element)
         @element.style.left = xy.x - $element.width() / 2 + 'px'
         @element.style.top = xy.y - $element.height() - @anchor.getIcon().size.height + 'px'
+
     onRemove: ->
+        google.maps.event.removeListener @clickListener
         @element.parentNode.removeChild @element
         @element = null
         
@@ -454,6 +467,15 @@ initializeGoogleMaps = ->
     
     infoWindow = new MobileInfoWindow
         maxWidth: Math.floor innerWidth*0.9
+
+    google.maps.event.addListener infoWindow, 'domready', ->
+        $('#street-view').on 'click' , (event) ->
+            new google.maps.StreetViewService().getPanoramaByLocation currentBookmark.marker.getPosition(), 49, getPanoramaHandler
+
+        $('#button-info').on 'click', (event) ->
+            setInfoPage(currentBookmark, currentBookmark is droppedBookmark)
+            $('#container').css 'right', '100%'
+
         
     naviMarker = new google.maps.Marker
         flat: true
@@ -687,13 +709,6 @@ initializeDOM = ->
         setTimeout window.print, 0
         backToMap()
         
-    $(document).on 'click', '#street-view', (event) ->
-        new google.maps.StreetViewService().getPanoramaByLocation currentBookmark.marker.getPosition(), 49, getPanoramaHandler
-
-    $(document).on 'click', '#button-info', (event) ->
-        setInfoPage(currentBookmark, currentBookmark is droppedBookmark)
-        $('#container').css 'right', '100%'
-
     $('#button-map').on 'click', ->
         $('#container').css 'right', ''
         
