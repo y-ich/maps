@@ -340,7 +340,7 @@
       case 'start':
         navigate.leg = 0;
         navigate.step = 0;
-        $('#navi-toolbar2').css('display', 'block');
+        $('#navi-header2').css('display', 'block');
         naviMarker.setVisible(true);
         break;
       case 'next':
@@ -523,7 +523,7 @@
     google.maps.event.addListener(directionsRenderer, 'directions_changed', function() {
       navigate.leg = null;
       navigate.step = null;
-      $('#navi-toolbar2').css('display', 'none');
+      $('#navi-header2').css('display', 'none');
       return naviMarker.setVisible(false);
     });
     droppedBookmark = new Bookmark(new google.maps.Marker({
@@ -570,7 +570,7 @@
   };
 
   initializeDOM = function() {
-    var $edit, $mapType, $navi, $option, $route, $routeSearchFrame, $search, $traffic, $travelMode, $versatile, backToMap, e, openRouteForm, otherStatus, trafficLayer, watchPosition, _i, _len, _ref1, _ref2, _ref3;
+    var $edit, $mapType, $naviHeader, $option, $route, $routeSearchFrame, $search, $traffic, $travelMode, $versatile, backToMap, e, openRouteForm, otherStatus, trafficLayer, visibleSearchHeaderHeight, watchPosition, _i, _len, _ref1, _ref2, _ref3;
     $map = $('#map');
     $gps = $('#gps');
     $addressField = $('#address input[name="address"]');
@@ -604,17 +604,12 @@
       history = (_ref3 = otherStatus.history) != null ? _ref3 : [];
     }
     $('#option-page').css('bottom', $('#footer').outerHeight(true));
-    $map.height(innerHeight - $('#header').outerHeight(true) - $('#footer').outerHeight(true));
+    visibleSearchHeaderHeight = $('#search-header').outerHeight(true) + parseInt($('#search-header').css('top'));
+    $map.css('top', visibleSearchHeaderHeight + 'px');
+    $map.height(innerHeight - visibleSearchHeaderHeight - $('#footer').outerHeight(true));
     $('#pin-list-frame').css('height', innerHeight - mapSum($('#bookmark-page .btn-toolbar').toArray(), function(e) {
       return $(e).outerHeight(true);
     }) + 'px');
-    $gps.on('click', function() {
-      return mapFSM.gpsClicked();
-    });
-    $('#address').on('submit', function() {
-      searchAddress(false);
-      return false;
-    });
     $('.search-query').on('keyup', function() {
       var $this;
       $this = $(this);
@@ -624,29 +619,52 @@
         return $this.siblings('.btn-bookmark').css('display', 'none');
       }
     });
+    $('#clear, .btn-reset').on('mousedown', function(event) {
+      return event.preventDefault();
+    });
     $('.btn-reset').on('click', function() {
       return $(this).siblings('.btn-bookmark').css('display', 'block');
     });
-    $('#address .btn-reset').on('click', function() {
+    $('#clear').on('click', function() {
+      return $('#address .btn-bookmark').css('display', 'block');
+    });
+    $gps.on('click', function() {
+      return mapFSM.gpsClicked();
+    });
+    $addressField.on('focus', function() {
+      return $('#search-header').css('top', '0');
+    });
+    $addressField.on('blur', function() {
+      return $('#search-header').css('top', '');
+    });
+    $('#address').on('submit', function() {
+      searchAddress(false);
+      return false;
+    });
+    $addressField.on('keyup', function() {
+      return $('#done').text($(this).val() === '' ? '完了' : 'キャンセル');
+    });
+    $('#clear, #address .btn-reset').on('click', function() {
+      $('#done').text($(this).val() === '' ? '完了' : 'キャンセル');
       searchBookmark.marker.setVisible(false);
       if (currentBookmark === searchBookmark) {
         return infoWindow.setVisible(false);
       }
     });
-    $navi = $('#navi');
+    $naviHeader = $('#navi-header1');
     $search = $('#search');
     $search.on('click', function() {
       directionsRenderer.setMap(null);
       naviMarker.setVisible(false);
       $route.removeClass('btn-primary');
       $search.addClass('btn-primary');
-      return $navi.css('display', 'none');
+      return $naviHeader.css('display', 'none');
     });
     $route = $('#route');
     $route.on('click', function() {
       $search.removeClass('btn-primary');
       $route.addClass('btn-primary');
-      $navi.css('display', 'block');
+      $naviHeader.css('display', 'block');
       return directionsRenderer.setMap(map);
     });
     $edit = $('#edit');
@@ -655,7 +673,7 @@
     openRouteForm = function() {
       $edit.text('キャンセル');
       $versatile.text('経路');
-      $('#navi-toolbar2').css('display', 'none');
+      $('#navi-header2').css('display', 'none');
       return $routeSearchFrame.css('top', '0px');
     };
     $edit.on('click', function() {
@@ -665,7 +683,7 @@
         $edit.text('編集');
         $versatile.text('出発');
         if ((navigate.leg != null) && (navigate.step != null)) {
-          $('#navi-toolbar2').css('display', 'block');
+          $('#navi-header2').css('display', 'block');
         }
         return $routeSearchFrame.css('top', '');
       }

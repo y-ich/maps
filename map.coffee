@@ -250,7 +250,7 @@ navigate = (str) ->
         when 'start'
             navigate.leg = 0
             navigate.step = 0
-            $('#navi-toolbar2').css 'display', 'block'
+            $('#navi-header2').css 'display', 'block'
             naviMarker.setVisible true
         when 'next'
             if navigate.step < route.legs[navigate.leg].steps.length - 1
@@ -394,7 +394,7 @@ initializeGoogleMaps = ->
     google.maps.event.addListener directionsRenderer, 'directions_changed', ->
         navigate.leg = null
         navigate.step = null
-        $('#navi-toolbar2').css 'display', 'none'
+        $('#navi-header2').css 'display', 'none'
         naviMarker.setVisible false
 
     droppedBookmark = new Bookmark new google.maps.Marker(
@@ -484,7 +484,9 @@ initializeDOM = ->
 #        .height(squareSize)
 #        .css('margin', - squareSize / 2 + 'px')
     # fits map between header and footer
-    $map.height innerHeight - $('#header').outerHeight(true) - $('#footer').outerHeight(true)
+    visibleSearchHeaderHeight = $('#search-header').outerHeight(true) + parseInt $('#search-header').css 'top'
+    $map.css 'top', visibleSearchHeaderHeight + 'px'
+    $map.height innerHeight - visibleSearchHeaderHeight - $('#footer').outerHeight(true)
     # fits list frame between header and footer. should be rewritten.
     $('#pin-list-frame').css 'height', innerHeight - mapSum($('#bookmark-page .btn-toolbar').toArray(), (e) -> $(e).outerHeight(true)) + 'px'
 
@@ -492,12 +494,7 @@ initializeDOM = ->
     # event handlers
     #
 
-    $gps.on 'click', -> mapFSM.gpsClicked()
-            
-    $('#address').on 'submit', ->
-        searchAddress(false)
-        return false 
-
+    # input with reset button
     $('.search-query').on 'keyup', -> # textInput, keypress is before inputting a character.
         $this = $(this)
         if $this.val() is ''
@@ -505,26 +502,47 @@ initializeDOM = ->
         else
             $this.siblings('.btn-bookmark').css('display', 'none')
 
-    $('.btn-reset').on 'click', ->
-        $(this).siblings('.btn-bookmark').css('display', 'block')
+    $('#clear, .btn-reset').on 'mousedown', (event) -> event.preventDefault() # prevent blur of input
+        
+    # input with bookmark icon
+    $('.btn-reset').on 'click', -> $(this).siblings('.btn-bookmark').css('display', 'block')
+    $('#clear').on 'click', -> $('#address .btn-bookmark').css('display', 'block')
+
+    # footer
     
-    $('#address .btn-reset').on 'click', ->
+    $gps.on 'click', -> mapFSM.gpsClicked()
+            
+
+    # search header
+
+    $addressField.on 'focus', -> $('#search-header').css 'top', '0' # down form
+    $addressField.on 'blur', -> $('#search-header').css 'top', '' # up form
+        
+    $('#address').on 'submit', ->
+        searchAddress(false)
+        false # to prevent submit action
+
+    $addressField.on 'keyup', -> $('#done').text if $(this).val() is '' then '完了' else 'キャンセル'
+
+    $('#clear, #address .btn-reset').on 'click', ->
+        $('#done').text if $(this).val() is '' then '完了' else 'キャンセル'
         searchBookmark.marker.setVisible false
         infoWindow.setVisible false if currentBookmark is searchBookmark
         
-    $navi = $('#navi')
+
+    $naviHeader = $('#navi-header1')
     $search = $('#search')
     $search.on 'click', ->
         directionsRenderer.setMap null
         naviMarker.setVisible false
         $route.removeClass 'btn-primary'
         $search.addClass 'btn-primary'
-        $navi.css 'display', 'none'
+        $naviHeader.css 'display', 'none'
     $route = $('#route')
     $route.on 'click', ->
         $search.removeClass 'btn-primary'
         $route.addClass 'btn-primary'
-        $navi.css 'display', 'block'
+        $naviHeader.css 'display', 'block'
         directionsRenderer.setMap map
 
     $edit = $('#edit')
@@ -533,7 +551,7 @@ initializeDOM = ->
     openRouteForm = () ->
         $edit.text 'キャンセル'
         $versatile.text '経路'
-        $('#navi-toolbar2').css 'display', 'none'
+        $('#navi-header2').css 'display', 'none'
         $routeSearchFrame.css 'top', '0px'
         
     $edit.on 'click', ->
@@ -542,7 +560,7 @@ initializeDOM = ->
         else
             $edit.text '編集'
             $versatile.text '出発'
-            $('#navi-toolbar2').css 'display', 'block' if navigate.leg? and navigate.step?
+            $('#navi-header2').css 'display', 'block' if navigate.leg? and navigate.step?
             $routeSearchFrame.css 'top', ''
 
     $('#edit2').on 'click', ->
