@@ -531,6 +531,7 @@ initializeDOM = ->
         
     $('#address').on 'submit', ->
         searchAddress(false)
+        $addressField.blur()
         false # to prevent submit action
 
     $addressField.on 'keyup', -> $('#done').text if $(this).val() is '' then '完了' else 'キャンセル'

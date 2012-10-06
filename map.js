@@ -654,6 +654,7 @@
     });
     $('#address').on('submit', function() {
       searchAddress(false);
+      $addressField.blur();
       return false;
     });
     $addressField.on('keyup', function() {
