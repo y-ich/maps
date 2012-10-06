@@ -443,10 +443,10 @@
         mapFSM.setState(MapState.NORMAL);
         map.setCenter(result[0].geometry.location);
         searchBookmark.address = result[0].formatted_address;
-        searchBookmark.marker.setAnimation(google.maps.Animation.DROP);
         searchBookmark.marker.setPosition(result[0].geometry.location);
         searchBookmark.marker.setTitle(address);
         searchBookmark.marker.setVisible(true);
+        searchBookmark.marker.setAnimation(google.maps.Animation.DROP);
         return currentBookmark = searchBookmark;
       } else {
         return alert(status);
@@ -556,9 +556,9 @@
     google.maps.event.addListener(map, 'click', function(event) {
       infoWindow.close();
       droppedBookmark.address = '';
-      droppedBookmark.marker.setAnimation(google.maps.Animation.DROP);
       droppedBookmark.marker.setVisible(true);
       droppedBookmark.marker.setPosition(event.latLng);
+      droppedBookmark.marker.setAnimation(google.maps.Animation.DROP);
       currentBookmark = droppedBookmark;
       return geocoder.geocode({
         latLng: event.latLng

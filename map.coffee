@@ -323,10 +323,10 @@ searchAddress = (fromHistory) ->
             mapFSM.setState MapState.NORMAL
             map.setCenter result[0].geometry.location
             searchBookmark.address = result[0].formatted_address
-            searchBookmark.marker.setAnimation google.maps.Animation.DROP
             searchBookmark.marker.setPosition result[0].geometry.location
             searchBookmark.marker.setTitle address
             searchBookmark.marker.setVisible true
+            searchBookmark.marker.setAnimation google.maps.Animation.DROP
             currentBookmark = searchBookmark
         else
             alert status
@@ -429,9 +429,9 @@ initializeGoogleMaps = ->
     google.maps.event.addListener map, 'click', (event) ->
         infoWindow.close()
         droppedBookmark.address = ''
-        droppedBookmark.marker.setAnimation google.maps.Animation.DROP
         droppedBookmark.marker.setVisible true
         droppedBookmark.marker.setPosition event.latLng
+        droppedBookmark.marker.setAnimation google.maps.Animation.DROP
         currentBookmark = droppedBookmark
         geocoder.geocode {latLng : event.latLng }, (result, status) ->
             droppedBookmark.address = if status is google.maps.GeocoderStatus.OK

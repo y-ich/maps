@@ -112,10 +112,6 @@ width: 200px;
     position: absolute;
     top: 7px;
     left: 11px;
-    background-image: url("http://twitter.github.com/bootstrap/assets/img/glyphicons-halflings-white.png");
-}
-
-.search-query:focus + .icon-search {
     background-image: url("http://twitter.github.com/bootstrap/assets/img/glyphicons-halflings.png");
 }
 
