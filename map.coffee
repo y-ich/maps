@@ -46,6 +46,42 @@ history = [] # an array of Object instances. two formats. { type: 'search', addr
 # classes
 #
 
+# custom InfoWindow
+class MobileInfoWindow extends google.maps.OverlayView
+    constructor: (options) -> @setOptions options
+    close: -> @setMap null
+    getContent: -> @content
+    getPosition: -> @position
+    getZIndex: -> @zIndex
+    open: (map, @anchor) ->
+        @setPosition anchor.getPosition() if anchor?
+        @setMap map
+        
+    setContent: (@content) ->
+        unless @element?
+            @element = document.createElement 'div'
+            @element.className = 'info-window'
+        @element.innerHTML = @content
+    setOptions: (options) ->
+        @setContent options.content ? ''
+        @setPosition options.position ? null
+        @setZIndex options.zIndex ? 0
+    setPosition: (@position) ->
+    setZIndex: (@zIndex) ->
+        @element.style['z-index'] = @zIndex.toString()
+    # overlayview
+    onAdd: ->
+        @getPanes().floatPane.appendChild @element
+    draw: ->
+        xy = @getProjection().fromLatLngToDivPixel @getPosition()
+        $element = $(@element)
+        @element.style.left = xy.x - $element.width() / 2 + 'px'
+        @element.style.top = xy.y - $element.height() - @anchor.getIcon().size.height + 'px'
+    onRemove: ->
+        @element.parentNode.removeChild @element
+        @element = null
+        
+
 # manages id for navigator.geolocation
 class WatchPosition
     start: (dummy) ->
@@ -416,7 +452,7 @@ initializeGoogleMaps = ->
             visible: false
         ), ''
     
-    infoWindow = new google.maps.InfoWindow
+    infoWindow = new MobileInfoWindow
         maxWidth: Math.floor innerWidth*0.9
         
     naviMarker = new google.maps.Marker
@@ -469,7 +505,7 @@ initializeDOM = ->
         event.preventDefault()
     $('#pin-list-frame, #info').on 'touchmove', (event) ->
         event.stopPropagation()
-    
+
     # restores from localStorage
     if localStorage['maps-other-status']?
         otherStatus = JSON.parse localStorage['maps-other-status']

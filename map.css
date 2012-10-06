@@ -40,6 +40,13 @@ form {
 
 /* end of cancel */
 
+.info-window {
+    position: absolute;
+    color: white;
+    background-color: rgba(0,0,0,0.5);
+    border-radius: 5px;
+}
+
 .controls input {
     width: 160px;
 }
