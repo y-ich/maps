@@ -254,18 +254,18 @@ img.icon {
 width: 100px;
 }
 
-#option-container {
+#option-page {
     display: none;
     position: absolute;
     width: 100%;
     text-align: center;
 }
 
-#option-container > * {
+#option-page > * {
     margin: 5px;
 }
 
-#window-bookmark {
+#bookmark-page {
     width: 100%;
     height: 100%;
     position: absolute;

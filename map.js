@@ -603,9 +603,9 @@
       }
       history = (_ref3 = otherStatus.history) != null ? _ref3 : [];
     }
-    $('#option-container').css('bottom', $('#footer').outerHeight(true));
+    $('#option-page').css('bottom', $('#footer').outerHeight(true));
     $map.height(innerHeight - $('#header').outerHeight(true) - $('#footer').outerHeight(true));
-    $('#pin-list-frame').css('height', innerHeight - mapSum($('#window-bookmark .btn-toolbar').toArray(), function(e) {
+    $('#pin-list-frame').css('height', innerHeight - mapSum($('#bookmark-page .btn-toolbar').toArray(), function(e) {
       return $(e).outerHeight(true);
     }) + 'px');
     $gps.on('click', function() {
@@ -716,11 +716,11 @@
     };
     $option = $('#option');
     $option.on('click', function() {
-      $('#option-container').css('display', 'block');
+      $('#option-page').css('display', 'block');
       if ($option.hasClass('btn-primary')) {
         return backToMap();
       } else {
-        $map.css('top', -$('#option-container').outerHeight(true) + 'px');
+        $map.css('top', -$('#option-page').outerHeight(true) + 'px');
         return $option.addClass('btn-primary');
       }
     });
@@ -771,10 +771,10 @@
       mapFSM.bookmarkClicked();
       bookmarkContext = $(this).parent().attr('id');
       generateBookmarkList();
-      return $('#window-bookmark').css('bottom', '0');
+      return $('#bookmark-page').css('bottom', '0');
     });
     $('#bookmark-done').on('click', function() {
-      return $('#window-bookmark').css('bottom', '-100%');
+      return $('#bookmark-page').css('bottom', '-100%');
     });
     $(document).on('click', '#pin-list td', function() {
       var bookmarkOrMarker, item, latLng;
@@ -822,13 +822,13 @@
             updateField($destinationField, name === 'pulsatingMarker' ? (latLng = bookmarkOrMarker.getPosition(), "" + (latLng.lat()) + ", " + (latLng.lng())) : bookmarkOrMarker.address);
         }
       }
-      return $('#window-bookmark').css('bottom', '-100%');
+      return $('#bookmark-page').css('bottom', '-100%');
     });
     $('#add-bookmark').on('click', function() {
-      return $('#info-add-window').css('top', '0');
+      return $('#add-bookmark-page').css('top', '0');
     });
     $('#cancel-add-bookmark').on('click', function() {
-      return $('#info-add-window').css('top', '');
+      return $('#add-bookmark-page').css('top', '');
     });
     $('#delete-pin').on('click', function() {
       var index;
@@ -852,7 +852,7 @@
       bookmarks.push(bookmark);
       bookmark.showInfoWindow();
       saveOtherStatus();
-      $('#info-add-window').css('top', '');
+      $('#add-bookmark-page').css('top', '');
       return $('#container').css('right', '');
     });
     $('#nav-bookmark button').on('click', function() {

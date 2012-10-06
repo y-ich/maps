@@ -476,7 +476,7 @@ initializeDOM = ->
 
 
     # layouts dynamically
-    $('#option-container').css 'bottom', $('#footer').outerHeight(true)
+    $('#option-page').css 'bottom', $('#footer').outerHeight(true)
 # disabled heading trace
 #    # makes map large square for rotation of heading
 #    squareSize = Math.floor(Math.sqrt(Math.pow(innerWidth, 2) + Math.pow(innerHeight, 2)))
@@ -486,7 +486,7 @@ initializeDOM = ->
     # fits map between header and footer
     $map.height innerHeight - $('#header').outerHeight(true) - $('#footer').outerHeight(true)
     # fits list frame between header and footer. should be rewritten.
-    $('#pin-list-frame').css 'height', innerHeight - mapSum($('#window-bookmark .btn-toolbar').toArray(), (e) -> $(e).outerHeight(true)) + 'px'
+    $('#pin-list-frame').css 'height', innerHeight - mapSum($('#bookmark-page .btn-toolbar').toArray(), (e) -> $(e).outerHeight(true)) + 'px'
 
     #
     # event handlers
@@ -584,12 +584,12 @@ initializeDOM = ->
         
     $option = $('#option')
     $option.on 'click', ->
-        $('#option-container').css 'display', 'block' # option-container is not visible in order to let startup clear.
+        $('#option-page').css 'display', 'block' # option-page is not visible in order to let startup clear.
 
         if $option.hasClass 'btn-primary'
             backToMap()
         else
-            $map.css 'top', - $('#option-container').outerHeight(true) + 'px'
+            $map.css 'top', - $('#option-page').outerHeight(true) + 'px'
             $option.addClass 'btn-primary'
 
     $mapType = $('#map-type')
@@ -635,10 +635,10 @@ initializeDOM = ->
         mapFSM.bookmarkClicked()
         bookmarkContext = $(this).parent().attr 'id'
         generateBookmarkList()
-        $('#window-bookmark').css 'bottom', '0'
+        $('#bookmark-page').css 'bottom', '0'
     
     $('#bookmark-done').on 'click', ->
-        $('#window-bookmark').css 'bottom', '-100%'
+        $('#bookmark-page').css 'bottom', '-100%'
     
     $(document).on 'click', '#pin-list td', ->
         name = $(this).data('object-name')
@@ -684,13 +684,13 @@ initializeDOM = ->
                         else
                             bookmarkOrMarker.address            
 
-        $('#window-bookmark').css 'bottom', '-100%'
+        $('#bookmark-page').css 'bottom', '-100%'
 
     $('#add-bookmark').on 'click', ->
-        $('#info-add-window').css 'top', '0'
+        $('#add-bookmark-page').css 'top', '0'
 
     $('#cancel-add-bookmark').on 'click', ->
-        $('#info-add-window').css 'top', ''
+        $('#add-bookmark-page').css 'top', ''
 
     $('#delete-pin').on 'click', ->
         if currentBookmark is droppedBookmark
@@ -711,7 +711,7 @@ initializeDOM = ->
         bookmarks.push bookmark
         bookmark.showInfoWindow()
         saveOtherStatus()
-        $('#info-add-window').css 'top', ''
+        $('#add-bookmark-page').css 'top', ''
         $('#container').css 'right', ''
 
 
