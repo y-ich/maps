@@ -94,6 +94,7 @@ form {
 
 .navbar-search {
     padding-left: 4px;
+    padding-bottom: 4px;
 }
 
 .navbar-search .search-query {
@@ -193,8 +194,15 @@ img.icon {
 #search-header {
     width: 100%;
     position :absolute;
-    top: -40px;
+    top: -46px; /* outerHeight of #upper-header */
     -webkit-transition: top 0.5s;
+}
+
+#upper-header {
+    text-align: center;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    border-bottom: 1px solid #d4d4d4;
 }
 
 #navi-header1 {
