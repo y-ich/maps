@@ -56,10 +56,14 @@ class MobileInfoWindow extends google.maps.OverlayView
     getZIndex: -> @zIndex
     open: (map, @anchor) ->
         if anchor?
-            @setPosition anchor.getPosition()
+            @setPosition @anchor.getPosition()
             icon = @anchor.getIcon()
-            markerAnchor = icon.anchor ? new google.maps.Point Math.floor(icon.size.width / 2), icon.size.height
-            markerSize = @anchor.getIcon().size
+            if icon?
+                markerSize = icon.size
+                markerAnchor = icon.anchor ? new google.maps.Point Math.floor(markerSize.width / 2), markerSize.height
+            else
+                markerSize = new google.maps.Size 32, 32            
+                markerAnchor = new google.maps.Point 32/2, 32
             @pixelOffset = new google.maps.Size Math.floor(markerSize.width / 2) - markerAnchor.x, - markerAnchor.y, 'px', 'px'            
         @setMap map
         
@@ -192,6 +196,65 @@ class Bookmark
 # functions 
 #
 
+
+# localize function
+window.getRouteIndexMessage = window.getRouteIndexMessage ? (index, total) ->
+    ordinal = (n) ->
+        switch n % 10
+            when 1
+                '1st'
+            when 2
+                '2nd'
+            when 3
+                '3rd'
+            else
+                n + 'th'
+    "#{ordinal(index + 1)} of #{total} Suggested Routes"
+    
+getLocalizedString = (key) ->
+    if localizedStrings? then localizedStrings[key] ? key else key
+
+localize = ->
+    document.title = getLocalizedString 'Maps'
+    $('#replace-pin').text getLocalizedString 'Replace Pin'
+    $('#print').text getLocalizedString 'Print'
+    $('#traffic').text getLocalizedString 'Show Traffic'
+    $('#roadmap').text getLocalizedString 'Standard'
+    $('#satellite').text getLocalizedString 'Satellite'
+    $('#panel').text getLocalizedString 'List'
+    $('#clear').text getLocalizedString 'Clear'
+    $('#map-title').text getLocalizedString 'Search'
+    $('#done').text getLocalizedString 'Done'
+    $('#search-input').attr 'placeholder', getLocalizedString 'Search or Address'
+    $('#edit').text getLocalizedString 'Edit'
+    $('#versatile').text getLocalizedString 'Start'
+    $('#origin-label').text getLocalizedString 'Start: '
+    $('#destination-label').text getLocalizedString 'End: '
+    $('#edit2').text getLocalizedString 'Edit'
+    $('#search').text getLocalizedString 'Search'
+    $('#route').text getLocalizedString 'Directions'
+    $('#bookmark-message').text getLocalizedString 'Choose a bookmark to view on the map'
+    $('#bookmark-edit').text getLocalizedString 'Edit'
+    $('#bookmark-done').text getLocalizedString 'Done'
+    $('#bookmark-title').text getLocalizedString 'Bookmarks'
+    $('#bookmark').text getLocalizedString 'Bookmarks'
+    $('#history').text getLocalizedString 'Recents'
+    $('#contact').text getLocalizedString 'Contacts'
+    $('#button-map').text getLocalizedString 'Map'
+    $('#info-title').text getLocalizedString 'Info'
+    $('#address-label').text getLocalizedString 'address'
+    $('#to-here').text getLocalizedString 'Directions To Here'
+    $('#from-here').text getLocalizedString 'Directions From Here'
+    $('#delete-pin').text getLocalizedString 'Remove Pin'
+    $('#add-into-contact').text getLocalizedString 'Add to Contacts'
+    $('#send-place').text getLocalizedString 'Share Location'
+    $('#add-bookmark').text getLocalizedString 'Add to Bookmarks'
+    $('#name-label').text getLocalizedString 'Hybrid'
+    $('#add-bookmark-message').text getLocalizedString 'Type a name for the bookmark'
+    $('#cancel-add-bookmark').text getLocalizedString 'Cancel'
+    $('#add-bookmark-title').text getLocalizedString 'Add Bookmark'
+    $('#save-bookmark').text getLocalizedString 'Save'
+
 # saves current state into localStorage
 # saves frequently changing state
 saveMapStatus = () ->
@@ -226,9 +289,13 @@ secondToString = (sec) ->
     min -= hour * 60
     day = Math.floor(hour / 24)
     hour -= day * 24
-    result += day + '日' if day > 0
-    result += hour + '時間' if hour > 0 and day < 10
-    result += min + '分' if min > 0 and day == 0 and hour < 10
+
+    result += if day == 1 then day + getLocalizedString('day') else if day > 1 then day + getLocalizedString('days') else ''    
+    if day < 10
+        result += if hour == 1 then hour + getLocalizedString('hour') else if hour > 1 then hour + getLocalizedString('hours') else ''
+    if day == 0 and hour < 10
+        result += if min == 1 then min + getLocalizedString('minute') else if min > 1 then min + getLocalizedString('minutes') else ''
+
     result
 
 # returns formatted string '?km' or '?m' from sec(number)
@@ -302,17 +369,20 @@ searchDirections = (fromHistory = false) ->
                     directionsRenderer.setMap map
                     directionsRenderer.setDirections result
                     index = directionsRenderer.getRouteIndex()
-                    message += "候補経路：全#{result.routes.length}件中#{index + 1}件目<br>" if result.routes.length > 1
+                    message += getRouteIndexMessage(index, result.routes.length) + '<br>' if result.routes.length > 1
                     distance = mapSum result.routes[index].legs, (e) -> e.distance.value
                     duration = mapSum result.routes[index].legs, (e) -> e.duration.value
-                    summary = "#{secondToString duration}〜#{meterToString distance}〜#{result.routes[index].summary}"
+                    summary = "#{secondToString duration} - #{meterToString distance} - #{result.routes[index].summary}"
                     if summary.length > innerWidth / parseInt($message.css('font-size')) # assuming the unit is px.
-                        summary = "#{result.routes[index].summary}<br>#{secondToString duration}〜#{meterToString distance}"
+                        summary = "#{result.routes[index].summary}<br>#{secondToString duration} - #{meterToString distance}"
                     message += summary
                     $('#message').html message
                 when google.maps.DirectionsStatus.ZERO_RESULTS
                     directionsRenderer.setMap null
-                    $('#message').html "経路が見つかりませんでした。"
+                    mode = $('#travel-mode').children('.btn-primary').attr('id')
+                    mode = mode[0].toUpperCase() + mode.substr 1
+                    $('#message').html getLocalizedString mode + ' directions could not be found between these locations'
+                    Alert getLocalizedString 'Directions Not Available\nDirections could not be found between these locations.'   
                 else
                     directionsRenderer.setMap null
                     console.log status
@@ -375,8 +445,8 @@ setInfoPage = (bookmark, dropped) ->
     $('#send-place').attr 'href', "mailto:?subject=#{title}&body=<a href=\"https://maps.google.co.jp/maps?q=#{position.lat()},#{position.lng()}\">#{title}</a>"
 
 generateBookmarkList = ->
-    list = '<tr><td data-object-name="pulsatingMarker">現在地</td></tr>'
-    list += '<tr><td data-object-name="droppedBookmark">ドロップされたピン</td></tr>' if droppedBookmark.marker.getVisible()
+    list = "<tr><td data-object-name=\"pulsatingMarker\">#{getLocalizedString 'Current Location'}</td></tr>"
+    list += "<tr><td data-object-name=\"droppedBookmark\">#{getLocalizedString 'Dropped Pin'}</td></tr>" if droppedBookmark.marker.getVisible()
     list += "<tr><td data-object-name=\"bookmarks[#{i}]\">#{e.marker.getTitle()}</td></tr>" for e, i in bookmarks
     list += Array(Math.max(1, Math.floor(innerHeight / pinRowHeight) - bookmarks.length)).join '<tr><td></td></tr>'
     $pinList.html list
@@ -385,9 +455,9 @@ generateHistoryList = ->
     print = (e) ->
         switch e.type
             when 'search'
-                "検索: #{e.address}"
+                getLocalizedString('Search: ') + e.address
             when 'route'
-                "出発: #{e.origin}<br>到着: #{e.destination}"
+                getLocalizedString('Start: ') + e.origin + '<br>' + getLocalizedString('End: ') + e.destination
     list = ''
     list += "<tr><td data-object-name=\"history[#{i}]\">#{print e}</td></tr>" for e, i in history
     list += Array(Math.max(1, Math.floor(innerHeight / pinRowHeight) - history.length)).join '<tr><td></td></tr>'
@@ -408,9 +478,9 @@ getPanoramaHandler = (data, status) ->
                 zoom: 1
             sv.setVisible true
         when google.maps.StreetViewStatus.ZERO_RESULTS
-            alert "近くにストリートビューが見つかりませんでした。"
+            alert getLocalizedString 'There are no street views near here.'
         else
-            alert "すいません、エラーが起こりました。"
+            alert getLocaliedString 'Sorry, an error occurred.'
 
 traceHandler = (position) ->
     latLng = new google.maps.LatLng position.coords.latitude,position.coords.longitude
@@ -467,7 +537,7 @@ initializeGoogleMaps = ->
             icon: new google.maps.MarkerImage(PURPLE_DOT_IMAGE)
             shadow: new google.maps.MarkerImage(MSMARKER_SHADOW, null, null, new google.maps.Point(16, 32))
             position: mapOptions.center
-            title: 'ドロップされたピン'
+            title: getLocalizedString 'Dropped Pin'
             visible: false
         ), ''
 
@@ -516,7 +586,7 @@ initializeGoogleMaps = ->
             droppedBookmark.address = if status is google.maps.GeocoderStatus.OK
                     result[0].formatted_address.replace(/日本, /, '')
                 else
-                    '情報がみつかりませんでした。'
+                    getLocalizedString 'No information'
             infoWindow.setContent makeInfoMessage droppedBookmark.marker.getTitle(), droppedBookmark.address
 
     google.maps.event.addListener droppedBookmark.marker, 'animation_changed', ->
@@ -564,7 +634,9 @@ initializeDOM = ->
                 ), e.address
         history = otherStatus.history ? []
 
-
+    #localization
+    localize()
+    
     # layouts dynamically
     $('#option-page').css 'bottom', $('#footer').outerHeight(true)
 # disabled heading trace
@@ -617,10 +689,10 @@ initializeDOM = ->
         $addressField.blur()
         false # to prevent submit action
 
-    $addressField.on 'keyup', -> $('#done').text if $(this).val() is '' then '完了' else 'キャンセル'
+    $addressField.on 'keyup', -> $('#done').text if $(this).val() is '' then getLocalizedString 'Done' else getLocalizedString 'Cancel'
 
     $('#clear, #address .btn-reset').on 'click', ->
-        $('#done').text if $(this).val() is '' then '完了' else 'キャンセル'
+        $('#done').text getLocalizedString 'Done'
         searchBookmark.marker.setVisible false
         infoWindow.setVisible false if currentBookmark is searchBookmark
         
@@ -644,17 +716,17 @@ initializeDOM = ->
     $versatile = $('#versatile')
     $routeSearchFrame = $('#route-search-frame')
     openRouteForm = () ->
-        $edit.text 'キャンセル'
-        $versatile.text '経路'
+        $edit.text getLocalizedString 'Cancel'
+        $versatile.text getLocalizedString 'Route'
         $('#navi-header2').css 'display', 'none'
         $routeSearchFrame.css 'top', '0px'
         
     $edit.on 'click', ->
-        if $edit.text() == '編集'
+        if $edit.text() is getLocalizedString 'Edit'
             openRouteForm()
         else
-            $edit.text '編集'
-            $versatile.text '出発'
+            $edit.text getLocalizedString 'Edit'
+            $versatile.text getLocalizedString 'Start'
             $('#navi-header2').css 'display', 'block' if navigate.leg? and navigate.step?
             $routeSearchFrame.css 'top', ''
 
@@ -680,12 +752,12 @@ initializeDOM = ->
         
     $versatile.on 'click', ->
         switch $versatile.text()
-            when '経路'
-                $edit.text '編集'
-                $versatile.text '出発'
+            when getLocalizedString 'Route'
+                $edit.text getLocalizedString 'Edit'
+                $versatile.text getLocalizedString 'Start'
                 $routeSearchFrame.css 'top', ''
                 searchDirections false
-            when '出発'
+            when getLocalizedString 'Start'
                 navigate 'start'
 
     $('#cursor-left').on 'click', -> navigate 'previous'
@@ -717,12 +789,12 @@ initializeDOM = ->
     $traffic = $('#traffic')
     trafficLayer = new google.maps.TrafficLayer()
     $traffic.on 'click', ->
-        if $traffic.text() is '渋滞状況を表示'
+        if $traffic.text() is getLocalizedString 'Show Traffic'
             trafficLayer.setMap map
-            $traffic.text '渋滞状況を隠す'
+            $traffic.text getLocalizedString 'Hide Traffic'
         else
             trafficLayer.setMap null
-            $traffic.text '渋滞状況を表示'
+            $traffic.text getLocalizedString 'Show Traffic'
         backToMap()
 
     $('#replace-pin').on 'click', ->
@@ -827,15 +899,22 @@ initializeDOM = ->
         $this.addClass 'btn-primary'
         switch $this.attr 'id'
             when 'bookmark'
-                $('#bookmark-message').text 'マップ上に表示するブックマークを選択'
-                $('#bookmark-edit').text('編集')
-                                   .addClass 'disabled'
+                $('#bookmark-message').text getLocalizedString 'Choose a bookmark to view on the map'
+                $('#bookmark-edit').text(getLocalizedString 'Edit')
+                                   .addClass('disabled')
                 generateBookmarkList()
             when 'history'
-                $('#bookmark-message').text '検索履歴を選択'
-                $('#bookmark-edit').text('消去')
-                                   .removeClass 'disabled'
+                $('#bookmark-message').text getLocalizedString 'Choose a recent search'
+                $('#bookmark-edit').text(getLocalizedString 'Clear')
+                                   .removeClass('disabled')
                 generateHistoryList()
+
+    $('#bookmark-edit').on 'click', ->
+        switch $(this).text()
+            when getLocalizedString 'Clear'
+                if confirm getLocalizedString 'Clear All Recents'
+                    history = []
+                    generateHistoryList()
 
     $('#to-here').on 'click', ->
         updateField $destinationField, currentBookmark.address
