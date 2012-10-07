@@ -126,9 +126,12 @@
     };
 
     MobileInfoWindow.prototype.onAdd = function() {
+      var _this = this;
       this.getPanes().floatPane.appendChild(this.element);
-      this.clickListener = google.maps.event.addDomListener(this.element, 'click', function(event) {
-        return event.stopPropagation();
+      this.listeners = ["click", "dblclick", "rightclick", "mousedown", "mouseup", "mousemove", "mouseover", "mouseout", "dragstart", "dragend", "contextmenu"].map(function(e) {
+        return google.maps.event.addDomListener(_this.element, e, function(event) {
+          return event.stopPropagation();
+        });
       });
       return google.maps.event.trigger(this, 'domready');
     };
@@ -141,7 +144,9 @@
     };
 
     MobileInfoWindow.prototype.onRemove = function() {
-      google.maps.event.removeListener(this.clickListener);
+      this.listeners.forEach(function(e) {
+        return google.maps.event.removeListener(e);
+      });
       this.element.parentNode.removeChild(this.element);
       return this.element = null;
     };
@@ -367,7 +372,7 @@
   };
 
   makeInfoMessage = function(title, message) {
-    return "<table id=\"info-window\"><tr>\n    <td><button id=\"street-view\" class=\"btn\"><i class=\"icon-user\"></i></button></td>\n    <td style=\"white-space: nowrap;\"><div style=\"max-width:160px;overflow:hidden;\">" + title + "<br><span id=\"dropped-message\" style=\"font-size:10px\">" + message + "</span></div></td>\n    <td><button id=\"button-info\" class\"btn\"><i class=\"icon-chevron-right\"></i></button></td>\n</tr></table>";
+    return "<table id=\"info-window\"><tr>\n    <td><button id=\"street-view\" class=\"btn\"><i class=\"icon-user\"></i></button></td>\n    <td style=\"white-space: nowrap;\"><div style=\"max-width:160px;overflow:hidden;\">" + title + "<br><span id=\"dropped-message\" style=\"font-size:10px\">" + message + "</span></div></td>\n    <td><button id=\"button-info\" class=\"btn\"><i class=\"icon-chevron-right\"></i></button></td>\n</tr></table>";
   };
 
   updateField = function($field, str) {

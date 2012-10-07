@@ -91,8 +91,8 @@ class MobileInfoWindow extends google.maps.OverlayView
     # overlayview
     onAdd: ->
         @getPanes().floatPane.appendChild @element
-        @clickListener = google.maps.event.addDomListener @element, 'click', (event) ->
-            event.stopPropagation();
+        @listeners = ["click", "dblclick", "rightclick", "mousedown", "mouseup", "mousemove", "mouseover", "mouseout", "dragstart", "dragend", "contextmenu"].map (e) =>
+            google.maps.event.addDomListener @element, e, (event) -> event.stopPropagation()
         google.maps.event.trigger this, 'domready'
 
     draw: ->
@@ -101,7 +101,7 @@ class MobileInfoWindow extends google.maps.OverlayView
         @element.style.top = xy.y + @pixelOffset.height - @element.offsetHeight + 'px'
 
     onRemove: ->
-        google.maps.event.removeListener @clickListener
+        @listeners.forEach (e) -> google.maps.event.removeListener e
         @element.parentNode.removeChild @element
         @element = null
 
@@ -249,7 +249,7 @@ makeInfoMessage = (title, message) ->
     <table id="info-window"><tr>
         <td><button id="street-view" class="btn"><i class="icon-user"></i></button></td>
         <td style="white-space: nowrap;"><div style="max-width:160px;overflow:hidden;">#{title}<br><span id="dropped-message" style="font-size:10px">#{message}</span></div></td>
-        <td><button id="button-info" class"btn"><i class="icon-chevron-right"></i></button></td>
+        <td><button id="button-info" class="btn"><i class="icon-chevron-right"></i></button></td>
     </tr></table>
     """
 
