@@ -235,7 +235,7 @@ img.icon {
     height: 40px;
 }
 
-#route-header {
+#route-nav {
     position: absolute;
     width: 100%;
     z-index: -1; /* in order to hide #route-search-frame to upper region */

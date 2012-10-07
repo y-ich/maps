@@ -52,7 +52,7 @@
                     <div class="navbar-inner">
                         <div>
                             <form id="address" class="form-search with-reset-button">
-                                <div id="upper-header" style="text-align: center; margin: 2px; border-bottom: 1px solid #d4d4d4;">
+                                <div id="upper-header" style="">
                                     <button id="clear" type="reset" class="btn btn-left">消去</button>
                                     <h4 style="display: inline-block;">検索</h4>
                                     <button id="done" type="button" class="btn btn-right">完了</button>
@@ -72,10 +72,37 @@
                         <button id="edit" type="button" class="btn btn-left">編集</button>
                         <div id="travel-mode" class="btn-group">
                             <button id="driving" type="button" class="btn btn-primary"><img src="glyphicons/png/glyphicons_005_car.png" class="icon"></button>
-                            <button id="transit" type="button" class="btn disabled"><img src="glyphicons/png/glyphicons_014_train.png" class="icon"></button>
+                            <button id="transit" type="button" class="btn"><img src="glyphicons/png/glyphicons_014_train.png" class="icon"></button>
                             <button id="walking" type="button" class="btn"><img src="glyphicons/png/glyphicons_284_pants.png" class="icon"></button>                
                         </div>
                         <button id="versatile" type="button" class="btn btn-right">出発</button>
+                    </div>
+                    <div id="route-nav">
+                        <div id="message"></div>
+                        <div id="route-search-frame">
+                            <table><tr>
+                                <td>
+                                    <button id="switch" type="button" class="btn"><i class="icon-random"></i></button>
+                                </td>
+                                <td>
+                                    <div id="route-search">
+                                        <form id="origin" class="form-inline with-reset-button">
+                                            <label class="control-label">出発: </label>
+                                            <input type="text" name="origin" class="search-query">
+                                            <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
+                                            <button type="button" class="btn btn-mini btn-bookmark disabled"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
+                                        </form>
+                                        <div class="clearfix"></div>
+                                        <form id="destination" class="form-inline with-reset-button">
+                                            <label class="control-label">到着: </label>
+                                            <input type="text" name="destination" class="search-query">
+                                            <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
+                                            <button type="button" class="btn btn-mini btn-bookmark disabled"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr></table>
+                        </div>
                     </div>
                 </div>
                 <div id="navi-header2" class="navbar">
@@ -84,33 +111,6 @@
                     <div id="cursors" class="btn-group btn-right">
                         <button id="cursor-left" type="button" class="btn"><i class="icon-arrow-left"></i></button>
                         <button id="cursor-right" type="button" class="btn"><i class="icon-arrow-right"></i></button>
-                    </div>
-                </div>
-                <div id="route-header">
-                    <div id="message"></div>
-                    <div id="route-search-frame">
-                        <table><tr>
-                            <td>
-                                <button id="switch" type="button" class="btn"><i class="icon-random"></i></button>
-                            </td>
-                            <td>
-                                <div id="route-search">
-                                    <form id="origin" class="form-inline with-reset-button">
-                                        <label class="control-label">出発: </label>
-                                        <input type="text" name="origin" class="search-query">
-                                        <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
-                                        <button type="button" class="btn btn-mini btn-bookmark disabled"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
-                                    </form>
-                                    <div class="clearfix"></div>
-                                    <form id="destination" class="form-inline with-reset-button">
-                                        <label class="control-label">到着: </label>
-                                        <input type="text" name="destination" class="search-query">
-                                        <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
-                                        <button type="button" class="btn btn-mini btn-bookmark disabled"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr></table>
                     </div>
                 </div>
                 <div id="footer" class="btn-toolbar">
