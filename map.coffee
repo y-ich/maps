@@ -9,7 +9,7 @@
 PURPLE_DOT_IMAGE = 'http://maps.google.co.jp/mapfiles/ms/icons/purple-dot.png'
 RED_DOT_IMAGE = 'http://maps.google.co.jp/mapfiles/ms/icons/red-dot.png'
 MSMARKER_SHADOW = 'http://maps.google.co.jp/mapfiles/ms/icons/msmarker.shadow.png'
-
+DEFAULT_ICON_SIZE = 32
 
 # Google Maps services
 map = null
@@ -62,8 +62,8 @@ class MobileInfoWindow extends google.maps.OverlayView
                 markerSize = icon.size
                 markerAnchor = icon.anchor ? new google.maps.Point Math.floor(markerSize.width / 2), markerSize.height
             else
-                markerSize = new google.maps.Size 32, 32            
-                markerAnchor = new google.maps.Point 32/2, 32
+                markerSize = new google.maps.Size DEFAULT_ICON_SIZE, DEFAULT_ICON_SIZE            
+                markerAnchor = new google.maps.Point DEFAULT_ICON_SIZE/2, DEFAULT_ICON_SIZE
             @pixelOffset = new google.maps.Size Math.floor(markerSize.width / 2) - markerAnchor.x, - markerAnchor.y, 'px', 'px'            
         @setMap map
         
@@ -535,7 +535,7 @@ initializeGoogleMaps = ->
             animation: google.maps.Animation.DROP
             map: map
             icon: new google.maps.MarkerImage(PURPLE_DOT_IMAGE)
-            shadow: new google.maps.MarkerImage(MSMARKER_SHADOW, null, null, new google.maps.Point(16, 32))
+            shadow: new google.maps.MarkerImage(MSMARKER_SHADOW, null, null, new google.maps.Point(DEFAULT_ICON_SIZE/2, DEFAULT_ICON_SIZE))
             position: mapOptions.center
             title: getLocalizedString 'Dropped Pin'
             visible: false
