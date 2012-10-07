@@ -40,7 +40,7 @@ mapFSM = null
 bookmarkContext = null
 bookmarks = [] # an array of Bookmark instances
 history = [] # an array of Object instances. two formats. { type: 'search', address: }, { type: 'route', origin: ,destination: }
-
+isHold = true
 
 #
 # classes
@@ -494,6 +494,7 @@ initializeGoogleMaps = ->
         visible: false
 
     google.maps.event.addListener map, 'click', (event) ->
+        return unless isHold
         # The following code is a work around for iOS Safari. iOS Safari can not stop propagation of mouse event on the map.
         $infoWindow = $('.info-window')
         if $infoWindow.length > 0
@@ -579,6 +580,10 @@ initializeDOM = ->
     # event handlers
     #
 
+    $map.on 'touchstart', ->
+        isHold = false
+        setTimeout (-> isHold = true), 800
+        
     # input with reset button
     $('.search-query').on 'keyup', -> # textInput, keypress is before inputting a character.
         $this = $(this)
