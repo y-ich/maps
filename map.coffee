@@ -568,7 +568,9 @@ initializeGoogleMaps = ->
         visible: false
 
     google.maps.event.addListener map, 'click', (event) ->
-        return unless isHold
+        unless isHold
+            infoWindow.close()
+            return
         # The following code is a work around for iOS Safari. iOS Safari can not stop propagation of mouse event on the map.
         $infoWindow = $('.info-window')
         if $infoWindow.length > 0

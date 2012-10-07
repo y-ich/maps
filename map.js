@@ -748,6 +748,7 @@
     google.maps.event.addListener(map, 'click', function(event) {
       var $infoWindow, position, xy, _ref2, _ref3;
       if (!isHold) {
+        infoWindow.close();
         return;
       }
       $infoWindow = $('.info-window');
