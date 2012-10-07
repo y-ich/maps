@@ -53,9 +53,9 @@
                         <div>
                             <form id="address" class="form-search with-reset-button">
                                 <div id="upper-header" style="">
-                                    <button id="clear" type="reset" class="btn btn-left">消去</button>
-                                    <h4 style="display: inline-block;">検索</h4>
-                                    <button id="done" type="button" class="btn btn-right">完了</button>
+                                    <button id="clear" type="reset" class="btn btn-small btn-left">消去</button>
+                                    <h5 style="display: inline-block;">検索</h5>
+                                    <button id="done" type="button" class="btn btn-small btn-right">完了</button>
                                 </div>
                                 <div class="navbar-search">
                                     <input type="text" name="address" class="search-query" placeholder="検索または住所">
@@ -69,32 +69,32 @@
                 </div>
                 <div id="navi-header1" class="navbar">
                     <div id="navi-toolbar" class="btn-toolbar">
-                        <button id="edit" type="button" class="btn btn-left">編集</button>
+                        <button id="edit" type="button" class="btn btn-small btn-left">編集</button>
                         <div id="travel-mode" class="btn-group">
-                            <button id="driving" type="button" class="btn btn-primary"><img src="glyphicons/png/glyphicons_005_car.png" class="icon"></button>
-                            <button id="transit" type="button" class="btn disabled"><img src="glyphicons/png/glyphicons_014_train.png" class="icon"></button>
-                            <button id="walking" type="button" class="btn"><img src="glyphicons/png/glyphicons_284_pants.png" class="icon"></button>                
+                            <button id="driving" type="button" class="btn btn-small btn-primary"><img src="glyphicons/png/glyphicons_005_car.png" class="icon"></button>
+                            <button id="transit" type="button" class="btn btn-small disabled"><img src="glyphicons/png/glyphicons_014_train.png" class="icon"></button>
+                            <button id="walking" type="button" class="btn btn-small"><img src="glyphicons/png/glyphicons_284_pants.png" class="icon"></button>                
                         </div>
-                        <button id="versatile" type="button" class="btn btn-right">出発</button>
+                        <button id="versatile" type="button" class="btn btn-small btn-right">出発</button>
                     </div>
                     <div id="route-nav">
                         <div id="message"></div>
                         <div id="route-search-frame">
                             <table><tr>
                                 <td>
-                                    <button id="switch" type="button" class="btn"><i class="icon-random"></i></button>
+                                    <button id="switch" type="button" class="btn btn-small"><i class="icon-random"></i></button>
                                 </td>
                                 <td>
                                     <div id="route-search">
                                         <form id="origin" class="form-inline with-reset-button">
-                                            <label class="control-label">出発: </label>
+                                            <label>出発: </label>
                                             <input type="text" name="origin" class="search-query">
                                             <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
                                             <button type="button" class="btn btn-mini btn-bookmark disabled"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
                                         </form>
                                         <div class="clearfix"></div>
                                         <form id="destination" class="form-inline with-reset-button">
-                                            <label class="control-label">到着: </label>
+                                            <label>到着: </label>
                                             <input type="text" name="destination" class="search-query">
                                             <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
                                             <button type="button" class="btn btn-mini btn-bookmark disabled"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
@@ -106,20 +106,20 @@
                     </div>
                 </div>
                 <div id="navi-header2" class="navbar">
-                    <button id="edit2" type="button" class="btn btn-left">編集</button>
+                    <button id="edit2" type="button" class="btn btn-small btn-left">編集</button>
                     <div id="numbering"></div>
                     <div id="cursors" class="btn-group btn-right">
-                        <button id="cursor-left" type="button" class="btn"><i class="icon-arrow-left"></i></button>
-                        <button id="cursor-right" type="button" class="btn"><i class="icon-arrow-right"></i></button>
+                        <button id="cursor-left" type="button" class="btn btn-small"><i class="icon-arrow-left"></i></button>
+                        <button id="cursor-right" type="button" class="btn btn-small"><i class="icon-arrow-right"></i></button>
                     </div>
                 </div>
                 <div id="footer" class="btn-toolbar">
-                    <button id="gps" type="button" class="btn btn-left"><img src="glyphicons/png/glyphicons_233_direction.png" class="icon"></button>
+                    <button id="gps" type="button" class="btn btn-small btn-left"><img src="glyphicons/png/glyphicons_233_direction.png" class="icon"></button>
                     <div id="nav" class="btn-group">
-                        <button id="search" type="button" class="btn btn-primary">検索</button>
-                        <button id="route" type="button" class="btn">経路</button>
+                        <button id="search" type="button" class="btn btn-small btn-primary">検索</button>
+                        <button id="route" type="button" class="btn btn-small">経路</button>
                     </div>
-                    <button id="option" type="button" class="btn btn-right"><i class=" icon-info-sign"></i></button>
+                    <button id="option" type="button" class="btn btn-small btn-right"><i class=" icon-info-sign"></i></button>
                 </div>
             </div>
             <div id="bookmark-page">
@@ -127,9 +127,9 @@
                     <div id="bookmark-message">マップ上に表示するブックマークを選択</div>
                 </div>
                 <div class="btn-toolbar">
-                    <button id="bookmark-edit" type="button" class="btn btn-left disabled">編集</button>
-                    <h4 td="bookmark-title">ブックマーク</h4>
-                    <button id="bookmark-done" type="button" class="btn btn-right">完了</button>
+                    <button id="bookmark-edit" type="button" class="btn btn-small btn-left disabled">編集</button>
+                    <h5 td="bookmark-title">ブックマーク</h5>
+                    <button id="bookmark-done" type="button" class="btn btn-small btn-right">完了</button>
                 </div>
                 <div id="pin-list-frame">
                     <table id="pin-list" class="table">
@@ -138,9 +138,9 @@
                 </div>
                 <div id="nav-bookmark" class="btn-toolbar">
                     <div class="btn-group">
-                        <button id="bookmark" type="button" class="btn btn-primary">ブックマーク</button>
-                        <button id="history" type="button" class="btn">履歴</button>
-                        <button id="contact" type="button" class="btn disabled">連絡先</button>
+                        <button id="bookmark" type="button" class="btn btn-small btn-primary">ブックマーク</button>
+                        <button id="history" type="button" class="btn btn-small">履歴</button>
+                        <button id="contact" type="button" class="btn btn-small disabled">連絡先</button>
                     </div>
                 </div>
             </div>
@@ -148,8 +148,8 @@
         <div id="info" class="page-group">
             <div id="info-page">
                 <div class="btn-toolbar">
-                    <button id="button-map" type="button" class="btn btn-left">マップ</button>
-                    <h4>情報</h4>            
+                    <button id="button-map" type="button" class="btn btn-small btn-left">マップ</button>
+                    <h5>情報</h5>            
                 </div>
                 <table id="info-name-row"><tr>
                     <td><div id="info-marker"><div>
@@ -180,9 +180,9 @@
             <div id="add-bookmark-page">
                 <div class="btn-toolbar">ブックマークの名前を入力</div>
                 <div class="btn-toolbar">
-                    <button id="cancel-add-bookmark" class="btn btn-left">キャンセル</button>
+                    <button id="cancel-add-bookmark" class="btn btn-small btn-left">キャンセル</button>
                     <h4>追加</h4>
-                    <button id="save-bookmark" class="btn btn-right">保存</button>
+                    <button id="save-bookmark" class="btn btn-small btn-right">保存</button>
                 </div>
                 <form id="bookmark-name" class="form-inline with-reset-button">
                     <input type="text" name="bookmark-name" class="search-query">
