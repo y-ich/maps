@@ -91,8 +91,7 @@ class MobileInfoWindow extends google.maps.OverlayView
     # overlayview
     onAdd: ->
         @getPanes().floatPane.appendChild @element
-        @listeners = ["click", "dblclick", "rightclick", "mousedown", "mouseup", "mousemove", "mouseover", "mouseout", "dragstart", "dragend", "contextmenu"].map (e) =>
-            google.maps.event.addDomListener @element, e, (event) -> event.stopPropagation()
+        @listeners = []
         google.maps.event.trigger this, 'domready'
 
     draw: ->
@@ -495,6 +494,13 @@ initializeGoogleMaps = ->
         visible: false
 
     google.maps.event.addListener map, 'click', (event) ->
+        # The following code is a work around for iOS Safari. iOS Safari can not stop propagation of mouse event on the map.
+        $infoWindow = $('.info-window')
+        if $infoWindow.length > 0
+            xy = infoWindow.getProjection().fromLatLngToDivPixel event.latLng
+            position = $infoWindow.position()
+            return if (position.left <= xy.x <= position.left + $infoWindow.width()) and (position.top <= xy.y <= position.top + $infoWindow.height())
+                
         infoWindow.close()
         droppedBookmark.address = ''
         droppedBookmark.marker.setVisible true

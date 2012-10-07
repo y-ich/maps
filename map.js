@@ -126,13 +126,8 @@
     };
 
     MobileInfoWindow.prototype.onAdd = function() {
-      var _this = this;
       this.getPanes().floatPane.appendChild(this.element);
-      this.listeners = ["click", "dblclick", "rightclick", "mousedown", "mouseup", "mousemove", "mouseover", "mouseout", "dragstart", "dragend", "contextmenu"].map(function(e) {
-        return google.maps.event.addDomListener(_this.element, e, function(event) {
-          return event.stopPropagation();
-        });
-      });
+      this.listeners = [];
       return google.maps.event.trigger(this, 'domready');
     };
 
@@ -670,6 +665,15 @@
       visible: false
     });
     google.maps.event.addListener(map, 'click', function(event) {
+      var $infoWindow, position, xy, _ref1, _ref2;
+      $infoWindow = $('.info-window');
+      if ($infoWindow.length > 0) {
+        xy = infoWindow.getProjection().fromLatLngToDivPixel(event.latLng);
+        position = $infoWindow.position();
+        if (((position.left <= (_ref1 = xy.x) && _ref1 <= position.left + $infoWindow.width())) && ((position.top <= (_ref2 = xy.y) && _ref2 <= position.top + $infoWindow.height()))) {
+          return;
+        }
+      }
       infoWindow.close();
       droppedBookmark.address = '';
       droppedBookmark.marker.setVisible(true);
