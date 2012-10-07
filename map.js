@@ -1144,8 +1144,8 @@
     };
   };
 
-  initializeGoogleMaps();
-
   initializeDOM();
+
+  initializeGoogleMaps();
 
 }).call(this);

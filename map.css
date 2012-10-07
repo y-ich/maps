@@ -138,7 +138,6 @@ img.icon {
     position: absolute;
     top: 42px; /* default visible height of search header */
     width: 100%;
-    height: 100%;
 /* disable tracing heading, so commented out the below. */
 /*    left: 50%; /* for centering. margin will be defined by javascript. */
 /*    top: 50%; /* for centering. margin will be defined by javascript. */ 
