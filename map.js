@@ -375,8 +375,36 @@
     return "<table id=\"info-window\"><tr>\n    <td><button id=\"street-view\" class=\"btn btn-mini\"><i class=\"icon-user\"></i></button></td>\n    <td style=\"white-space: nowrap;\"><div style=\"max-width:160px;overflow:hidden;\">" + title + "<br><span id=\"dropped-message\" style=\"font-size:10px\">" + message + "</span></div></td>\n    <td><button id=\"button-info\" class=\"btn btn-mini\"><i class=\"icon-chevron-right\"></i></button></td>\n</tr></table>";
   };
 
-  updateField = function($field, str) {
-    return $field.val(str).siblings('.btn-bookmark').css('display', str === '' ? 'block' : 'none');
+  searchAddress = function(fromHistory) {
+    var address;
+    address = $addressField.val();
+    if (!((address != null) && address !== '')) {
+      return;
+    }
+    infoWindow.close();
+    searchBookmark.marker.setVisible(false);
+    if (!fromHistory) {
+      history.unshift({
+        type: 'search',
+        address: address
+      });
+    }
+    return geocoder.geocode({
+      address: address
+    }, function(result, status) {
+      if (status === google.maps.GeocoderStatus.OK) {
+        mapFSM.setState(MapState.NORMAL);
+        map.setCenter(result[0].geometry.location);
+        searchBookmark.address = result[0].formatted_address;
+        searchBookmark.marker.setPosition(result[0].geometry.location);
+        searchBookmark.marker.setTitle(address);
+        searchBookmark.marker.setVisible(true);
+        searchBookmark.marker.setAnimation(google.maps.Animation.DROP);
+        return currentBookmark = searchBookmark;
+      } else {
+        return alert(status);
+      }
+    });
   };
 
   searchDirections = function(fromHistory) {
@@ -484,6 +512,10 @@
 
   navigate.step = null;
 
+  updateField = function($field, str) {
+    return $field.val(str).siblings('.btn-bookmark').css('display', str === '' ? 'block' : 'none');
+  };
+
   setInfoPage = function(bookmark, dropped) {
     var position, title, _ref1, _ref2;
     console.log(bookmark.marker.getIcon());
@@ -527,38 +559,6 @@
     }
     list += Array(Math.max(1, Math.floor(innerHeight / pinRowHeight) - history.length)).join('<tr><td></td></tr>');
     return $pinList.html(list);
-  };
-
-  searchAddress = function(fromHistory) {
-    var address;
-    address = $addressField.val();
-    if (!((address != null) && address !== '')) {
-      return;
-    }
-    infoWindow.close();
-    searchBookmark.marker.setVisible(false);
-    if (!fromHistory) {
-      history.unshift({
-        type: 'search',
-        address: address
-      });
-    }
-    return geocoder.geocode({
-      address: address
-    }, function(result, status) {
-      if (status === google.maps.GeocoderStatus.OK) {
-        mapFSM.setState(MapState.NORMAL);
-        map.setCenter(result[0].geometry.location);
-        searchBookmark.address = result[0].formatted_address;
-        searchBookmark.marker.setPosition(result[0].geometry.location);
-        searchBookmark.marker.setTitle(address);
-        searchBookmark.marker.setVisible(true);
-        searchBookmark.marker.setAnimation(google.maps.Animation.DROP);
-        return currentBookmark = searchBookmark;
-      } else {
-        return alert(status);
-      }
-    });
   };
 
   getPanoramaHandler = function(data, status) {

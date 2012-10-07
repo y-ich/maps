@@ -254,10 +254,28 @@ makeInfoMessage = (title, message) ->
     </tr></table>
     """
 
-updateField = ($field, str) ->
-    $field.val(str)
-          .siblings('.btn-bookmark').css 'display', if str is '' then 'block' else 'none'
-
+# search and display a place
+searchAddress = (fromHistory) ->
+    address = $addressField.val()
+    return unless address? and address isnt ''
+    infoWindow.close()
+    searchBookmark.marker.setVisible false
+    if not fromHistory
+        history.unshift
+            type: 'search'
+            address: address
+    geocoder.geocode {address : address }, (result, status) ->
+        if status is google.maps.GeocoderStatus.OK
+            mapFSM.setState MapState.NORMAL
+            map.setCenter result[0].geometry.location
+            searchBookmark.address = result[0].formatted_address
+            searchBookmark.marker.setPosition result[0].geometry.location
+            searchBookmark.marker.setTitle address
+            searchBookmark.marker.setVisible true
+            searchBookmark.marker.setAnimation google.maps.Animation.DROP
+            currentBookmark = searchBookmark
+        else
+            alert status
 
 # invokes to search directions and displays a result.
 searchDirections = (fromHistory = false) ->
@@ -337,6 +355,13 @@ navigate = (str) ->
 navigate.leg = null
 navigate.step = null
 
+
+# DOM treat
+
+updateField = ($field, str) ->
+    $field.val(str)
+          .siblings('.btn-bookmark').css 'display', if str is '' then 'block' else 'none'
+
 # prepare page of bookmark information
 setInfoPage = (bookmark, dropped) ->
     console.log bookmark.marker.getIcon()
@@ -367,29 +392,6 @@ generateHistoryList = ->
     list += "<tr><td data-object-name=\"history[#{i}]\">#{print e}</td></tr>" for e, i in history
     list += Array(Math.max(1, Math.floor(innerHeight / pinRowHeight) - history.length)).join '<tr><td></td></tr>'
     $pinList.html list
-
-# search and display a place
-searchAddress = (fromHistory) ->
-    address = $addressField.val()
-    return unless address? and address isnt ''
-    infoWindow.close()
-    searchBookmark.marker.setVisible false
-    if not fromHistory
-        history.unshift
-            type: 'search'
-            address: address
-    geocoder.geocode {address : address }, (result, status) ->
-        if status is google.maps.GeocoderStatus.OK
-            mapFSM.setState MapState.NORMAL
-            map.setCenter result[0].geometry.location
-            searchBookmark.address = result[0].formatted_address
-            searchBookmark.marker.setPosition result[0].geometry.location
-            searchBookmark.marker.setTitle address
-            searchBookmark.marker.setVisible true
-            searchBookmark.marker.setAnimation google.maps.Animation.DROP
-            currentBookmark = searchBookmark
-        else
-            alert status
 
 #
 # handlers
