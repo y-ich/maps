@@ -40,7 +40,8 @@ mapFSM = null
 bookmarkContext = null
 bookmarks = [] # an array of Bookmark instances
 history = [] # an array of Object instances. two formats. { type: 'search', address: }, { type: 'route', origin: ,destination: }
-isHold = true
+maxHistory = 20 # max number of history
+isHold = true # hold detection of touch. default is true for desktop
 
 #
 # classes
@@ -202,6 +203,7 @@ saveMapStatus = () ->
 
 # saves others
 saveOtherStatus = () ->
+    history.splice maxHistory
     localStorage['maps-other-status'] = JSON.stringify
         origin: $originField.val()
         destination: $destinationField.val()
