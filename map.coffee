@@ -136,7 +136,7 @@ class MapState
     bookmarkClicked: -> @
 
 MapState.NORMAL.update = ->
-    $gps.removeClass('btn-primary')
+    $gps.removeClass('btn-light')
     # disabled trace heading
     # $map.css '-webkit-transform', $map.css('-webkit-transform').replace(/\s*rotate(-?[\d.]+deg)/, '')
     # need to restore icon if implementing TRACE_HEADING
@@ -145,7 +145,7 @@ MapState.NORMAL.gpsClicked = -> MapState.TRACE_POSITION
 
 MapState.TRACE_POSITION.update = ->
     map.setCenter pulsatingMarker.getPosition()
-    $gps.addClass 'btn-primary'
+    $gps.addClass 'btn-light'
     @
 MapState.TRACE_POSITION.gpsClicked = -> MapState.NORMAL # disabled TRACE_HEADING
 

@@ -211,7 +211,7 @@
   })();
 
   MapState.NORMAL.update = function() {
-    $gps.removeClass('btn-primary');
+    $gps.removeClass('btn-light');
     return this;
   };
 
@@ -221,7 +221,7 @@
 
   MapState.TRACE_POSITION.update = function() {
     map.setCenter(pulsatingMarker.getPosition());
-    $gps.addClass('btn-primary');
+    $gps.addClass('btn-light');
     return this;
   };
 
