@@ -214,46 +214,49 @@ window.getRouteIndexMessage = window.getRouteIndexMessage ? (index, total) ->
 getLocalizedString = (key) ->
     if localizedStrings? then localizedStrings[key] ? key else key
 
-localize = ->
+setLocalExpressionInto = (id, english) ->
+    document.getElementById(id).lastChild.data = getLocalizedString english
+
+localize = ->        
     document.title = getLocalizedString 'Maps'
-    $('#replace-pin')[0].lastChild.data = getLocalizedString 'Replace Pin'
-    $('#print')[0].lastChild.data = getLocalizedString 'Print'
-    $('#traffic')[0].lastChild.data = getLocalizedString 'Show Traffic'
-    $('#roadmap')[0].lastChild.data = getLocalizedString 'Standard'
-    $('#satellite')[0].lastChild.data = getLocalizedString 'Satellite'
-    $('#panel')[0].lastChild.data = getLocalizedString 'List'
-    $('#hybrid')[0].lastChild.data = getLocalizedString 'Hybrid'
-    $('#clear')[0].lastChild.data = getLocalizedString 'Clear'
-    $('#map-title')[0].lastChild.data = getLocalizedString 'Search'
-    $('#done')[0].lastChild.data = getLocalizedString 'Done'
-    $('#search-input').attr 'placeholder', getLocalizedString 'Search or Address'
-    $('#edit')[0].lastChild.data = getLocalizedString 'Edit'
-    $('#versatile')[0].lastChild.data = getLocalizedString 'Start'
-    $('#origin-label')[0].lastChild.data = getLocalizedString 'Start: '
-    $('#destination-label')[0].lastChild.data = getLocalizedString 'End: '
-    $('#edit2')[0].lastChild.data = getLocalizedString 'Edit'
-    $('#search')[0].lastChild.data = getLocalizedString 'Search'
-    $('#route')[0].lastChild.data = getLocalizedString 'Directions'
-    $('#bookmark-message')[0].lastChild.data = getLocalizedString 'Choose a bookmark to view on the map'
-    $('#bookmark-edit')[0].lastChild.data = getLocalizedString 'Edit'
-    $('#bookmark-done')[0].lastChild.data = getLocalizedString 'Done'
-    $('#bookmark-title')[0].lastChild.data = getLocalizedString 'Bookmarks'
-    $('#bookmark')[0].lastChild.data = getLocalizedString 'Bookmarks'
-    $('#history')[0].lastChild.data = getLocalizedString 'Recents'
-    $('#contact')[0].lastChild.data = getLocalizedString 'Contacts'
-    $('#button-map')[0].lastChild.data = getLocalizedString 'Map'
-    $('#info-title')[0].lastChild.data = getLocalizedString 'Info'
-    $('#address-label')[0].lastChild.data = getLocalizedString 'address'
-    $('#to-here')[0].lastChild.data = getLocalizedString 'Directions To Here'
-    $('#from-here')[0].lastChild.data = getLocalizedString 'Directions From Here'
-    $('#delete-pin')[0].lastChild.data = getLocalizedString 'Remove Pin'
-    $('#add-into-contact')[0].lastChild.data = getLocalizedString 'Add to Contacts'
-    $('#send-place')[0].lastChild.data = getLocalizedString 'Share Location'
-    $('#add-bookmark')[0].lastChild.data = getLocalizedString 'Add to Bookmarks'
-    $('#add-bookmark-message')[0].lastChild.data = getLocalizedString 'Type a name for the bookmark'
-    $('#cancel-add-bookmark')[0].lastChild.data = getLocalizedString 'Cancel'
-    $('#add-bookmark-title')[0].lastChild.data = getLocalizedString 'Add Bookmark'
-    $('#save-bookmark')[0].lastChild.data = getLocalizedString 'Save'
+    document.getElementById('search-input').placeholder = getLocalizedString 'Search or Address'
+    setLocalExpressionInto 'replace-pin', 'Replace Pin'
+    setLocalExpressionInto 'print', 'Print'
+    setLocalExpressionInto 'traffic', 'Show Traffic'
+    setLocalExpressionInto 'roadmap', 'Standard'
+    setLocalExpressionInto 'satellite', 'Satellite'
+    setLocalExpressionInto 'panel', 'List'
+    setLocalExpressionInto 'hybrid', 'Hybrid'
+    setLocalExpressionInto 'clear', 'Clear'
+    setLocalExpressionInto 'map-title', 'Search'
+    setLocalExpressionInto 'done', 'Done'
+    setLocalExpressionInto 'edit', 'Edit'
+    setLocalExpressionInto 'versatile', 'Start'
+    setLocalExpressionInto 'origin-label', 'Start: '
+    setLocalExpressionInto 'destination-label', 'End: '
+    setLocalExpressionInto 'edit2', 'Edit'
+    setLocalExpressionInto 'search', 'Search'
+    setLocalExpressionInto 'route', 'Directions'
+    setLocalExpressionInto 'bookmark-message', 'Choose a bookmark to view on the map'
+    setLocalExpressionInto 'bookmark-edit', 'Edit'
+    setLocalExpressionInto 'bookmark-done', 'Done'
+    setLocalExpressionInto 'bookmark-title', 'Bookmarks'
+    setLocalExpressionInto 'bookmark', 'Bookmarks'
+    setLocalExpressionInto 'history', 'Recents'
+    setLocalExpressionInto 'contact', 'Contacts'
+    setLocalExpressionInto 'button-map', 'Map'
+    setLocalExpressionInto 'info-title', 'Info'
+    setLocalExpressionInto 'address-label', 'address'
+    setLocalExpressionInto 'to-here', 'Directions To Here'
+    setLocalExpressionInto 'from-here', 'Directions From Here'
+    setLocalExpressionInto 'delete-pin', 'Remove Pin'
+    setLocalExpressionInto 'add-into-contact', 'Add to Contacts'
+    setLocalExpressionInto 'send-place', 'Share Location'
+    setLocalExpressionInto 'add-bookmark', 'Add to Bookmarks'
+    setLocalExpressionInto 'add-bookmark-message', 'Type a name for the bookmark'
+    setLocalExpressionInto 'cancel-add-bookmark', 'Cancel'
+    setLocalExpressionInto 'add-bookmark-title', 'Add Bookmark'
+    setLocalExpressionInto 'save-bookmark', 'Save'
 
 # saves current state into localStorage
 # saves frequently changing state
@@ -381,7 +384,7 @@ searchDirections = (fromHistory = false) ->
                     directionsRenderer.setMap null
                     mode = $('#travel-mode').children('.btn-primary').attr('id')
                     mode = mode[0].toUpperCase() + mode.substr 1
-                    $('#message').html getLocalizedString mode + ' directions could not be found between these locations'
+                    $('#message').html getLocalizedString(mode + ' directions could not be found between these locations')
                     Alert getLocalizedString 'Directions Not Available\nDirections could not be found between these locations.'   
                 else
                     directionsRenderer.setMap null
@@ -692,10 +695,10 @@ initializeDOM = ->
         $addressField.blur()
         false # to prevent submit action
 
-    $addressField.on 'keyup', -> $('#done')[0].lastChild.data = if $(this).val() is '' then getLocalizedString 'Done' else getLocalizedString 'Cancel'
+    $addressField.on 'keyup', -> setLocalExpressionInto 'done', if $(this).val() is '' then 'Done' else 'Cancel'
 
     $('#clear, #address .btn-reset').on 'click', ->
-        $('#done')[0].lastChild.data = getLocalizedString 'Done'
+        setLocalExpressionInto 'done', 'Done'
         searchBookmark.marker.setVisible false
         infoWindow.setVisible false if currentBookmark is searchBookmark
         
@@ -719,8 +722,8 @@ initializeDOM = ->
     $versatile = $('#versatile')
     $routeSearchFrame = $('#route-search-frame')
     openRouteForm = () ->
-        $edit[0].lastChild.data = getLocalizedString 'Cancel'
-        $versatile[0].lastChild.data = getLocalizedString 'Route'
+        setLocalExpressionInto 'edit', 'Cancel'
+        setLocalExpressionInto 'versatile', 'Route'
         $('#navi-header2').css 'display', 'none'
         $routeSearchFrame.css 'top', '0px'
         
@@ -728,8 +731,8 @@ initializeDOM = ->
         if $edit.text() is getLocalizedString 'Edit'
             openRouteForm()
         else
-            $edit[0].lastChild.data = getLocalizedString 'Edit'
-            $versatile[0].lastChild.data = getLocalizedString 'Start'
+            setLocalExpressionInto 'edit', 'Edit'
+            setLocalExpressionInto 'versatile', 'Start'
             $('#navi-header2').css 'display', 'block' if navigate.leg? and navigate.step?
             $routeSearchFrame.css 'top', ''
 
@@ -756,8 +759,8 @@ initializeDOM = ->
     $versatile.on 'click', ->
         switch $versatile.text()
             when getLocalizedString 'Route'
-                $edit[0].lastChild.data = getLocalizedString 'Edit'
-                $versatile[0].lastChild.data = getLocalizedString 'Start'
+                setLocalExpressionInto 'edit', 'Edit'
+                setLocalExpressionInto 'versatile', 'Start'
                 $routeSearchFrame.css 'top', ''
                 searchDirections false
             when getLocalizedString 'Start'
@@ -794,10 +797,10 @@ initializeDOM = ->
     $traffic.on 'click', ->
         if $traffic.text() is getLocalizedString 'Show Traffic'
             trafficLayer.setMap map
-            $traffic.text getLocalizedString 'Hide Traffic'
+            setLocalExpressionInto 'traffic', 'Hide Traffic'
         else
             trafficLayer.setMap null
-            $traffic.text getLocalizedString 'Show Traffic'
+            setLocalExpressionInto 'traffic', 'Show Traffic'
         backToMap()
 
     $('#replace-pin').on 'click', ->
@@ -902,13 +905,13 @@ initializeDOM = ->
         $this.addClass 'btn-primary'
         switch $this.attr 'id'
             when 'bookmark'
-                $('#bookmark-message').text getLocalizedString 'Choose a bookmark to view on the map'
-                $('#bookmark-edit')[0].lastChild.data = getLocalizedString 'Edit'
+                setLocalExpressionInto 'bookmark-message', 'Choose a bookmark to view on the map'
+                setLocalExpressionInto 'bookmark-edit', 'Edit'
                 $('#bookmark-edit').addClass('disabled')
                 generateBookmarkList()
             when 'history'
-                $('#bookmark-message').text getLocalizedString 'Choose a recent search'
-                $('#bookmark-edit')[0].lastChild.data = getLocalizedString 'Clear'
+                setLocalExpressionInto 'bookmark-message', 'Choose a recent search'
+                setLocalExpressionInto 'bookmark-edit', 'Clear'
                 $('#bookmark-edit').removeClass('disabled')
                 generateHistoryList()
 
