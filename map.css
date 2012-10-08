@@ -42,6 +42,7 @@ html, body {
 }
 
 .mynavbar table.layout td:first-child, .toolbar table.layout td:first-child {
+    width: 50px;
     height: 42px; /* min-height of td */
     text-align: left;
     padding-left: 4px;
@@ -49,6 +50,7 @@ html, body {
 }
 
 .mynavbar table.layout td:last-child, .toolbar table.layout td:last-child {
+    width: 50px;
     height: 42px; /* min-height of td */
     text-align: right;
     padding-right: 4px;
@@ -102,7 +104,7 @@ html, body {
     border-radius: 11px;
 }
 
-.route-query {
+input.route-query {
     width: 233px; /* width = 320 - (border*2 + margin-left + margin-right + padding-left + left td.width(32) */
     height: 28px;
     margin: 5px 4px 7px 7px;
@@ -174,6 +176,11 @@ h5 {
 
 .btn {
     color: white;
+    text-shadow: none;
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(100,128,159)), to(rgb(106, 132, 165)));
+}
+			
+.btn-primary {
     background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(65,99,153)), to(rgb(69, 105, 157)));
 }
 
@@ -188,6 +195,18 @@ h5 {
 }
 
 /* end of cancel */
+
+.btn-reset {
+    background: transparent;
+    border: 0;
+    -webkit-box-shadow: none;
+    opacity: 0.5;
+}
+
+.btn-light {
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(38,100,219)), to(rgb(34, 98, 219)));
+}
+			
 
 .btn-toolbar {
     width: 100%;

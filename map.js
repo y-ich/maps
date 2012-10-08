@@ -445,7 +445,7 @@
   };
 
   makeInfoMessage = function(title, message) {
-    return "<table id=\"info-window\"><tr>\n    <td><button id=\"street-view\" class=\"btn btn-mini\"><i class=\"icon-user icon-white\"></i></button></td>\n    <td style=\"white-space: nowrap;\"><div style=\"max-width:160px;overflow:hidden;\">" + title + "<br><span id=\"dropped-message\" style=\"font-size:10px\">" + message + "</span></div></td>\n    <td><button id=\"button-info\" class=\"btn btn-mini\"><i class=\"icon-chevron-right icon-white\"></i></button></td>\n</tr></table>";
+    return "<table id=\"info-window\"><tr>\n    <td><button id=\"street-view\" class=\"btn btn-mini\"><i class=\"icon-user icon-white\"></i></button></td>\n    <td style=\"white-space: nowrap;\"><div style=\"max-width:160px;overflow:hidden;\">" + title + "<br><span id=\"dropped-message\" style=\"font-size:10px\">" + message + "</span></div></td>\n    <td><button id=\"button-info\" class=\"btn btn-mini btn-light\"><i class=\"icon-chevron-right icon-white\"></i></button></td>\n</tr></table>";
   };
 
   searchAddress = function(fromHistory) {

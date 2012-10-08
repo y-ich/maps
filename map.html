@@ -65,8 +65,8 @@
                             <div class="search-format">
                                 <input id="search-input" type="search" name="address" class="search-query" placeholder="Search or Address">
                                 <div class="icon-search"></div>
-                                <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign icon-white"></i></button>
-                                <button type="button" class="btn btn-mini btn-bookmark"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
+                                <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
+                                <button type="button" class="btn btn-mini btn-bookmark btn-light"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
                             </div>
                         </div>
                     </form>
@@ -90,23 +90,23 @@
                         <div id="message"></div>
                         <div id="route-search-frame" class="toolbar">
                             <table><tr>
-                                <td><button id="switch" type="button" class="btn btn-mini"><i class="icon-random"></i></button></td>
+                                <td><button id="switch" type="button" class="btn btn-mini"><i class="icon-random icon-white"></i></button></td>
                                 <td>
                                     <div id="route-search">
-                                        <form id="origin">
+                                        <form id="origin" class="clearfix">
                                             <div class="search-format">
                                                 <input type="search" name="origin" class="route-query">
                                                 <label id="origin-label" class="label-route">Start: </label>
-                                                <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign icon-white"></i></button>
-                                                <button type="button" class="btn btn-mini btn-bookmark disabled"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
+                                                <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
+                                                <button type="button" class="btn btn-mini btn-bookmark btn-light"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
                                             </div>
                                         </form>
-                                        <form id="destination">
+                                        <form id="destination" class="clearfix">
                                             <div class="search-format">
                                                 <label id="destination-label" class="label-route">End: </label>
                                                 <input type="search" name="destination" class="route-query">
-                                                <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign icon-white"></i></button>
-                                                <button type="button" class="btn btn-mini btn-bookmark disabled"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
+                                                <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
+                                                <button type="button" class="btn btn-mini btn-bookmark btn-light"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
                                             </div>
                                         </form>
                                     </div>
@@ -126,7 +126,6 @@
                     </tr></table>
                 </div>
                 <div id="footer" class="mynavbar">
-                    <div class="gloss"></div>
                     <table class="layout"><tr>
                         <td><button id="gps" type="button" class="btn btn-small"><img src="glyphicons/png/glyphicons_233_direction.png" class="icon"></button></td>
                         <td><div id="nav" class="btn-group">
@@ -135,6 +134,7 @@
                         </div></td>
                         <td><button id="option" type="button" class="btn btn-small"><i class="icon-info-sign icon-white"></i></button></td>
                     </tr></table>
+                    <div class="gloss"></div>
                 </div>
             </div>
             <div id="bookmark-page">
@@ -170,6 +170,7 @@
                         <td><h5 id="info-title">Info</h5></td>
                         <td></td>
                     </tr></table>
+                    <div class="gloss"></div>
                 </div>
                 <table id="info-name-row"><tr>
                     <td><div id="info-marker"><div>
@@ -209,7 +210,7 @@
                 <form id="bookmark-name">
                     <div class="input-format">
                         <input type="text" name="bookmark-name" class="name-query">
-                        <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign icon-white"></i></button>
+                        <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
                     </div>
                 </form>
             </div>
