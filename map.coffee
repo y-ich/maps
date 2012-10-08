@@ -179,8 +179,19 @@ class Bookmark
             currentBookmark = @
             @showInfoWindow()
 
-    showInfoWindow: () ->
+    setInfoWindow: ->
+        makeInfoMessage = (title, message) ->
+            """
+            <table id="info-window"><tr>
+                <td><button id="street-view" class="btn btn-mini"><i class="icon-user icon-white"></i></button></td>
+                <td style="white-space: nowrap;"><div style="max-width:160px;overflow:hidden;">#{title}<br><span id="dropped-message" style="font-size:10px">#{message}</span></div></td>
+                <td><button id="button-info" class="btn btn-mini btn-light"><i class="icon-chevron-right icon-white"></i></button></td>
+            </tr></table>
+            """
         infoWindow.setContent makeInfoMessage @marker.getTitle(), @address        
+
+    showInfoWindow: ->
+        @setInfoWindow()
         infoWindow.open map, @marker
         
     toObject: () ->
@@ -317,16 +328,6 @@ getTravelMode = -> google.maps.TravelMode[$('#travel-mode').children('.btn-prima
 
 # returns current map type on display
 getMapType = -> google.maps.MapTypeId[$('#map-type').children('.btn-primary').attr('id').toUpperCase()]
-
-# 
-makeInfoMessage = (title, message) ->
-    """
-    <table id="info-window"><tr>
-        <td><button id="street-view" class="btn btn-mini"><i class="icon-user icon-white"></i></button></td>
-        <td style="white-space: nowrap;"><div style="max-width:160px;overflow:hidden;">#{title}<br><span id="dropped-message" style="font-size:10px">#{message}</span></div></td>
-        <td><button id="button-info" class="btn btn-mini btn-light"><i class="icon-chevron-right icon-white"></i></button></td>
-    </tr></table>
-    """
 
 # search and display a place
 searchAddress = (fromHistory) ->
@@ -597,7 +598,7 @@ initializeGoogleMaps = ->
                     result[0].formatted_address.replace(/日本, /, '')
                 else
                     getLocalizedString 'No information'
-            infoWindow.setContent makeInfoMessage droppedBookmark.marker.getTitle(), droppedBookmark.address
+            droppedBookmark.setInfoWindow()
 
     google.maps.event.addListener droppedBookmark.marker, 'animation_changed', ->
         droppedBookmark.showInfoWindow() if not this.getAnimation()? # animation property becomes undefined after animation ends
