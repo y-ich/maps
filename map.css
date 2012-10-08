@@ -58,8 +58,9 @@ html, body {
 }
 
 .with-gloss {
-    display: block;
+    position: relative;
 }
+
 .with-gloss > * {
     position: relative;
 }
