@@ -329,6 +329,7 @@ getTravelMode = -> google.maps.TravelMode[$('#travel-mode').children('.btn-prima
 # returns current map type on display
 getMapType = -> google.maps.MapTypeId[$('#map-type').children('.btn-primary').attr('id').toUpperCase()]
 
+
 # search and display a place
 searchAddress = (fromHistory) ->
     address = $addressField.val()
@@ -339,7 +340,7 @@ searchAddress = (fromHistory) ->
         history.unshift
             type: 'search'
             address: address
-    geocoder.geocode {address : address }, (result, status) ->
+    geocoder.geocode { address : address }, (result, status) ->
         if status is google.maps.GeocoderStatus.OK
             mapFSM.setState MapState.NORMAL
             map.setCenter result[0].geometry.location
@@ -356,9 +357,9 @@ searchAddress = (fromHistory) ->
 searchDirections = (fromHistory = false) ->
     origin = $originField.val()
     destination = $destinationField.val()
-    return unless (origin? and origin isnt '') and (destination? and destination isnt '')
+    return unless origin? and origin isnt '' and destination? and destination isnt ''
 
-    if fromHistory
+    if not fromHistory
         history.unshift
             type: 'route'
             origin: origin
@@ -733,7 +734,7 @@ initializeDOM = ->
         $routeSearchFrame.css 'top', '0px'
         
     $edit.on 'click', ->
-        if $edit.text() is getLocalizedString 'Edit'
+        if $edit.text().replace(/^\s*|\s*$/, '') is getLocalizedString 'Edit'
             openRouteForm()
         else
             setLocalExpressionInto 'edit', 'Edit'
@@ -741,8 +742,7 @@ initializeDOM = ->
             $('#navi-header2').css 'display', 'block' if navigate.leg? and navigate.step?
             $routeSearchFrame.css 'top', ''
 
-    $('#edit2').on 'click', ->
-        $edit.trigger 'click'
+    $('#edit2').on 'click', -> $edit.trigger 'click'
 
     $('#switch').on 'click', ->
         tmp = $destinationField.val()
@@ -762,7 +762,7 @@ initializeDOM = ->
         searchDirections false
         
     $versatile.on 'click', ->
-        switch $versatile.text()
+        switch $versatile.text().replace(/^\s*|\s*$/, '')
             when getLocalizedString 'Route'
                 setLocalExpressionInto 'edit', 'Edit'
                 setLocalExpressionInto 'versatile', 'Start'
@@ -820,14 +820,15 @@ initializeDOM = ->
     $('#button-map').on 'click', ->
         $('#container').css 'right', ''
         
+    $bookmarkPage = $('#bookmark-page')    
     $('.btn-bookmark').on 'click', ->
         mapFSM.bookmarkClicked()
         bookmarkContext = $(this).parent().attr 'id'
         generateBookmarkList()
-        $('#bookmark-page').css 'bottom', '0'
+        $bookmarkPage.css 'bottom', '0'
     
     $('#bookmark-done').on 'click', ->
-        $('#bookmark-page').css 'bottom', '-100%'
+        $bookmarkPage.css 'bottom', '-100%'
     
     $(document).on 'click', '#pin-list td', ->
         name = $(this).data('object-name')
@@ -854,8 +855,6 @@ initializeDOM = ->
                         mapFSM.setState(MapState.TRACE_POSITION)
                     else
                         mapFSM.setState(MapState.NORMAL)
-                        console.log bookmarkOrMarker.address
-                        console.log bookmarkOrMarker isnt droppedBookmark
                         updateField $addressField, bookmarkOrMarker.address if bookmarkOrMarker isnt droppedBookmark
                         map.setCenter bookmarkOrMarker.marker.getPosition()
                         currentBookmark = bookmarkOrMarker
@@ -873,13 +872,11 @@ initializeDOM = ->
                         else
                             bookmarkOrMarker.address            
 
-        $('#bookmark-page').css 'bottom', '-100%'
+        $bookmarkPage.css 'bottom', '-100%'
 
-    $('#add-bookmark').on 'click', ->
-        $('#add-bookmark-page').css 'top', '0'
+    $('#add-bookmark').on 'click', -> $('#add-bookmark-page').css 'top', '0'
 
-    $('#cancel-add-bookmark').on 'click', ->
-        $('#add-bookmark-page').css 'top', ''
+    $('#cancel-add-bookmark').on 'click', -> $('#add-bookmark-page').css 'top', ''
 
     $('#delete-pin').on 'click', ->
         if currentBookmark is droppedBookmark

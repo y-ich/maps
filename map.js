@@ -504,10 +504,10 @@
     }
     origin = $originField.val();
     destination = $destinationField.val();
-    if (!(((origin != null) && origin !== '') && ((destination != null) && destination !== ''))) {
+    if (!((origin != null) && origin !== '' && (destination != null) && destination !== '')) {
       return;
     }
-    if (fromHistory) {
+    if (!fromHistory) {
       history.unshift({
         type: 'route',
         origin: origin,
@@ -807,7 +807,7 @@
   };
 
   initializeDOM = function() {
-    var $edit, $mapType, $naviHeader, $option, $route, $routeSearchFrame, $search, $traffic, $travelMode, $versatile, backToMap, e, openRouteForm, otherStatus, trafficLayer, visibleSearchHeaderHeight, watchPosition, _i, _len, _ref2, _ref3, _ref4;
+    var $bookmarkPage, $edit, $mapType, $naviHeader, $option, $route, $routeSearchFrame, $search, $traffic, $travelMode, $versatile, backToMap, e, openRouteForm, otherStatus, trafficLayer, visibleSearchHeaderHeight, watchPosition, _i, _len, _ref2, _ref3, _ref4;
     $map = $('#map');
     $gps = $('#gps');
     $addressField = $('#address input[name="address"]');
@@ -922,7 +922,7 @@
       return $routeSearchFrame.css('top', '0px');
     };
     $edit.on('click', function() {
-      if ($edit.text() === getLocalizedString('Edit')) {
+      if ($edit.text().replace(/^\s*|\s*$/, '') === getLocalizedString('Edit')) {
         return openRouteForm();
       } else {
         setLocalExpressionInto('edit', 'Edit');
@@ -957,7 +957,7 @@
       return searchDirections(false);
     });
     $versatile.on('click', function() {
-      switch ($versatile.text()) {
+      switch ($versatile.text().replace(/^\s*|\s*$/, '')) {
         case getLocalizedString('Route'):
           setLocalExpressionInto('edit', 'Edit');
           setLocalExpressionInto('versatile', 'Start');
@@ -1023,14 +1023,15 @@
     $('#button-map').on('click', function() {
       return $('#container').css('right', '');
     });
+    $bookmarkPage = $('#bookmark-page');
     $('.btn-bookmark').on('click', function() {
       mapFSM.bookmarkClicked();
       bookmarkContext = $(this).parent().attr('id');
       generateBookmarkList();
-      return $('#bookmark-page').css('bottom', '0');
+      return $bookmarkPage.css('bottom', '0');
     });
     $('#bookmark-done').on('click', function() {
-      return $('#bookmark-page').css('bottom', '-100%');
+      return $bookmarkPage.css('bottom', '-100%');
     });
     $(document).on('click', '#pin-list td', function() {
       var bookmarkOrMarker, item, latLng;
@@ -1061,8 +1062,6 @@
               mapFSM.setState(MapState.TRACE_POSITION);
             } else {
               mapFSM.setState(MapState.NORMAL);
-              console.log(bookmarkOrMarker.address);
-              console.log(bookmarkOrMarker !== droppedBookmark);
               if (bookmarkOrMarker !== droppedBookmark) {
                 updateField($addressField, bookmarkOrMarker.address);
               }
@@ -1078,7 +1077,7 @@
             updateField($destinationField, name === 'pulsatingMarker' ? (latLng = bookmarkOrMarker.getPosition(), "" + (latLng.lat()) + ", " + (latLng.lng())) : bookmarkOrMarker.address);
         }
       }
-      return $('#bookmark-page').css('bottom', '-100%');
+      return $bookmarkPage.css('bottom', '-100%');
     });
     $('#add-bookmark').on('click', function() {
       return $('#add-bookmark-page').css('top', '0');
