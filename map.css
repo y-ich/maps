@@ -8,6 +8,146 @@ html, body {
     height: 100%;
 }
 
+#search-header {
+    width: 100%;
+    position :absolute;
+    top: -46px; /* outerHeight of #upper-header */
+    -webkit-transition: top 0.5s;
+}
+
+#address {
+    width :100%;
+}
+
+.mynavbar {
+    color: white;
+    width: 100%;
+    position: relative;
+    min-height: 42px;
+    border-top: 1px solid rgb(204,213,224);	
+    border-bottom: 1px solid rgb(71,85,104);
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(132,153,180)), to(rgb(120, 143, 172)));
+}
+
+.mynavbar table.layout, .toolbar table.layout {
+    width: 100%;
+    height: 100%;
+    table-layout: fixed;
+}
+
+.mynavbar table.layout td, .toolbar table.layout td {
+    height: 42px; /* min-height of td */
+    text-align: center;
+    vertical-align: middle;
+}
+
+.mynavbar table.layout td:first-child, .toolbar table.layout td:first-child {
+    height: 42px; /* min-height of td */
+    text-align: left;
+    padding-left: 4px;
+    vertical-align: middle;
+}
+
+.mynavbar table.layout td:last-child, .toolbar table.layout td:last-child {
+    height: 42px; /* min-height of td */
+    text-align: right;
+    padding-right: 4px;
+    vertical-align: middle;
+}
+
+.gloss {
+    width: 100%;
+    height: 50%;
+    position: absolute;
+    top: 0;
+    left: 0; 			
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgba(255, 255, 255, 0.5)), to(rgba(255, 255, 255, 0.1)));
+}
+
+.toolbar {
+    width: 100%;
+    position: relative;
+    min-height: 42px;
+    border-top: 1px solid rgb(147,164,189);	
+    border-bottom: 1px solid rgb(43,53,67);			
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(120,142,171)), to(rgb(107,131,163)));
+}
+
+.toolbar .search-query {
+    width: 285px; /* width = 320 - (border*2 + margin-left + margin-right + padding-left) */
+    height: 28px;
+    margin: 5px 4px 7px;
+    padding: 0 0 0 25px;
+    
+}
+
+.search-format {
+    position: relative;
+    float: left;
+}
+
+.search-format .icon-search {
+    position: absolute;
+    top: 50%;
+    margin-top: -7px; /* half of size */
+    left: 9px;
+    background-image: url("http://twitter.github.com/bootstrap/assets/img/glyphicons-halflings.png");
+}
+
+.search-format .btn-reset, .search-format .btn-bookmark, .input-format .btn-reset {
+    position: absolute;
+    top: 50%;
+    margin-top: -12px; /* half of size */
+    right: 7px;
+    border-radius: 11px;
+}
+
+.route-query {
+    width: 233px; /* width = 320 - (border*2 + margin-left + margin-right + padding-left + left td.width(32) */
+    height: 28px;
+    margin: 5px 4px 7px 7px;
+    padding: 0 0 0 40px;
+    border-radius: 5px;    
+}
+
+.search-format .label-route {
+    position: absolute;
+    top: 50%;
+    margin-top: -10px; /* half of size */
+    left: 9px;
+}
+
+.messagebar {
+    position: relative;
+    width: 100%;
+    height: 29px;
+    text-align: center;
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(174,187,206)), to(rgb(133,154,180)));			
+}
+
+#address-label {
+    width: 74px;
+    text-align: right;
+}
+
+.input-format {
+    position: relative;
+    float: left;
+}
+
+.name-query {
+    width: 295px; 
+    height: 28px;
+    margin: 5px 4px 7px 7px;
+    padding: 0 0 0 40px;
+    border-radius: 5px;
+}
+
+#bookmark-name {
+    position: relative;
+    top: 64px;
+}
+
 /*
  * Twitter Bootstrap canceling
  */
@@ -30,6 +170,11 @@ h5 {
 
 .form-horizontal .control-label {
     width: auto; /* 160px */
+}
+
+.btn {
+    color: white;
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(65,99,153)), to(rgb(69, 105, 157)));
 }
 
 .btn-toolbar {
@@ -57,35 +202,12 @@ h5 {
     display: inline-block; /* to avoid static child element for elements whose postion is absolute. */
 }
 
-.btn-left {
-    position: absolute;
-    left: 6px;
-}
-
-.btn-right {
-    position: absolute;
-    right: 6px;
-}
-
-
 .navbar {
     margin-bottom: 0;
 }
 
 .controls {
     position: relative; /* in order to give a basis to children (reset and bookmark button) */
-}
-
-.with-reset-button {
-    position: relative;
-    float: left;
-}
-
-.btn-reset, .btn-bookmark {
-    border-radius: 20px;
-    position: absolute;
-    top: 4px;
-    right: 4px;
 }
 
 .navbar-inner {
@@ -95,13 +217,6 @@ h5 {
 .navbar-search {
     padding-left: 4px;
     padding-bottom: 4px;
-}
-
-.navbar-search .search-query {
-    margin: 0;
-    width: 270px;
-    padding-left: 25px;
-    /* consistency between fixed padding and relative width is difficult. so fixed for iPhone. */
 }
 
 .info-window {
@@ -118,13 +233,6 @@ h5 {
 
 #route-search .search-query {
 width: 200px;
-}
-
-.navbar-search .icon-search {
-    position: absolute;
-    top: 7px;
-    left: 11px;
-    background-image: url("http://twitter.github.com/bootstrap/assets/img/glyphicons-halflings.png");
 }
 
 img.icon {
@@ -198,13 +306,6 @@ img.icon {
 	}
 }
 
-#search-header {
-    width: 100%;
-    position :absolute;
-    top: -35px; /* outerHeight of #upper-header */
-    -webkit-transition: top 0.5s;
-}
-
 .header {
     text-align: center;
     padding-top: 4px;
@@ -228,14 +329,6 @@ img.icon {
     background-color: transparent;
 }
 
-#numbering {
-    display: inline-block;
-    background-color: rgb(250,250,250);
-    line-height: 20px;
-    width: 200px;
-    height: 40px;
-}
-
 #route-nav {
     position: absolute;
     width: 100%;
@@ -250,9 +343,6 @@ img.icon {
 }
 
 #route-search-frame {
-    background-color: rgb(250,250,250);
-    width: 100%;
-    position: absolute;
     top: -102px; /* should be same as height. Setting this initial value by JavaScript causes a little complicated implementation because ancester is not displayed and it has transition effect. */
     -webkit-transition: top 0.5s;
 }
@@ -265,10 +355,6 @@ img.icon {
     position: absolute;
     bottom: 0;
     width: 100%;
-}
-
-.btn-bookmark {
-    margin-top: 4px;
 }
 
 #search, #route {

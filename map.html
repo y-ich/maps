@@ -51,63 +51,62 @@
             </div>
             <div id="map-page">
                 <div id="map"></div>
-                <div id="search-header" class="navbar">
-                    <div class="navbar-inner">
-                        <div>
-                            <form id="address" class="form-search with-reset-button">
-                                <div id="upper-header" class="header">
-                                    <button id="clear" type="reset" class="btn btn-small btn-left">Clear</button>
-                                    <h5 id="map-title" style="display: inline-block;">Search</h5>
-                                    <button id="done" type="button" class="btn btn-small btn-right">Done</button>
-                                </div>
-                                <div class="navbar-search">
-                                    <input id="search-input" type="text" name="address" class="search-query" placeholder="Search or Address">
-                                    <div class="icon-search"></div>
-                                    <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
-                                    <button type="button" class="btn btn-mini btn-bookmark"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
-                                </div>
-                            </form>
+                <div id="search-header">
+                    <form id="address">
+                        <div  class="mynavbar">
+                            <div class="gloss"></div>
+                            <table class="layout"><tr>
+                                <td><button id="clear" type="reset" class="btn btn-small">Clear</button></td>
+                                <td><h5 id="map-title" style="display: inline-block;">Search</h5></td>
+                                <td><button id="done" type="button" class="btn btn-small">Done</button></td>
+                            </tr></table>
                         </div>
-                    </div>
+                        <div class="toolbar">
+                            <div class="search-format">
+                                <input id="search-input" type="search" name="address" class="search-query" placeholder="Search or Address">
+                                <div class="icon-search"></div>
+                                <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign icon-white"></i></button>
+                                <button type="button" class="btn btn-mini btn-bookmark"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
-                <div id="navi-header1" class="navbar">
-                    <div id="navi-toolbar" class="btn-toolbar">
-                        <button id="edit" type="button" class="btn btn-small btn-left">Edit</button>
-                        <div id="travel-mode" class="btn-group">
-                            <button id="driving" type="button" class="btn btn-small btn-primary"><img src="glyphicons/png/glyphicons_005_car.png" class="icon"></button>
-                            <button id="transit" type="button" class="btn btn-small disabled"><img src="glyphicons/png/glyphicons_014_train.png" class="icon"></button>
-                            <button id="walking" type="button" class="btn btn-small"><img src="glyphicons/png/glyphicons_284_pants.png" class="icon"></button>                
-                        </div>
-                        <button id="versatile" type="button" class="btn btn-small btn-right">Start</button>
+                <div id="navi-header1">
+                    <div id="navi-toolbar" class="mynavbar">
+                        <div class="gloss"></div>
+                        <table  class="layout"><tr>
+                            <td><button id="edit" type="button" class="btn btn-small btn-left">Edit</button></td>
+                            <td>
+                                <div id="travel-mode" class="btn-group">
+                                    <button id="driving" type="button" class="btn btn-small btn-primary"><img src="glyphicons/png/glyphicons_005_car.png" class="icon"></button>
+                                    <button id="transit" type="button" class="btn btn-small disabled"><img src="glyphicons/png/glyphicons_014_train.png" class="icon"></button>
+                                    <button id="walking" type="button" class="btn btn-small"><img src="glyphicons/png/glyphicons_284_pants.png" class="icon"></button>                
+                                </div>
+                            </td>
+                            <td><button id="versatile" type="button" class="btn btn-small btn-right">Start</button></td>
+                        </tr></table>
                     </div>
                     <div id="route-nav">
                         <div id="message"></div>
-                        <div id="route-search-frame">
+                        <div id="route-search-frame" class="toolbar">
                             <table><tr>
-                                <td>
-                                    <button id="switch" type="button" class="btn btn-small"><i class="icon-random"></i></button>
-                                </td>
+                                <td><button id="switch" type="button" class="btn btn-mini"><i class="icon-random"></i></button></td>
                                 <td>
                                     <div id="route-search">
-                                        <form id="origin" class="form-horizontal with-reset-button">
-                                            <div class="control-group">
-                                                <label id="origin-label" class="control-label">Start: </label>
-                                                <div class="controls">
-                                                    <input type="text" name="origin" class="search-query">
-                                                    <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
-                                                    <button type="button" class="btn btn-mini btn-bookmark disabled"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
-                                                </div>
+                                        <form id="origin">
+                                            <div class="search-format">
+                                                <input type="search" name="origin" class="route-query">
+                                                <label id="origin-label" class="label-route">Start: </label>
+                                                <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign icon-white"></i></button>
+                                                <button type="button" class="btn btn-mini btn-bookmark disabled"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
                                             </div>
                                         </form>
-                                        <div class="clearfix"></div>
-                                        <form id="destination" class="form-horizontal with-reset-button">
-                                            <div class="control-group">
-                                                <label id="destination-label" class="control-label">End: </label>
-                                                <div class="controls">
-                                                    <input type="text" name="destination" class="search-query">
-                                                    <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
-                                                    <button type="button" class="btn btn-mini btn-bookmark disabled"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
-                                                </div>
+                                        <form id="destination">
+                                            <div class="search-format">
+                                                <label id="destination-label" class="label-route">End: </label>
+                                                <input type="search" name="destination" class="route-query">
+                                                <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign icon-white"></i></button>
+                                                <button type="button" class="btn btn-mini btn-bookmark disabled"><img src="glyphicons/png/glyphicons_330_blog.png" class="icon"></button>
                                             </div>
                                         </form>
                                     </div>
@@ -116,31 +115,38 @@
                         </div>
                     </div>
                 </div>
-                <div id="navi-header2" class="navbar">
-                    <button id="edit2" type="button" class="btn btn-small btn-left">Edit</button>
-                    <div id="numbering"></div>
-                    <div id="cursors" class="btn-group btn-right">
-                        <button id="cursor-left" type="button" class="btn btn-small"><i class="icon-arrow-left"></i></button>
-                        <button id="cursor-right" type="button" class="btn btn-small"><i class="icon-arrow-right"></i></button>
-                    </div>
+                <div id="navi-header2" class="mynavbar">
+                    <table class="layout"><tr>
+                        <td><button id="edit2" type="button" class="btn btn-small btn-left">Edit</button></td>
+                        <td><div id="numbering">a</div></td>
+                        <td><div id="cursors" class="btn-group btn-right">
+                            <button id="cursor-left" type="button" class="btn btn-small"><i class="icon-arrow-left icon-white"></i></button>
+                            <button id="cursor-right" type="button" class="btn btn-small"><i class="icon-arrow-right icon-white"></i></button>
+                        </div></td>
+                    </tr></table>
                 </div>
-                <div id="footer" class="btn-toolbar">
-                    <button id="gps" type="button" class="btn btn-small btn-left"><img src="glyphicons/png/glyphicons_233_direction.png" class="icon"></button>
-                    <div id="nav" class="btn-group">
-                        <button id="search" type="button" class="btn btn-small btn-primary">Search</button>
-                        <button id="route" type="button" class="btn btn-small">Directions</button>
-                    </div>
-                    <button id="option" type="button" class="btn btn-small btn-right"><i class=" icon-info-sign"></i></button>
+                <div id="footer" class="mynavbar">
+                    <div class="gloss"></div>
+                    <table class="layout"><tr>
+                        <td><button id="gps" type="button" class="btn btn-small"><img src="glyphicons/png/glyphicons_233_direction.png" class="icon"></button></td>
+                        <td><div id="nav" class="btn-group">
+                            <button id="search" type="button" class="btn btn-small btn-primary">Search</button>
+                            <button id="route" type="button" class="btn btn-small">Directions</button>
+                        </div></td>
+                        <td><button id="option" type="button" class="btn btn-small"><i class="icon-info-sign icon-white"></i></button></td>
+                    </tr></table>
                 </div>
             </div>
             <div id="bookmark-page">
-                <div class="btn-toolbar">
+                <div class="messagebar">
                     <div id="bookmark-message">Choose a bookmark to view on the map</div>
                 </div>
-                <div class="btn-toolbar">
-                    <button id="bookmark-edit" type="button" class="btn btn-small btn-left disabled">Edit</button>
-                    <h5 td="bookmark-title">Bookmarks</h5>
-                    <button id="bookmark-done" type="button" class="btn btn-small btn-right">Done</button>
+                <div class="toolbar">
+                    <table class="layout"><tr>
+                        <td><button id="bookmark-edit" type="button" class="btn btn-small btn-left disabled">Edit</button></td>
+                        <td><h5 td="bookmark-title">Bookmarks</h5></td>
+                        <td><button id="bookmark-done" type="button" class="btn btn-small btn-right">Done</button></td>
+                    </tr></table>
                 </div>
                 <div id="pin-list-frame">
                     <table id="pin-list" class="table">
@@ -158,9 +164,12 @@
         </div>
         <div id="info" class="page-group">
             <div id="info-page">
-                <div class="navbar header">
-                    <button id="button-map" type="button" class="btn btn-small btn-left">Map</button>
-                    <h5 id="info-title">Info</h5>            
+                <div class="mynavbar">
+                    <table class="layout"><tr>
+                        <td><button id="button-map" type="button" class="btn btn-small">Map</button></td>
+                        <td><h5 id="info-title">Info</h5></td>
+                        <td></td>
+                    </tr></table>
                 </div>
                 <table id="info-name-row"><tr>
                     <td><div id="info-marker"><div>
@@ -189,15 +198,19 @@
                 </table>
             </div>
             <div id="add-bookmark-page">
-                <div id="add-bookmark-message" class="btn-toolbar">Type a name for the bookmark</div>
-                <div class="btn-toolbar">
-                    <button id="cancel-add-bookmark" class="btn btn-small btn-left">Cancel</button>
-                    <h5 id="add-bookmark-title">Add Bookmark</h5>
-                    <button id="save-bookmark" class="btn btn-small btn-right">Save</button>
+                <div class=messagebar><div id="add-bookmark-message">Type a name for the bookmark</div></div>
+                <div class="toolbar">
+                    <table class="layout"><tr>
+                        <td><button id="cancel-add-bookmark" class="btn btn-small btn-left">Cancel</button></td>
+                        <td><h5 id="add-bookmark-title">Add Bookmark</h5></td>
+                        <td><button id="save-bookmark" class="btn btn-small btn-right">Save</button></td>
+                    </tr></table>
                 </div>
-                <form id="bookmark-name" class="form-inline with-reset-button">
-                    <input type="text" name="bookmark-name" class="search-query">
-                    <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign"></i></button>
+                <form id="bookmark-name">
+                    <div class="input-format">
+                        <input type="text" name="bookmark-name" class="name-query">
+                        <button type="reset" class="btn btn-mini btn-reset"><i class="icon-remove-sign icon-white"></i></button>
+                    </div>
                 </form>
             </div>
         </div>
