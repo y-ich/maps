@@ -966,7 +966,7 @@
       if ($option.hasClass('btn-primary')) {
         return backToMap();
       } else {
-        $map.css('top', 42 - $('#option-page').outerHeight(true) + 'px');
+        $map.css('top', $('#search-header .toolbar').outerHeight() - $('#option-page').outerHeight(true) + 'px');
         return $option.addClass('btn-primary');
       }
     });

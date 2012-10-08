@@ -267,7 +267,7 @@ img.icon {
 
 #map {
     position: absolute;
-    top: 42px; /* default visible height of search header */
+    top: 44px; /* $('#search-header .toolbar').outerHeight() */
     width: 100%;
 /* disable tracing heading, so commented out the below. */
 /*    left: 50%; /* for centering. margin will be defined by javascript. */

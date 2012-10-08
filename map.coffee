@@ -777,7 +777,7 @@ initializeDOM = ->
         if $option.hasClass 'btn-primary'
             backToMap()
         else
-            $map.css 'top', 42 - $('#option-page').outerHeight(true) + 'px'
+            $map.css 'top', $('#search-header .toolbar').outerHeight() - $('#option-page').outerHeight(true) + 'px'
             $option.addClass 'btn-primary'
 
     $mapType = $('#map-type')
