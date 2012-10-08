@@ -653,7 +653,7 @@ initializeDOM = ->
     $map.css 'top', visibleSearchHeaderHeight + 'px'
     $map.height innerHeight - visibleSearchHeaderHeight - $('#footer').outerHeight(true)
     # fits list frame between header and footer. should be rewritten.
-    $('#pin-list-frame').css 'height', innerHeight - mapSum($('#bookmark-page .btn-toolbar').toArray(), (e) -> $(e).outerHeight(true)) + 'px'
+    $('#pin-list-frame').css 'height', innerHeight - mapSum($('#bookmark-page > div:not(#pin-list-frame)').toArray(), (e) -> $(e).outerHeight(true)) + 'px'
 
     #
     # event handlers

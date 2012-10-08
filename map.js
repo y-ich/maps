@@ -828,7 +828,7 @@
     visibleSearchHeaderHeight = $('#search-header').outerHeight(true) + parseInt($('#search-header').css('top'));
     $map.css('top', visibleSearchHeaderHeight + 'px');
     $map.height(innerHeight - visibleSearchHeaderHeight - $('#footer').outerHeight(true));
-    $('#pin-list-frame').css('height', innerHeight - mapSum($('#bookmark-page .btn-toolbar').toArray(), function(e) {
+    $('#pin-list-frame').css('height', innerHeight - mapSum($('#bookmark-page > div:not(#pin-list-frame)').toArray(), function(e) {
       return $(e).outerHeight(true);
     }) + 'px');
     $map.on('touchstart', function() {
