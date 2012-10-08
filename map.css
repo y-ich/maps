@@ -16,6 +16,10 @@ form {
     margin: 0; /* 0 0 20px */
 }
 
+h5 {
+    margin: 0; /* 10px 0 */
+}
+
 .form-horizontal .controls {
     margin-left: 40px; /* 180px */
 }
@@ -197,14 +201,14 @@ img.icon {
 #search-header {
     width: 100%;
     position :absolute;
-    top: -46px; /* outerHeight of #upper-header */
+    top: -35px; /* outerHeight of #upper-header */
     -webkit-transition: top 0.5s;
 }
 
 .header {
     text-align: center;
-    margin-top: 2px;
-    margin-bottom: 2px;
+    padding-top: 4px;
+    padding-bottom: 4px;
     border-bottom: 1px solid #d4d4d4;
     min-height: 26px;
 }
