@@ -35,19 +35,23 @@
     <div id="container">
         <div class="page-group">
             <div id="option-page">
-                <div>
-                    <button id="replace-pin" type="button" class="btn">Replace Pin</button>
-                    <button id="print" type="button" class="btn">Print</button>
-                </div>
-                <div>
-                    <button id="traffic" type="button" class="btn btn-block">Show Traffic</button>
-                </div>
-                <div id="map-type" class="btn-group">
-                    <button id="roadmap" type="button" class="btn btn-primary">Standard</button>
-                    <button id="satellite" type="button" class="btn">Satellite</button>
-                    <button id="hybrid" type="button" class="btn">Hybrid</button>
-                    <button id="panel" type="button" class="btn disabled">List</button>
-                </div>
+                <table id="options" class="layout">
+                    <tr>
+                        <td><button id="replace-pin" type="button" class="btn btn-block">Replace Pin</button></td>
+                        <td><button id="print" type="button" class="btn btn-block">Print</button></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><button id="traffic" type="button" class="btn btn-block">Show Traffic</button></td>
+                    </tr>
+                    <tr><td colspan="2">
+                        <div id="map-type" class="btn-group">
+                            <button id="roadmap" type="button" class="btn btn-primary">Standard</button>
+                            <button id="satellite" type="button" class="btn">Satellite</button>
+                            <button id="hybrid" type="button" class="btn">Hybrid</button>
+                            <button id="panel" type="button" class="btn disabled">List</button>
+                        </div>
+                    </td></tr>
+                </table>
             </div>
             <div id="map-page">
                 <div id="map"></div>

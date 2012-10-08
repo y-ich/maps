@@ -502,3 +502,17 @@ width: 100px;
 #add-into-contact {
     color: lightgray;
 }
+
+#options {
+    table-layout: fixed;
+}
+
+
+#options td > button, #options .btn-group {
+    margin: 4px 0 4px 0;
+}
+
+#map-type button {
+    min-width: 78px;
+    padding: 4px 4px;
+}
