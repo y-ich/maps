@@ -335,44 +335,44 @@
 
   localize = function() {
     document.title = getLocalizedString('Maps');
-    $('#replace-pin').text(getLocalizedString('Replace Pin'));
-    $('#print').text(getLocalizedString('Print'));
-    $('#traffic').text(getLocalizedString('Show Traffic'));
-    $('#roadmap').text(getLocalizedString('Standard'));
-    $('#satellite').text(getLocalizedString('Satellite'));
-    $('#panel').text(getLocalizedString('List'));
-    $('#clear').text(getLocalizedString('Clear'));
-    $('#map-title').text(getLocalizedString('Search'));
-    $('#done').text(getLocalizedString('Done'));
+    $('#replace-pin')[0].lastChild.data = getLocalizedString('Replace Pin');
+    $('#print')[0].lastChild.data = getLocalizedString('Print');
+    $('#traffic')[0].lastChild.data = getLocalizedString('Show Traffic');
+    $('#roadmap')[0].lastChild.data = getLocalizedString('Standard');
+    $('#satellite')[0].lastChild.data = getLocalizedString('Satellite');
+    $('#panel')[0].lastChild.data = getLocalizedString('List');
+    $('#hybrid')[0].lastChild.data = getLocalizedString('Hybrid');
+    $('#clear')[0].lastChild.data = getLocalizedString('Clear');
+    $('#map-title')[0].lastChild.data = getLocalizedString('Search');
+    $('#done')[0].lastChild.data = getLocalizedString('Done');
     $('#search-input').attr('placeholder', getLocalizedString('Search or Address'));
-    $('#edit').text(getLocalizedString('Edit'));
-    $('#versatile').text(getLocalizedString('Start'));
-    $('#origin-label').text(getLocalizedString('Start: '));
-    $('#destination-label').text(getLocalizedString('End: '));
-    $('#edit2').text(getLocalizedString('Edit'));
-    $('#search').text(getLocalizedString('Search'));
-    $('#route').text(getLocalizedString('Directions'));
-    $('#bookmark-message').text(getLocalizedString('Choose a bookmark to view on the map'));
-    $('#bookmark-edit').text(getLocalizedString('Edit'));
-    $('#bookmark-done').text(getLocalizedString('Done'));
-    $('#bookmark-title').text(getLocalizedString('Bookmarks'));
-    $('#bookmark').text(getLocalizedString('Bookmarks'));
-    $('#history').text(getLocalizedString('Recents'));
-    $('#contact').text(getLocalizedString('Contacts'));
-    $('#button-map').text(getLocalizedString('Map'));
-    $('#info-title').text(getLocalizedString('Info'));
-    $('#address-label').text(getLocalizedString('address'));
-    $('#to-here').text(getLocalizedString('Directions To Here'));
-    $('#from-here').text(getLocalizedString('Directions From Here'));
-    $('#delete-pin').text(getLocalizedString('Remove Pin'));
-    $('#add-into-contact').text(getLocalizedString('Add to Contacts'));
-    $('#send-place').text(getLocalizedString('Share Location'));
-    $('#add-bookmark').text(getLocalizedString('Add to Bookmarks'));
-    $('#name-label').text(getLocalizedString('Hybrid'));
-    $('#add-bookmark-message').text(getLocalizedString('Type a name for the bookmark'));
-    $('#cancel-add-bookmark').text(getLocalizedString('Cancel'));
-    $('#add-bookmark-title').text(getLocalizedString('Add Bookmark'));
-    return $('#save-bookmark').text(getLocalizedString('Save'));
+    $('#edit')[0].lastChild.data = getLocalizedString('Edit');
+    $('#versatile')[0].lastChild.data = getLocalizedString('Start');
+    $('#origin-label')[0].lastChild.data = getLocalizedString('Start: ');
+    $('#destination-label')[0].lastChild.data = getLocalizedString('End: ');
+    $('#edit2')[0].lastChild.data = getLocalizedString('Edit');
+    $('#search')[0].lastChild.data = getLocalizedString('Search');
+    $('#route')[0].lastChild.data = getLocalizedString('Directions');
+    $('#bookmark-message')[0].lastChild.data = getLocalizedString('Choose a bookmark to view on the map');
+    $('#bookmark-edit')[0].lastChild.data = getLocalizedString('Edit');
+    $('#bookmark-done')[0].lastChild.data = getLocalizedString('Done');
+    $('#bookmark-title')[0].lastChild.data = getLocalizedString('Bookmarks');
+    $('#bookmark')[0].lastChild.data = getLocalizedString('Bookmarks');
+    $('#history')[0].lastChild.data = getLocalizedString('Recents');
+    $('#contact')[0].lastChild.data = getLocalizedString('Contacts');
+    $('#button-map')[0].lastChild.data = getLocalizedString('Map');
+    $('#info-title')[0].lastChild.data = getLocalizedString('Info');
+    $('#address-label')[0].lastChild.data = getLocalizedString('address');
+    $('#to-here')[0].lastChild.data = getLocalizedString('Directions To Here');
+    $('#from-here')[0].lastChild.data = getLocalizedString('Directions From Here');
+    $('#delete-pin')[0].lastChild.data = getLocalizedString('Remove Pin');
+    $('#add-into-contact')[0].lastChild.data = getLocalizedString('Add to Contacts');
+    $('#send-place')[0].lastChild.data = getLocalizedString('Share Location');
+    $('#add-bookmark')[0].lastChild.data = getLocalizedString('Add to Bookmarks');
+    $('#add-bookmark-message')[0].lastChild.data = getLocalizedString('Type a name for the bookmark');
+    $('#cancel-add-bookmark')[0].lastChild.data = getLocalizedString('Cancel');
+    $('#add-bookmark-title')[0].lastChild.data = getLocalizedString('Add Bookmark');
+    return $('#save-bookmark')[0].lastChild.data = getLocalizedString('Save');
   };
 
   saveMapStatus = function() {
@@ -870,10 +870,10 @@
       return false;
     });
     $addressField.on('keyup', function() {
-      return $('#done').text($(this).val() === '' ? getLocalizedString('Done') : getLocalizedString('Cancel'));
+      return $('#done')[0].lastChild.data = $(this).val() === '' ? getLocalizedString('Done') : getLocalizedString('Cancel');
     });
     $('#clear, #address .btn-reset').on('click', function() {
-      $('#done').text(getLocalizedString('Done'));
+      $('#done')[0].lastChild.data = getLocalizedString('Done');
       searchBookmark.marker.setVisible(false);
       if (currentBookmark === searchBookmark) {
         return infoWindow.setVisible(false);
@@ -899,8 +899,8 @@
     $versatile = $('#versatile');
     $routeSearchFrame = $('#route-search-frame');
     openRouteForm = function() {
-      $edit.text(getLocalizedString('Cancel'));
-      $versatile.text(getLocalizedString('Route'));
+      $edit[0].lastChild.data = getLocalizedString('Cancel');
+      $versatile[0].lastChild.data = getLocalizedString('Route');
       $('#navi-header2').css('display', 'none');
       return $routeSearchFrame.css('top', '0px');
     };
@@ -908,8 +908,8 @@
       if ($edit.text() === getLocalizedString('Edit')) {
         return openRouteForm();
       } else {
-        $edit.text(getLocalizedString('Edit'));
-        $versatile.text(getLocalizedString('Start'));
+        $edit[0].lastChild.data = getLocalizedString('Edit');
+        $versatile[0].lastChild.data = getLocalizedString('Start');
         if ((navigate.leg != null) && (navigate.step != null)) {
           $('#navi-header2').css('display', 'block');
         }
@@ -942,8 +942,8 @@
     $versatile.on('click', function() {
       switch ($versatile.text()) {
         case getLocalizedString('Route'):
-          $edit.text(getLocalizedString('Edit'));
-          $versatile.text(getLocalizedString('Start'));
+          $edit[0].lastChild.data = getLocalizedString('Edit');
+          $versatile[0].lastChild.data = getLocalizedString('Start');
           $routeSearchFrame.css('top', '');
           return searchDirections(false);
         case getLocalizedString('Start'):
@@ -1102,11 +1102,13 @@
       switch ($this.attr('id')) {
         case 'bookmark':
           $('#bookmark-message').text(getLocalizedString('Choose a bookmark to view on the map'));
-          $('#bookmark-edit').text(getLocalizedString('Edit')).addClass('disabled');
+          $('#bookmark-edit')[0].lastChild.data = getLocalizedString('Edit');
+          $('#bookmark-edit').addClass('disabled');
           return generateBookmarkList();
         case 'history':
           $('#bookmark-message').text(getLocalizedString('Choose a recent search'));
-          $('#bookmark-edit').text(getLocalizedString('Clear')).removeClass('disabled');
+          $('#bookmark-edit')[0].lastChild.data = getLocalizedString('Clear');
+          $('#bookmark-edit').removeClass('disabled');
           return generateHistoryList();
       }
     });
