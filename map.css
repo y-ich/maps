@@ -355,14 +355,14 @@ img.icon {
 }
 
 #message {
-    color: black;
+    color: white;
     text-align: center;
-    background-color: rgb(250,250,250);
     opacity: 0.8;
 }
 
 #route-search-frame {
-    top: -102px; /* should be same as height. Setting this initial value by JavaScript causes a little complicated implementation because ancester is not displayed and it has transition effect. */
+    position: absolute;
+    top: -88px; /* should be same as height. Setting this initial value by JavaScript causes a little complicated implementation because ancester is not displayed and it has transition effect. */
     -webkit-transition: top 0.5s;
 }
 
