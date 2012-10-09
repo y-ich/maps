@@ -221,6 +221,12 @@ window.getRouteIndexMessage = window.getRouteIndexMessage ? (index, total) ->
             else
                 n + 'th'
     "#{ordinal(index + 1)} of #{total} Suggested Routes"
+
+getDepartAtMessage = window.getDepartAtMessage ? (time) ->
+    'Departs at ' + time
+
+getArriveAtMessage = window.getArriveAtMessage ? (time) ->
+    'Arrives at ' + time
     
 getLocalizedString = (key) ->
     if localizedStrings? then localizedStrings[key] ? key else key
@@ -364,13 +370,14 @@ searchDirections = (fromHistory = false) ->
             type: 'route'
             origin: origin
             destination: destination
-
+    travelMode = getTravelMode()
     searchDirections.service.route
             destination: destination
             origin: origin
             provideRouteAlternatives: getTravelMode() isnt google.maps.TravelMode.WALKING
-            travelMode: getTravelMode()
+            travelMode: travelMode
         , (result, status) ->
+            console.log result
             $message = $('#message')
             message = ''
             switch status
@@ -378,12 +385,18 @@ searchDirections = (fromHistory = false) ->
                     directionsRenderer.setMap map
                     directionsRenderer.setDirections result
                     index = directionsRenderer.getRouteIndex()
+                    route = result.routes[index]
                     message += getRouteIndexMessage(index, result.routes.length) + '<br>' if result.routes.length > 1
-                    distance = mapSum result.routes[index].legs, (e) -> e.distance.value
-                    duration = mapSum result.routes[index].legs, (e) -> e.duration.value
-                    summary = "#{secondToString duration} - #{meterToString distance} - #{result.routes[index].summary}"
-                    if summary.length > innerWidth / parseInt($message.css('font-size')) # assuming the unit is px.
-                        summary = "#{result.routes[index].summary}<br>#{secondToString duration} - #{meterToString distance}"
+                    if travelMode is google.maps.TravelMode.TRANSIT
+                        summary = getDepartAtMessage route.legs[0].departure_time.text
+                        summary += '<br>'
+                        summary += getArriveAtMessage route.legs[route.legs.length - 1].arrival_time.text
+                    else
+                        distance = mapSum result.routes[index].legs, (e) -> e.distance.value
+                        duration = mapSum result.routes[index].legs, (e) -> e.duration.value
+                        summary = "#{secondToString duration} - #{meterToString distance} - #{result.routes[index].summary}"
+                        if summary.length > innerWidth / parseInt($message.css('font-size')) # assuming the unit is px.
+                            summary = "#{result.routes[index].summary}<br>#{secondToString duration} - #{meterToString distance}"
                     message += summary
                     $('#message').html message
                 when google.maps.DirectionsStatus.ZERO_RESULTS
@@ -754,12 +767,11 @@ initializeDOM = ->
     $destinationField.on 'change', saveOtherStatus
 
     $travelMode = $('#travel-mode')
-    $travelMode.children(':not(#transit)').on 'click', -> # disabled transit
+    $travelMode.children().on 'click', ->
         $this = $(this)
         return if $this.hasClass 'btn-primary'
         $travelMode.children().removeClass 'btn-primary'
         $this.addClass 'btn-primary'
-        searchDirections false
         
     $versatile.on 'click', ->
         switch $versatile.text().replace(/^\s*|\s*$/, '')

@@ -56,6 +56,14 @@ localizedStrings['Walking directions could not be found between these locations'
 localizedStrings['There are no street views near here.'] = '近くにストリートビューが見つかりませんでした。';
 localizedStrings['Sorry, an error occurred.'] = 'すいません、エラーが起こりました。';
 
-getRouteIndexMessage = function(index, total) {
+var getRouteIndexMessage = function(index, total) {
     return '候補経路：全' + total +'件中' +(index + 1) + '件目';
+}
+
+var getDepartAtMessage = function(time) {
+    return time + 'に出発';
+}
+
+var getArriveAtMessage = function(time) {
+    return time + 'に到着';
 }
