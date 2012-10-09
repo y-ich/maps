@@ -8,161 +8,6 @@ html, body {
     height: 100%;
 }
 
-#search-header {
-    width: 100%;
-    position :absolute;
-    top: -46px; /* outerHeight of #upper-header */
-    -webkit-transition: top 0.5s;
-}
-
-#address {
-    width :100%;
-}
-
-.mynavbar {
-    color: white;
-    width: 100%;
-    position: relative;
-    min-height: 42px;
-    border-top: 1px solid rgb(204,213,224);	
-    border-bottom: 1px solid rgb(71,85,104);
-    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(132,153,180)), to(rgb(120, 143, 172)));
-}
-
-.mynavbar table.layout, .toolbar table.layout {
-    width: 100%;
-    height: 100%;
-    table-layout: fixed;
-}
-
-.mynavbar table.layout td, .toolbar table.layout td {
-    height: 42px; /* min-height of td */
-    text-align: center;
-    vertical-align: middle;
-}
-
-.mynavbar table.layout td:first-child, .toolbar table.layout td:first-child {
-    width: 100px;
-    height: 42px; /* min-height of td */
-    text-align: left;
-    padding-left: 4px;
-    vertical-align: middle;
-}
-
-.mynavbar table.layout td:last-child, .toolbar table.layout td:last-child {
-    width: 100px;
-    height: 42px; /* min-height of td */
-    text-align: right;
-    padding-right: 4px;
-    vertical-align: middle;
-}
-
-#footer td:first-child, #footer td:last-child {
-width: 50px;
-}
-
-.with-gloss {
-    position: relative;
-}
-
-.with-gloss > * {
-    position: relative;
-}
-
-.gloss {
-    width: 100%;
-    height: 50%;
-    position: absolute;
-    top: 0;
-    left: 0; 			
-    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgba(255, 255, 255, 0.5)), to(rgba(255, 255, 255, 0.1)));
-    z-index: 0;
-}
-
-.toolbar {
-    width: 100%;
-    position: relative;
-    min-height: 42px;
-    border-top: 1px solid rgb(147,164,189);	
-    border-bottom: 1px solid rgb(43,53,67);			
-    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(120,142,171)), to(rgb(107,131,163)));
-}
-
-.toolbar .search-query {
-    width: 285px; /* width = 320 - (border*2 + margin-left + margin-right + padding-left) */
-    height: 28px;
-    margin: 5px 4px 7px;
-    padding: 0 0 0 25px;
-    
-}
-
-.search-format {
-    position: relative;
-    float: left;
-}
-
-.search-format .icon-search {
-    position: absolute;
-    top: 50%;
-    margin-top: -7px; /* half of size */
-    left: 9px;
-    background-image: url("http://twitter.github.com/bootstrap/assets/img/glyphicons-halflings.png");
-}
-
-.search-format .btn-reset, .search-format .btn-bookmark, .input-format .btn-reset {
-    position: absolute;
-    top: 50%;
-    margin-top: -12px; /* half of size */
-    right: 7px;
-    border-radius: 11px;
-}
-
-input.route-query {
-    width: 233px; /* width = 320 - (border*2 + margin-left + margin-right + padding-left + left td.width(32) */
-    height: 28px;
-    margin: 5px 4px 7px 7px;
-    padding: 0 0 0 40px;
-    border-radius: 5px;    
-}
-
-.search-format .label-route {
-    position: absolute;
-    top: 50%;
-    margin-top: -10px; /* half of size */
-    left: 9px;
-}
-
-.messagebar {
-    position: relative;
-    width: 100%;
-    height: 29px;
-    text-align: center;
-    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(174,187,206)), to(rgb(133,154,180)));			
-}
-
-#address-label {
-    width: 74px;
-    text-align: right;
-}
-
-.input-format {
-    position: relative;
-    float: left;
-}
-
-input.name-query {
-    width: 295px; 
-    height: 28px;
-    margin: 5px 4px 7px 7px;
-    padding: 0 25px 0 5px;
-    border-radius: 5px;
-}
-
-#bookmark-name {
-    position: relative;
-    top: 64px;
-}
-
 /*
  * Twitter Bootstrap canceling
  */
@@ -209,6 +54,148 @@ h5 {
 
 /* end of cancel */
 
+/* my original navbar to layout buttons */
+
+.mynavbar {
+    color: white;
+    width: 100%;
+    position: relative;
+    min-height: 42px;
+    border-top: 1px solid rgb(204,213,224);	
+    border-bottom: 1px solid rgb(71,85,104);
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(132,153,180)), to(rgb(120, 143, 172)));
+}
+
+.mynavbar table.layout, .toolbar table.layout {
+    width: 100%;
+    height: 100%;
+    table-layout: fixed;
+}
+
+.mynavbar table.layout td, .toolbar table.layout td {
+    height: 42px; /* min-height of td */
+    text-align: center;
+    vertical-align: middle;
+}
+
+.mynavbar table.layout td:first-child, .toolbar table.layout td:first-child {
+    width: 100px;
+    height: 42px; /* min-height of td */
+    text-align: left;
+    padding-left: 4px;
+    vertical-align: middle;
+}
+
+.mynavbar table.layout td:last-child, .toolbar table.layout td:last-child {
+    width: 100px;
+    height: 42px; /* min-height of td */
+    text-align: right;
+    padding-right: 4px;
+    vertical-align: middle;
+}
+
+#footer.mynavbar td:first-child, #footer.mynavbar td:last-child {
+    width: 50px; /* side width is reduced because center button group is large in footer */
+}
+
+/* gloss */
+
+.with-gloss {
+    position: relative; /* to be base of position of children */
+}
+
+.with-gloss > * {
+    position: relative; /* to make z-index effective */
+}
+
+.gloss {
+    width: 100%;
+    height: 50%;
+    position: absolute;
+    top: 0;
+    left: 0; 			
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgba(255, 255, 255, 0.5)), to(rgba(255, 255, 255, 0.1)));
+    z-index: 0;
+}
+
+/* my original toolbar */
+
+.toolbar {
+    width: 100%;
+    position: relative;
+    min-height: 42px;
+    border-top: 1px solid rgb(147,164,189);	
+    border-bottom: 1px solid rgb(43,53,67);			
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(120,142,171)), to(rgb(107,131,163)));
+}
+
+/* search input */
+
+/* wrapper for input format which be formatted */
+.search-format, .input-format {
+    position: relative;
+    float: left; /* let width to be fit with children */
+}
+
+input.search-query { /* you need specify input to over write bootsrap */
+    width: 285px; /* width = 320 - (border*2 + margin-left + margin-right + padding-left) */
+    height: 28px;
+    margin: 5px 4px 7px;
+    padding: 0 0 0 25px;
+    
+}
+
+.icon-search {
+    position: absolute;
+    top: 50%;
+    margin-top: -7px; /* half of size */
+    left: 9px;
+    background-image: url("http://twitter.github.com/bootstrap/assets/img/glyphicons-halflings.png");
+}
+
+.btn-reset, .btn-bookmark {
+    position: absolute;
+    top: 50%;
+    margin-top: -12px; /* half of size */
+    right: 7px;
+    border-radius: 11px;
+}
+
+input.route-query { /* you need specify input to over write bootsrap */
+    width: 233px; /* width = 320 - (border*2 + margin-left + margin-right + padding-left + left td.width(32) */
+    height: 28px;
+    margin: 5px 4px 7px 7px;
+    padding: 0 0 0 40px;
+    border-radius: 5px;    
+}
+
+input.name-query { /* you need specify input to over write bootsrap */
+    width: 295px; 
+    height: 28px;
+    margin: 5px 4px 7px 7px;
+    padding: 0 25px 0 5px;
+    border-radius: 5px;
+}
+
+.label-route {
+    position: absolute;
+    top: 50%;
+    margin-top: -10px; /* half of size */
+    left: 9px;
+}
+
+/* message bar */
+
+.messagebar {
+    position: relative;
+    width: 100%;
+    height: 29px;
+    text-align: center;
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(174,187,206)), to(rgb(133,154,180)));			
+}
+
+
+/* button design */
 .btn-reset {
     background: transparent;
     border: 0;
@@ -219,38 +206,14 @@ h5 {
 .btn-light {
     background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(38,100,219)), to(rgb(34, 98, 219)));
 }
-			
-
-.btn-toolbar {
-    width: 100%;
-    min-height: 32px;
-    background-color: rgb(250,250,250);
-    padding-top: 5px;
-    padding-bottom: 5px;
-    text-align: center; /* for centering of center buttons */
+		
+/* for glyph by external image */
+img.icon {
+    width: 14px;
+    height: 14px;
 }
 
-.btn-toolbar * {
-    display: inline-block; /* to avoid static child element for elements whose postion is absolute. */
-}
-
-.navbar {
-    margin-bottom: 0;
-}
-
-.controls {
-    position: relative; /* in order to give a basis to children (reset and bookmark button) */
-}
-
-.navbar-inner {
-    padding: 0;
-}
-
-.navbar-search {
-    padding-left: 4px;
-    padding-bottom: 4px;
-}
-
+/* info window which is dynamically drawed by JavaScript */
 .info-window {
     position: absolute;
     color: white;
@@ -261,36 +224,6 @@ h5 {
 
 .info-window button {
     border-radius: 12px;
-}
-
-#route-search .search-query {
-width: 200px;
-}
-
-img.icon {
-    width: 14px;
-    height: 14px;
-}
-
-#container {
-    position: relative;
-    height: 100%;
-    -webkit-transition: right 1s;
-}
-
-#map {
-    position: absolute;
-    top: 44px; /* $('#search-header .toolbar').outerHeight() */
-    width: 100%;
-/* disable tracing heading, so commented out the below. */
-/*    left: 50%; /* for centering. margin will be defined by javascript. */
-/*    top: 50%; /* for centering. margin will be defined by javascript. */ 
-    -webkit-transition: -webkit-transform 0.1s;
-    -webkit-transition: top 0.5s;
-}
-
-#map img {
-    max-width: none; /* work around against a coherence between Google Maps and Bootstrap */
 }
 
 
@@ -337,12 +270,34 @@ img.icon {
 	}
 }
 
-.header {
-    text-align: center;
-    padding-top: 4px;
-    padding-bottom: 4px;
-    border-bottom: 1px solid #d4d4d4;
-    min-height: 26px;
+/* intrinsic */
+
+#container {
+    position: relative;
+    height: 100%;
+    -webkit-transition: right 1s;
+}
+
+#map {
+    position: absolute;
+    top: 44px; /* $('#search-header .toolbar').outerHeight() */
+    width: 100%;
+/* disable tracing heading, so commented out the below. */
+/*    left: 50%; /* for centering. margin will be defined by javascript. */
+/*    top: 50%; /* for centering. margin will be defined by javascript. */ 
+    -webkit-transition: -webkit-transform 0.1s;
+    -webkit-transition: top 0.5s;
+}
+
+#map img {
+    max-width: none; /* work around against a coherence between Google Maps and Bootstrap */
+}
+
+#search-header {
+    width: 100%;
+    position :absolute;
+    top: -46px; /* outerHeight of #upper-header */
+    -webkit-transition: top 0.5s;
 }
 
 #navi-header1 {
@@ -359,6 +314,20 @@ img.icon {
     top: 0;
     background-color: transparent;
     z-index: 0; /* because map uses z-index 0 */
+}
+
+#address {
+    width :100%;
+}
+
+#bookmark-name {
+    position: relative;
+    top: 64px;
+}
+
+#address-label {
+    width: 74px;
+    text-align: right;
 }
 
 #route-nav {
@@ -473,9 +442,6 @@ width: 100px;
     bottom: 15px;
 }
 
-#info-name {
-}
-
 #info-buttons {
     width: 100%;
     table-layout: fixed;
@@ -522,6 +488,8 @@ width: 100px;
 }
 
 #options {
+    margin-left: auto;
+    margin-right: auto;
     table-layout: fixed;
 }
 
