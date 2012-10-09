@@ -852,7 +852,7 @@
       isHold = false;
       return setTimeout((function() {
         return isHold = true;
-      }), 800);
+      }), 500);
     });
     $('.search-query').on('keyup', function() {
       var $this;

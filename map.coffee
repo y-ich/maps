@@ -670,7 +670,7 @@ initializeDOM = ->
 
     $map.on 'touchstart', ->
         isHold = false
-        setTimeout (-> isHold = true), 800
+        setTimeout (-> isHold = true), 500
         
     # input with reset button
     $('.search-query').on 'keyup', -> # textInput, keypress is before inputting a character.
