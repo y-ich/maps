@@ -287,7 +287,6 @@ img.icon {
 /*    top: 50%; /* for centering. margin will be defined by javascript. */ 
     -webkit-transition: -webkit-transform 0.1s;
     -webkit-transition: top 0.5s;
-    z-index: 0;
 }
 
 #map img {
@@ -351,7 +350,7 @@ img.icon {
     position: absolute;
     top: 0;
     width: 100%;
-    z-index: 1;
+    z-index: 0; /* because map uses z-index 0. but I don't know why search-header doesn't need z-index. */
 }
 
 #navi-header2 {
@@ -359,6 +358,7 @@ img.icon {
     position: absolute;
     top: 0;
     background-color: transparent;
+    z-index: 0; /* because map uses z-index 0 */
 }
 
 #route-nav {
