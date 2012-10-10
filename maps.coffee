@@ -377,7 +377,6 @@ searchDirections = (fromHistory = false) ->
             provideRouteAlternatives: getTravelMode() isnt google.maps.TravelMode.WALKING
             travelMode: travelMode
         , (result, status) ->
-            console.log result
             $message = $('#message')
             message = ''
             switch status
@@ -456,7 +455,6 @@ updateField = ($field, str) ->
 
 # prepare page of bookmark information
 setInfoPage = (bookmark, dropped) ->
-    console.log bookmark.marker.getIcon()
     $('#info-marker img:first-child').attr 'src', bookmark.marker.getIcon()?.url ? 'http://maps.google.co.jp/mapfiles/ms/icons/red-dot.png'
     title = bookmark.marker.getTitle()
     position = bookmark.marker.getPosition()

@@ -530,7 +530,6 @@
       travelMode: travelMode
     }, function(result, status) {
       var $message, distance, duration, index, message, mode, route, summary;
-      console.log(result);
       $message = $('#message');
       message = '';
       switch (status) {
@@ -628,7 +627,6 @@
 
   setInfoPage = function(bookmark, dropped) {
     var position, title, _ref4, _ref5;
-    console.log(bookmark.marker.getIcon());
     $('#info-marker img:first-child').attr('src', (_ref4 = (_ref5 = bookmark.marker.getIcon()) != null ? _ref5.url : void 0) != null ? _ref4 : 'http://maps.google.co.jp/mapfiles/ms/icons/red-dot.png');
     title = bookmark.marker.getTitle();
     position = bookmark.marker.getPosition();
