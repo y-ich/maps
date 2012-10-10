@@ -1041,8 +1041,13 @@
     });
     $bookmarkPage = $('#bookmark-page');
     $('.btn-bookmark').on('click', function() {
+      var ancestor;
       mapFSM.bookmarkClicked();
-      bookmarkContext = $(this).parent().attr('id');
+      ancestor = $(this).parent();
+      while (ancestor.size() > 0 && ancestor[0].nodeName !== 'FORM') {
+        ancestor = ancestor.parent();
+      }
+      bookmarkContext = ancestor.attr('id');
       generateBookmarkList();
       return $bookmarkPage.css('bottom', '0');
     });

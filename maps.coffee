@@ -835,7 +835,9 @@ initializeDOM = ->
     $bookmarkPage = $('#bookmark-page')    
     $('.btn-bookmark').on 'click', ->
         mapFSM.bookmarkClicked()
-        bookmarkContext = $(this).parent().attr 'id'
+        ancestor = $(this).parent()
+        ancestor = ancestor.parent() while ancestor.size() > 0 and ancestor[0].nodeName isnt 'FORM'
+        bookmarkContext = ancestor.attr 'id'
         generateBookmarkList()
         $bookmarkPage.css 'bottom', '0'
     
