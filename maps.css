@@ -150,7 +150,7 @@ input.search-query { /* you need specify input to over write bootsrap */
     top: 50%;
     margin-top: -7px; /* half of size */
     left: 9px;
-    background-image: url("http://twitter.github.com/bootstrap/assets/img/glyphicons-halflings.png");
+    background-image: url("img/glyphicons-halflings.png");
 }
 
 .btn-reset, .btn-bookmark {
