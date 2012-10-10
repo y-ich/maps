@@ -7,15 +7,22 @@
 <head>
     <meta charset="UTF-8">
     <title>Maps</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="viewport" content="initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <link rel="apple-touch-icon-precomposed" href="img/icon.png" />
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="img/icon@2x.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="img/icon-72.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="img/icon-72@2x.png" />
     <link rel="apple-touch-startup-image" media="(device-width: 320px) and (device-height: 480px) and not (-webkit-device-pixel-ratio: 2)" href="img/startup-iphone.png" />
     <link rel="apple-touch-startup-image" media="(device-width: 320px) and (device-height: 480px) and (-webkit-device-pixel-ratio: 2)" href="img/startup-iphone4.png" />
     <link rel="apple-touch-startup-image" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" href="img/startup-iphone5.png" />
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="maps.css" rel="stylesheet">
+    <script type="text/javascript">
+    if (window.screen.height==568) { // iPhone 4"
+    document.querySelector("meta[name=viewport]").content="width=320.1";
+    }
+    </script>
     <script src="js/jquery-1.8.2.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script type="text/javascript"><!--
