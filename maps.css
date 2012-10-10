@@ -94,7 +94,7 @@ h5 {
     vertical-align: middle;
 }
 
-#footer.mynavbar td:first-child, #footer.mynavbar td:last-child {
+#footer.mynavbar td:first-child, #footer.mynavbar td:last-child, #nav-bookmark.mynavbar td:first-child, #nav-bookmark.mynavbar td:last-child {
     width: 50px; /* side width is reduced because center button group is large in footer */
 }
 
