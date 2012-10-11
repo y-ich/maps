@@ -822,7 +822,7 @@
   };
 
   initializeDOM = function() {
-    var $bookmarkPage, $edit, $mapType, $naviHeader, $option, $route, $routeSearchFrame, $search, $traffic, $travelMode, $versatile, backToMap, e, layout, openRouteForm, otherStatus, trafficLayer, watchPosition, _i, _len, _ref4, _ref5, _ref6;
+    var $bookmarkPage, $edit, $mapType, $naviHeader, $option, $route, $routeSearchFrame, $search, $traffic, $travelMode, $versatile, backToMap, e, layout, openRouteForm, otherStatus, trafficLayer, watchStart, _i, _len, _ref4, _ref5, _ref6;
     $map = $('#map');
     $gps = $('#gps');
     $addressField = $('#address input[name="address"]');
@@ -865,7 +865,9 @@
       $('#pin-list-frame').css('height', innerHeight - mapSum($('#bookmark-page > div:not(#pin-list-frame)').toArray(), function(e) {
         return $(e).outerHeight(true);
       }) + 'px');
-      return document.body.scrollLeft = 0;
+      if (!(/iPhone/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent))) {
+        return document.body.scrollLeft = 0;
+      }
     };
     layout();
     window.addEventListener('resize', layout);
@@ -1174,17 +1176,22 @@
       $('#container').css('right', '');
       return openRouteForm();
     });
-    watchPosition = new WatchPosition().start(traceHandler, function(error) {
-      return console.log(error.message, {
-        enableHighAccuracy: true,
-        timeout: 30000
+    watchStart = function() {
+      var watchPosition;
+      return watchPosition = new WatchPosition().start(traceHandler, function(error) {
+        return console.log(error.message, {
+          enableHighAccuracy: true,
+          timeout: 30000
+        });
       });
-    });
-    return window.onpagehide = function() {
+    };
+    document.addEventListener('deviceready', watchStart, false);
+    document.addEventListener('resume', watchStart, false);
+    return document.addEventListener('pause', (function() {
       watchPosition.stop();
       saveMapStatus();
       return saveOtherStatus();
-    };
+    }), false);
   };
 
   initializeDOM();

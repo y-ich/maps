@@ -675,7 +675,9 @@ initializeDOM = ->
         $map.height innerHeight - visibleSearchHeaderHeight - $('#footer').outerHeight(true)
         # fits list frame between header and footer. should be rewritten.
         $('#pin-list-frame').css 'height', innerHeight - mapSum($('#bookmark-page > div:not(#pin-list-frame)').toArray(), (e) -> $(e).outerHeight(true)) + 'px'
-        document.body.scrollLeft = 0 # for rotation back to portrait
+        document.body.scrollLeft = 0 unless /iPhone/.test(navigator.userAgent) and /Safari/.test(navigator.userAgent) # Rotation back to portait causes slight left slide of page. correct it. 
+        # The above work around caused that address bar disappear to upper on iPhone.
+        # I don't know any consistent work around, so gave up to correct slide on iPhone Safari.
     layout()
     window.addEventListener 'resize', layout
     
@@ -952,15 +954,20 @@ initializeDOM = ->
         $('#container').css 'right', ''
         openRouteForm()
             
-    watchPosition = new WatchPosition().start traceHandler
-        , (error) -> console.log error.message
-        , { enableHighAccuracy: true, timeout: 30000 }
+    watchStart = ->
+        watchPosition = new WatchPosition().start traceHandler
+            , (error) -> console.log error.message
+            , { enableHighAccuracy: true, timeout: 30000 }
 
-    window.onpagehide = ->
-        watchPosition.stop()
-        saveMapStatus()
-        saveOtherStatus()
+    document.addEventListener 'deviceready', watchStart, false
+    document.addEventListener 'resume', watchStart, false
 
+    document.addEventListener 'pause', (->
+            watchPosition.stop()
+            saveMapStatus()
+            saveOtherStatus()
+        ), false
+        
 initializeDOM()
 initializeGoogleMaps()
 
