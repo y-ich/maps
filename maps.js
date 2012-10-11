@@ -822,7 +822,7 @@
   };
 
   initializeDOM = function() {
-    var $bookmarkPage, $edit, $mapType, $naviHeader, $option, $route, $routeSearchFrame, $search, $traffic, $travelMode, $versatile, backToMap, e, openRouteForm, otherStatus, trafficLayer, visibleSearchHeaderHeight, watchPosition, _i, _len, _ref4, _ref5, _ref6;
+    var $bookmarkPage, $edit, $mapType, $naviHeader, $option, $route, $routeSearchFrame, $search, $traffic, $travelMode, $versatile, backToMap, e, layout, openRouteForm, otherStatus, trafficLayer, watchPosition, _i, _len, _ref4, _ref5, _ref6;
     $map = $('#map');
     $gps = $('#gps');
     $addressField = $('#address input[name="address"]');
@@ -856,13 +856,19 @@
       history = (_ref6 = otherStatus.history) != null ? _ref6 : [];
     }
     localize();
-    $('#option-page').css('bottom', $('#footer').outerHeight(true));
-    visibleSearchHeaderHeight = $('#search-header').outerHeight(true) + parseInt($('#search-header').css('top'));
-    $map.css('top', visibleSearchHeaderHeight + 'px');
-    $map.height(innerHeight - visibleSearchHeaderHeight - $('#footer').outerHeight(true));
-    $('#pin-list-frame').css('height', innerHeight - mapSum($('#bookmark-page > div:not(#pin-list-frame)').toArray(), function(e) {
-      return $(e).outerHeight(true);
-    }) + 'px');
+    layout = function() {
+      var visibleSearchHeaderHeight;
+      $('#option-page').css('bottom', $('#footer').outerHeight(true));
+      visibleSearchHeaderHeight = $('#search-header').outerHeight(true) + parseInt($('#search-header').css('top'));
+      $map.css('top', visibleSearchHeaderHeight + 'px');
+      $map.height(innerHeight - visibleSearchHeaderHeight - $('#footer').outerHeight(true));
+      $('#pin-list-frame').css('height', innerHeight - mapSum($('#bookmark-page > div:not(#pin-list-frame)').toArray(), function(e) {
+        return $(e).outerHeight(true);
+      }) + 'px');
+      return document.body.scrollLeft = 0;
+    };
+    layout();
+    window.addEventListener('resize', layout);
     $map.on('touchstart', function() {
       isHold = false;
       return setTimeout((function() {

@@ -661,20 +661,24 @@ initializeDOM = ->
     localize()
     
     # layouts dynamically
-    $('#option-page').css 'bottom', $('#footer').outerHeight(true)
-# disabled heading trace
-#    # makes map large square for rotation of heading
-#    squareSize = Math.floor(Math.sqrt(Math.pow(innerWidth, 2) + Math.pow(innerHeight, 2)))
-#    $map.width(squareSize)
-#        .height(squareSize)
-#        .css('margin', - squareSize / 2 + 'px')
-    # fits map between header and footer
-    visibleSearchHeaderHeight = $('#search-header').outerHeight(true) + parseInt $('#search-header').css 'top'
-    $map.css 'top', visibleSearchHeaderHeight + 'px'
-    $map.height innerHeight - visibleSearchHeaderHeight - $('#footer').outerHeight(true)
-    # fits list frame between header and footer. should be rewritten.
-    $('#pin-list-frame').css 'height', innerHeight - mapSum($('#bookmark-page > div:not(#pin-list-frame)').toArray(), (e) -> $(e).outerHeight(true)) + 'px'
-
+    layout = ->
+        $('#option-page').css 'bottom', $('#footer').outerHeight(true)
+        # disabled heading trace
+        # makes map large square for rotation of heading
+        # squareSize = Math.floor(Math.sqrt(Math.pow(innerWidth, 2) + Math.pow(innerHeight, 2)))
+        # $map.width(squareSize)
+        #     .height(squareSize)
+        #     .css('margin', - squareSize / 2 + 'px')
+        # fits map between header and footer
+        visibleSearchHeaderHeight = $('#search-header').outerHeight(true) + parseInt $('#search-header').css 'top'
+        $map.css 'top', visibleSearchHeaderHeight + 'px'
+        $map.height innerHeight - visibleSearchHeaderHeight - $('#footer').outerHeight(true)
+        # fits list frame between header and footer. should be rewritten.
+        $('#pin-list-frame').css 'height', innerHeight - mapSum($('#bookmark-page > div:not(#pin-list-frame)').toArray(), (e) -> $(e).outerHeight(true)) + 'px'
+        document.body.scrollLeft = 0 # for rotation back to portrait
+    layout()
+    window.addEventListener 'resize', layout
+    
     #
     # event handlers
     #
