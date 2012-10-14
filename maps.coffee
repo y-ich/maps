@@ -954,19 +954,14 @@ initializeDOM = ->
         $('#container').css 'right', ''
         openRouteForm()
             
-    watchStart = ->
-        watchPosition = new WatchPosition().start traceHandler
-            , (error) -> console.log error.message
-            , { enableHighAccuracy: true, timeout: 30000 }
+    watchPosition = new WatchPosition().start traceHandler
+        , (error) -> console.log error.message
+        , { enableHighAccuracy: true, timeout: 30000 }
 
-    document.addEventListener 'deviceready', watchStart, false
-    document.addEventListener 'resume', watchStart, false
-
-    document.addEventListener 'pause', (->
-            watchPosition.stop()
-            saveMapStatus()
-            saveOtherStatus()
-        ), false
+    window.onpagehide = ->
+        watchPosition.stop()
+        saveMapStatus()
+        saveOtherStatus()
         
 initializeDOM()
 initializeGoogleMaps()
