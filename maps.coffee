@@ -749,7 +749,8 @@ initializeDOM = ->
         setLocalExpressionInto 'versatile', 'Route'
         $('#navi-header2').css 'display', 'none'
         $routeSearchFrame.css 'top', '0px'
-        
+        $destinationField.focus()
+
     $edit.on 'click', ->
         if $edit.text().replace(/^\s*|\s*$/, '') is getLocalizedString 'Edit'
             openRouteForm()

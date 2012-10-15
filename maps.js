@@ -942,7 +942,8 @@
       setLocalExpressionInto('edit', 'Cancel');
       setLocalExpressionInto('versatile', 'Route');
       $('#navi-header2').css('display', 'none');
-      return $routeSearchFrame.css('top', '0px');
+      $routeSearchFrame.css('top', '0px');
+      return $destinationField.focus();
     };
     $edit.on('click', function() {
       if ($edit.text().replace(/^\s*|\s*$/, '') === getLocalizedString('Edit')) {
