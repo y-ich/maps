@@ -170,7 +170,7 @@ input.route-query { /* you need specify input to over write bootsrap */
 }
 
 input.name-query { /* you need specify input to over write bootsrap */
-    width: 295px; 
+    width: 277px; 
     height: 28px;
     margin: 5px 4px 7px 7px;
     padding: 0 25px 0 5px;
