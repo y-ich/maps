@@ -144,7 +144,7 @@ MapState.NORMAL.update = ->
 MapState.NORMAL.gpsClicked = -> MapState.TRACE_POSITION
 
 MapState.TRACE_POSITION.update = ->
-    map.setCenter pulsatingMarker.getPosition()
+    map.setCenter pulsatingMarker.getPosition() if pulsatingMarker.getVisible()
     $gps.addClass 'btn-light'
     @
 MapState.TRACE_POSITION.gpsClicked = -> MapState.NORMAL # disabled TRACE_HEADING
@@ -504,17 +504,8 @@ getPanoramaHandler = (data, status) ->
 
 traceHandler = (position) ->
     latLng = new google.maps.LatLng position.coords.latitude,position.coords.longitude
-    if pulsatingMarker
-        pulsatingMarker.setPosition latLng
-    else
-        pulsatingMarker = new google.maps.Marker
-            flat: true
-            icon: new google.maps.MarkerImage('img/bluedot.png', null, null, new google.maps.Point(8, 8), new google.maps.Size(17, 17))
-            map: map
-            optimized: false
-            position: latLng
-            title: 'I might be here'
-            visible: true
+    pulsatingMarker.setVisible true
+    pulsatingMarker.setPosition latLng
     map.setCenter latLng unless mapFSM.is MapState.NORMAL
     if mapFSM.is MapState.TRACE_HEADING and position.coords.heading?
         transform = $map.css('-webkit-transform')
@@ -550,6 +541,15 @@ initializeGoogleMaps = ->
         navigate.step = null
         $('#navi-header2').css 'display', 'none'
         naviMarker.setVisible false
+
+    pulsatingMarker = new google.maps.Marker
+        flat: true
+        icon: new google.maps.MarkerImage('img/bluedot.png', null, null, new google.maps.Point(8, 8), new google.maps.Size(17, 17))
+        map: map
+        optimized: false
+        position: mapOptions.center
+        title: 'I might be here'
+        visible: false
 
     droppedBookmark = new Bookmark new google.maps.Marker(
             animation: google.maps.Animation.DROP

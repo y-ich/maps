@@ -220,7 +220,9 @@
   };
 
   MapState.TRACE_POSITION.update = function() {
-    map.setCenter(pulsatingMarker.getPosition());
+    if (pulsatingMarker.getVisible()) {
+      map.setCenter(pulsatingMarker.getPosition());
+    }
     $gps.addClass('btn-light');
     return this;
   };
@@ -691,19 +693,8 @@
   traceHandler = function(position) {
     var latLng, transform;
     latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-    if (pulsatingMarker) {
-      pulsatingMarker.setPosition(latLng);
-    } else {
-      pulsatingMarker = new google.maps.Marker({
-        flat: true,
-        icon: new google.maps.MarkerImage('img/bluedot.png', null, null, new google.maps.Point(8, 8), new google.maps.Size(17, 17)),
-        map: map,
-        optimized: false,
-        position: latLng,
-        title: 'I might be here',
-        visible: true
-      });
-    }
+    pulsatingMarker.setVisible(true);
+    pulsatingMarker.setPosition(latLng);
     if (!mapFSM.is(MapState.NORMAL)) {
       map.setCenter(latLng);
     }
@@ -742,6 +733,15 @@
       navigate.step = null;
       $('#navi-header2').css('display', 'none');
       return naviMarker.setVisible(false);
+    });
+    pulsatingMarker = new google.maps.Marker({
+      flat: true,
+      icon: new google.maps.MarkerImage('img/bluedot.png', null, null, new google.maps.Point(8, 8), new google.maps.Size(17, 17)),
+      map: map,
+      optimized: false,
+      position: mapOptions.center,
+      title: 'I might be here',
+      visible: false
     });
     droppedBookmark = new Bookmark(new google.maps.Marker({
       animation: google.maps.Animation.DROP,
