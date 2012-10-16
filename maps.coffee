@@ -273,6 +273,8 @@ localize = ->
         'cancel-add-bookmark' : 'Cancel'
         'add-bookmark-title' : 'Add Bookmark'
         'save-bookmark' : 'Save'
+        'edit3' : 'Edit'
+        'directions-title' : 'Directions'
 
     document.title = getLocalizedString 'Maps'
     document.getElementById('search-input').placeholder = getLocalizedString 'Search or Address'
@@ -534,8 +536,15 @@ initializeGoogleMaps = ->
     map = new google.maps.Map document.getElementById("map"), mapOptions
     mapFSM = new MapFSM(MapState.NORMAL)
     geocoder = new google.maps.Geocoder()
-    directionsRenderer = new google.maps.DirectionsRenderer()
-    directionsRenderer.setMap map
+    infoWindow = new MobileInfoWindow
+        maxWidth: Math.floor innerWidth*0.9
+
+    directionsRenderer = new google.maps.DirectionsRenderer
+        hideRouteList: true
+        infoWindow: infoWindow
+        map: map
+        panel: $('#directions-panel')[0]
+        
     google.maps.event.addListener directionsRenderer, 'directions_changed', ->
         navigate.leg = null
         navigate.step = null
@@ -568,9 +577,6 @@ initializeGoogleMaps = ->
             visible: false
         ), ''
     
-    infoWindow = new MobileInfoWindow
-        maxWidth: Math.floor innerWidth*0.9
-
     google.maps.event.addListener infoWindow, 'domready', ->
         $('#street-view').on 'click' , (event) ->
             new google.maps.StreetViewService().getPanoramaByLocation currentBookmark.marker.getPosition(), 49, getPanoramaHandler
@@ -673,6 +679,7 @@ initializeDOM = ->
         visibleSearchHeaderHeight = $('#search-header').outerHeight(true) + parseInt $('#search-header').css 'top'
         $map.css 'top', visibleSearchHeaderHeight + 'px'
         $map.height innerHeight - visibleSearchHeaderHeight - $('#footer').outerHeight(true)
+        $('#directions-panel').height innerHeight - $('#footer').outerHeight(true)
         # fits list frame between header and footer. should be rewritten.
         $('#pin-list-frame').css 'height', innerHeight - mapSum($('#bookmark-page > div:not(#pin-list-frame)').toArray(), (e) -> $(e).outerHeight(true)) + 'px'
         document.body.scrollLeft = 0 unless /iPhone/.test(navigator.userAgent) and /Safari/.test(navigator.userAgent) # Rotation back to portait causes slight left slide of page. correct it. 
@@ -768,6 +775,7 @@ initializeDOM = ->
         updateField $originField, tmp
         saveOtherStatus()
 
+    $('#origin, #destination').on 'submit', -> false
     $originField.on 'change', saveOtherStatus
     $destinationField.on 'change', saveOtherStatus
 
@@ -812,6 +820,15 @@ initializeDOM = ->
         $mapType.children().removeClass 'btn-primary'
         $this.addClass 'btn-primary'
         map.setMapTypeId getMapType()
+        $('#directions-window').css 'display', 'none'
+        backToMap()
+
+    $('#panel').on 'click', ->
+        $this = $(this)
+        return if $this.hasClass 'btn-primary'
+        $mapType.children().removeClass 'btn-primary'
+        $this.addClass 'btn-primary'
+        $('#directions-window').css 'display', 'block'
         backToMap()
 
     $traffic = $('#traffic')

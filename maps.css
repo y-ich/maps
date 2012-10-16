@@ -293,6 +293,22 @@ img.icon {
     max-width: none; /* work around against a coherence between Google Maps and Bootstrap */
 }
 
+#directions-window {
+    display: none;
+    position: absolute;
+    top: 0px;
+    width: 100%;
+    z-index: 0;
+}
+
+#directions-panel {
+    background-color: white;
+    position: absolute;
+    top: 44px;
+    width: 100%;
+    overflow: scroll;
+}
+
 #search-header {
     width: 100%;
     position :absolute;

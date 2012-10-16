@@ -394,7 +394,9 @@
       'add-bookmark-message': 'Type a name for the bookmark',
       'cancel-add-bookmark': 'Cancel',
       'add-bookmark-title': 'Add Bookmark',
-      'save-bookmark': 'Save'
+      'save-bookmark': 'Save',
+      'edit3': 'Edit',
+      'directions-title': 'Directions'
     };
     document.title = getLocalizedString('Maps');
     document.getElementById('search-input').placeholder = getLocalizedString('Search or Address');
@@ -726,8 +728,15 @@
     map = new google.maps.Map(document.getElementById("map"), mapOptions);
     mapFSM = new MapFSM(MapState.NORMAL);
     geocoder = new google.maps.Geocoder();
-    directionsRenderer = new google.maps.DirectionsRenderer();
-    directionsRenderer.setMap(map);
+    infoWindow = new MobileInfoWindow({
+      maxWidth: Math.floor(innerWidth * 0.9)
+    });
+    directionsRenderer = new google.maps.DirectionsRenderer({
+      hideRouteList: true,
+      infoWindow: infoWindow,
+      map: map,
+      panel: $('#directions-panel')[0]
+    });
     google.maps.event.addListener(directionsRenderer, 'directions_changed', function() {
       navigate.leg = null;
       navigate.step = null;
@@ -758,9 +767,6 @@
       position: mapOptions.center,
       visible: false
     }), '');
-    infoWindow = new MobileInfoWindow({
-      maxWidth: Math.floor(innerWidth * 0.9)
-    });
     google.maps.event.addListener(infoWindow, 'domready', function() {
       $('#street-view').on('click', function(event) {
         return new google.maps.StreetViewService().getPanoramaByLocation(currentBookmark.marker.getPosition(), 49, getPanoramaHandler);
@@ -862,6 +868,7 @@
       visibleSearchHeaderHeight = $('#search-header').outerHeight(true) + parseInt($('#search-header').css('top'));
       $map.css('top', visibleSearchHeaderHeight + 'px');
       $map.height(innerHeight - visibleSearchHeaderHeight - $('#footer').outerHeight(true));
+      $('#directions-panel').height(innerHeight - $('#footer').outerHeight(true));
       $('#pin-list-frame').css('height', innerHeight - mapSum($('#bookmark-page > div:not(#pin-list-frame)').toArray(), function(e) {
         return $(e).outerHeight(true);
       }) + 'px');
@@ -967,6 +974,9 @@
       updateField($originField, tmp);
       return saveOtherStatus();
     });
+    $('#origin, #destination').on('submit', function() {
+      return false;
+    });
     $originField.on('change', saveOtherStatus);
     $destinationField.on('change', saveOtherStatus);
     $travelMode = $('#travel-mode');
@@ -1020,6 +1030,18 @@
       $mapType.children().removeClass('btn-primary');
       $this.addClass('btn-primary');
       map.setMapTypeId(getMapType());
+      $('#directions-window').css('display', 'none');
+      return backToMap();
+    });
+    $('#panel').on('click', function() {
+      var $this;
+      $this = $(this);
+      if ($this.hasClass('btn-primary')) {
+        return;
+      }
+      $mapType.children().removeClass('btn-primary');
+      $this.addClass('btn-primary');
+      $('#directions-window').css('display', 'block');
       return backToMap();
     });
     $traffic = $('#traffic');
