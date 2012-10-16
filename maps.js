@@ -845,7 +845,7 @@
     document.addEventListener('touchmove', function(event) {
       return event.preventDefault();
     });
-    $('#pin-list-frame, #info').on('touchmove', function(event) {
+    $('#pin-list-frame, #info, #directions-panel').on('touchmove', function(event) {
       return event.stopPropagation();
     });
     if (localStorage['maps-other-status'] != null) {

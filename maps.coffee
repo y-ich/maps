@@ -649,7 +649,7 @@ initializeDOM = ->
     # prevents default page scroll, but scroll bookmark/history list.
     document.addEventListener 'touchmove', (event) ->
         event.preventDefault()
-    $('#pin-list-frame, #info').on 'touchmove', (event) ->
+    $('#pin-list-frame, #info, #directions-panel').on 'touchmove', (event) ->
         event.stopPropagation()
 
     # restores from localStorage
