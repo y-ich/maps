@@ -361,6 +361,26 @@ searchAddress = (fromHistory) ->
         else
             alert status
 
+updateMessage = ->
+    index = directionsRenderer.getRouteIndex()
+    result = directionsRenderer.getDirections()
+    route = result.routes[index]
+    $message = $('#message')
+    message = ''
+    message += getRouteIndexMessage(index, result.routes.length) + '<br>' if result.routes.length > 1
+    if getTravelMode() is google.maps.TravelMode.TRANSIT
+        summary = getDepartAtMessage route.legs[0].departure_time.text
+        summary += '<br>'
+        summary += getArriveAtMessage route.legs[route.legs.length - 1].arrival_time.text
+    else
+        distance = mapSum result.routes[index].legs, (e) -> e.distance.value
+        duration = mapSum result.routes[index].legs, (e) -> e.duration.value
+        summary = "#{secondToString duration} - #{meterToString distance} - #{result.routes[index].summary}"
+        if summary.length > innerWidth / parseInt($message.css('font-size')) # assuming the unit is px.
+            summary = "#{result.routes[index].summary}<br>#{secondToString duration} - #{meterToString distance}"
+    message += summary
+    $message.html message
+
 # invokes to search directions and displays a result.
 searchDirections = (fromHistory = false) ->
     origin = $originField.val()
@@ -379,27 +399,11 @@ searchDirections = (fromHistory = false) ->
             provideRouteAlternatives: getTravelMode() isnt google.maps.TravelMode.WALKING
             travelMode: travelMode
         , (result, status) ->
-            $message = $('#message')
-            message = ''
             switch status
                 when google.maps.DirectionsStatus.OK
                     directionsRenderer.setMap map
                     directionsRenderer.setDirections result
-                    index = directionsRenderer.getRouteIndex()
-                    route = result.routes[index]
-                    message += getRouteIndexMessage(index, result.routes.length) + '<br>' if result.routes.length > 1
-                    if travelMode is google.maps.TravelMode.TRANSIT
-                        summary = getDepartAtMessage route.legs[0].departure_time.text
-                        summary += '<br>'
-                        summary += getArriveAtMessage route.legs[route.legs.length - 1].arrival_time.text
-                    else
-                        distance = mapSum result.routes[index].legs, (e) -> e.distance.value
-                        duration = mapSum result.routes[index].legs, (e) -> e.duration.value
-                        summary = "#{secondToString duration} - #{meterToString distance} - #{result.routes[index].summary}"
-                        if summary.length > innerWidth / parseInt($message.css('font-size')) # assuming the unit is px.
-                            summary = "#{result.routes[index].summary}<br>#{secondToString duration} - #{meterToString distance}"
-                    message += summary
-                    $('#message').html message
+                    updateMessage()
                 when google.maps.DirectionsStatus.ZERO_RESULTS
                     directionsRenderer.setMap null
                     mode = $('#travel-mode').children('.btn-primary').attr('id')
@@ -540,7 +544,7 @@ initializeGoogleMaps = ->
         maxWidth: Math.floor innerWidth*0.9
 
     directionsRenderer = new google.maps.DirectionsRenderer
-        hideRouteList: true
+        hideRouteList: false
         infoWindow: infoWindow
         map: map
         panel: $('#directions-panel')[0]
@@ -824,6 +828,7 @@ initializeDOM = ->
         $this.addClass 'btn-primary'
         map.setMapTypeId getMapType()
         $('#directions-window').css 'display', 'none'
+        updateMessage() # in order to let message correspond to current route.
         backToMap()
 
     $('#panel').on 'click', ->
