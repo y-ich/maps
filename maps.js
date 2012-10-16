@@ -863,12 +863,13 @@
     }
     localize();
     layout = function() {
-      var visibleSearchHeaderHeight;
+      var height, visibleSearchHeaderHeight;
       $('#option-page').css('bottom', $('#footer').outerHeight(true));
       visibleSearchHeaderHeight = $('#search-header').outerHeight(true) + parseInt($('#search-header').css('top'));
       $map.css('top', visibleSearchHeaderHeight + 'px');
-      $map.height(innerHeight - visibleSearchHeaderHeight - $('#footer').outerHeight(true));
-      $('#directions-panel').height(innerHeight - $('#footer').outerHeight(true));
+      height = innerHeight - visibleSearchHeaderHeight - $('#footer').outerHeight(true);
+      $map.height(height);
+      $('#directions-panel').height(height);
       $('#pin-list-frame').css('height', innerHeight - mapSum($('#bookmark-page > div:not(#pin-list-frame)').toArray(), function(e) {
         return $(e).outerHeight(true);
       }) + 'px');
@@ -1008,6 +1009,7 @@
     });
     backToMap = function() {
       $map.css('top', '');
+      $('#directions-panel').css('top', '');
       return $option.removeClass('btn-primary');
     };
     $option = $('#option');
@@ -1017,6 +1019,7 @@
         return backToMap();
       } else {
         $map.css('top', $('#search-header .toolbar').outerHeight() - $('#option-page').outerHeight(true) + 'px');
+        $('#directions-panel').css('top', $('#directions-header').outerHeight() - $('#option-page').outerHeight(true) + 'px');
         return $option.addClass('btn-primary');
       }
     });

@@ -307,6 +307,7 @@ img.icon {
     top: 44px;
     width: 100%;
     overflow: scroll;
+    -webkit-transition: top 0.5s;
 }
 
 #search-header {

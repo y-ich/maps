@@ -678,8 +678,9 @@ initializeDOM = ->
         # fits map between header and footer
         visibleSearchHeaderHeight = $('#search-header').outerHeight(true) + parseInt $('#search-header').css 'top'
         $map.css 'top', visibleSearchHeaderHeight + 'px'
-        $map.height innerHeight - visibleSearchHeaderHeight - $('#footer').outerHeight(true)
-        $('#directions-panel').height innerHeight - $('#footer').outerHeight(true)
+        height = innerHeight - visibleSearchHeaderHeight - $('#footer').outerHeight(true)
+        $map.height height
+        $('#directions-panel').height height
         # fits list frame between header and footer. should be rewritten.
         $('#pin-list-frame').css 'height', innerHeight - mapSum($('#bookmark-page > div:not(#pin-list-frame)').toArray(), (e) -> $(e).outerHeight(true)) + 'px'
         document.body.scrollLeft = 0 unless /iPhone/.test(navigator.userAgent) and /Safari/.test(navigator.userAgent) # Rotation back to portait causes slight left slide of page. correct it. 
@@ -801,6 +802,7 @@ initializeDOM = ->
 
     backToMap = ->
         $map.css 'top', ''
+        $('#directions-panel').css 'top', ''
         $option.removeClass 'btn-primary'
         
     $option = $('#option')
@@ -811,6 +813,7 @@ initializeDOM = ->
             backToMap()
         else
             $map.css 'top', $('#search-header .toolbar').outerHeight() - $('#option-page').outerHeight(true) + 'px'
+            $('#directions-panel').css 'top', $('#directions-header').outerHeight() - $('#option-page').outerHeight(true) + 'px'
             $option.addClass 'btn-primary'
 
     $mapType = $('#map-type')
