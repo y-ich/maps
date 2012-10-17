@@ -67,3 +67,26 @@ class MobileInfoWindow extends google.maps.OverlayView
     onRemove: ->
         @element.parentNode.removeChild @element
         @element = null
+
+
+class PulsatingMarker extends google.maps.Marker
+    constructor: (options) ->
+        super options
+        @pulse = new google.maps.Circle
+            center: options.position
+            clickable: false
+            visible: options.visible ? true
+
+    setPosition: (latLng) ->
+        super latLng
+        @pulse.setCenter latLng
+
+    setVisible: (visible) ->
+        super visible
+        @pulse.setVisible visible
+
+    setMap: (map) ->
+        super map
+        @pulse.setMap map
+
+    setRadius: (radius) -> @pulse.setRadius radius

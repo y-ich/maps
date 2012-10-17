@@ -16,7 +16,7 @@ map = null
 geocoder = null
 directionsRenderer = null
 
-pulsatingMarker = null # is a pin of current position
+currentLocationMarker = null # is a pin of current position
 naviMarker = null # is a pin navigating a route.
 infoWindow = null # general purpose singlton of InfoWindow
 
@@ -89,7 +89,7 @@ MapState.NORMAL.update = ->
 MapState.NORMAL.gpsClicked = -> MapState.TRACE_POSITION
 
 MapState.TRACE_POSITION.update = ->
-    map.setCenter pulsatingMarker.getPosition() if pulsatingMarker.getVisible()
+    map.setCenter currentLocationMarker.getPosition() if currentLocationMarker.getVisible()
     $gps.addClass 'btn-light'
     @
 MapState.TRACE_POSITION.gpsClicked = -> MapState.NORMAL # disabled TRACE_HEADING
@@ -296,7 +296,7 @@ searchAddress = (fromHistory) ->
     geocoder.geocode { address : address }, (result, status) ->
         if status is google.maps.GeocoderStatus.OK
             directionsRenderer.setMap null
-            latLng = pulsatingMarker.getPosition()
+            latLng = currentLocationMarker.getPosition()
             updateField $originField, "#{latLng.lat()}, #{latLng.lng()}"
             updateField $destinationField, result[0].formatted_address
             mapFSM.setState MapState.NORMAL
@@ -421,7 +421,7 @@ setInfoPage = (bookmark, dropped) ->
     $('#send-place').attr 'href', "mailto:?subject=#{title}&body=<a href=\"https://maps.google.co.jp/maps?q=#{position.lat()},#{position.lng()}\">#{title}</a>"
 
 generateBookmarkList = ->
-    list = "<tr><td data-object-name=\"pulsatingMarker\">#{getLocalizedString 'Current Location'}</td></tr>"
+    list = "<tr><td data-object-name=\"currentLocationMarker\">#{getLocalizedString 'Current Location'}</td></tr>"
     list += "<tr><td data-object-name=\"droppedBookmark\">#{getLocalizedString 'Dropped Pin'}</td></tr>" if droppedBookmark.marker.getVisible()
     list += "<tr><td data-object-name=\"bookmarks[#{i}]\">#{e.marker.getTitle()}</td></tr>" for e, i in bookmarks
     list += Array(Math.max(1, Math.floor(innerHeight / pinRowHeight) - bookmarks.length)).join '<tr><td></td></tr>'
@@ -460,8 +460,8 @@ getPanoramaHandler = (data, status) ->
 
 traceHandler = (position) ->
     latLng = new google.maps.LatLng position.coords.latitude,position.coords.longitude
-    pulsatingMarker.setVisible true
-    pulsatingMarker.setPosition latLng
+    currentLocationMarker.setVisible true
+    currentLocationMarker.setPosition latLng
     map.setCenter latLng unless mapFSM.is MapState.NORMAL
     if mapFSM.is MapState.TRACE_HEADING and position.coords.heading?
         transform = $map.css('-webkit-transform')
@@ -505,7 +505,7 @@ initializeGoogleMaps = ->
         $('#navi-header2').css 'display', 'none'
         naviMarker.setVisible false
 
-    pulsatingMarker = new google.maps.Marker
+    currentLocationMarker = new google.maps.Marker
         flat: true
         icon: new google.maps.MarkerImage('img/bluedot.png', null, null, new google.maps.Point(8, 8), new google.maps.Size(17, 17))
         map: map
@@ -846,7 +846,7 @@ initializeDOM = ->
             switch bookmarkContext
                 when 'address'
                     map.getStreetView().setVisible(false)
-                    if name is 'pulsatingMarker'
+                    if name is 'currentLocationMarker'
                         mapFSM.setState(MapState.TRACE_POSITION)
                     else
                         mapFSM.setState(MapState.NORMAL)
@@ -856,13 +856,13 @@ initializeDOM = ->
                         currentBookmark = bookmarkOrMarker
                         bookmarkOrMarker.showInfoWindow()
                 when 'origin'
-                    updateField $originField, if name is 'pulsatingMarker'
+                    updateField $originField, if name is 'currentLocationMarker'
                             latLng = bookmarkOrMarker.getPosition()
                             "#{latLng.lat()}, #{latLng.lng()}"
                         else
                             bookmarkOrMarker.address            
                 when 'destination'
-                    updateField $destinationField, if name is 'pulsatingMarker'
+                    updateField $destinationField, if name is 'currentLocationMarker'
                             latLng = bookmarkOrMarker.getPosition()
                             "#{latLng.lat()}, #{latLng.lng()}"
                         else
