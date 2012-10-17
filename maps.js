@@ -877,7 +877,8 @@
         bookmarks.push(new Bookmark(new google.maps.Marker({
           map: map,
           position: new google.maps.LatLng(e.lat, e.lng),
-          title: e.title
+          title: e.title,
+          visible: false
         }), e.address));
       }
       history = (_ref6 = otherStatus.history) != null ? _ref6 : [];
@@ -1140,6 +1141,7 @@
               if (bookmarkOrMarker !== droppedBookmark) {
                 updateField($addressField, bookmarkOrMarker.address);
               }
+              bookmarkOrMarker.marker.setVisible(true);
               map.setCenter(bookmarkOrMarker.marker.getPosition());
               currentBookmark = bookmarkOrMarker;
               bookmarkOrMarker.showInfoWindow();

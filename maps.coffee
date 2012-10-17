@@ -676,6 +676,7 @@ initializeDOM = ->
                     map: map
                     position: new google.maps.LatLng e.lat, e.lng
                     title: e.title
+                    visible: false
                 ), e.address
         history = otherStatus.history ? []
 
@@ -912,6 +913,7 @@ initializeDOM = ->
                     else
                         mapFSM.setState(MapState.NORMAL)
                         updateField $addressField, bookmarkOrMarker.address if bookmarkOrMarker isnt droppedBookmark
+                        bookmarkOrMarker.marker.setVisible true
                         map.setCenter bookmarkOrMarker.marker.getPosition()
                         currentBookmark = bookmarkOrMarker
                         bookmarkOrMarker.showInfoWindow()
