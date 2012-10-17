@@ -503,7 +503,12 @@
     return geocoder.geocode({
       address: address
     }, function(result, status) {
+      var latLng;
       if (status === google.maps.GeocoderStatus.OK) {
+        directionsRenderer.setMap(null);
+        latLng = pulsatingMarker.getPosition();
+        updateField($originField, "" + (latLng.lat()) + ", " + (latLng.lng()));
+        updateField($destinationField, result[0].formatted_address);
         mapFSM.setState(MapState.NORMAL);
         map.setCenter(result[0].geometry.location);
         searchBookmark.address = result[0].formatted_address;
@@ -558,6 +563,7 @@
     if (!((origin != null) && origin !== '' && (destination != null) && destination !== '')) {
       return;
     }
+    infoWindow.close();
     if (!fromHistory) {
       history.unshift({
         type: 'route',

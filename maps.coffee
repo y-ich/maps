@@ -357,6 +357,10 @@ searchAddress = (fromHistory) ->
             address: address
     geocoder.geocode { address : address }, (result, status) ->
         if status is google.maps.GeocoderStatus.OK
+            directionsRenderer.setMap null
+            latLng = pulsatingMarker.getPosition()
+            updateField $originField, "#{latLng.lat()}, #{latLng.lng()}"
+            updateField $destinationField, result[0].formatted_address
             mapFSM.setState MapState.NORMAL
             map.setCenter result[0].geometry.location
             searchBookmark.address = result[0].formatted_address
@@ -394,6 +398,7 @@ searchDirections = (fromHistory = false) ->
     destination = $destinationField.val()
     return unless origin? and origin isnt '' and destination? and destination isnt ''
 
+    infoWindow.close()
     if not fromHistory
         history.unshift
             type: 'route'
