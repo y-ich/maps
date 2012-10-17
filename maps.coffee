@@ -462,6 +462,7 @@ traceHandler = (position) ->
     latLng = new google.maps.LatLng position.coords.latitude,position.coords.longitude
     currentLocationMarker.setVisible true
     currentLocationMarker.setPosition latLng
+    currentLocationMarker.setRadius position.coords.accuracy
     map.setCenter latLng unless mapFSM.is MapState.NORMAL
     if mapFSM.is MapState.TRACE_HEADING and position.coords.heading?
         transform = $map.css('-webkit-transform')
@@ -505,7 +506,7 @@ initializeGoogleMaps = ->
         $('#navi-header2').css 'display', 'none'
         naviMarker.setVisible false
 
-    currentLocationMarker = new google.maps.Marker
+    currentLocationMarker = new MarkerWithCircle
         flat: true
         icon: new google.maps.MarkerImage('img/bluedot.png', null, null, new google.maps.Point(8, 8), new google.maps.Size(17, 17))
         map: map

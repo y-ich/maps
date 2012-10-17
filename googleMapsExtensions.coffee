@@ -69,24 +69,37 @@ class MobileInfoWindow extends google.maps.OverlayView
         @element = null
 
 
-class PulsatingMarker extends google.maps.Marker
+class MarkerWithCircle
     constructor: (options) ->
-        super options
+        @marker = new google.maps.Marker options
         @pulse = new google.maps.Circle
             center: options.position
             clickable: false
+            map: options.map ? null
             visible: options.visible ? true
+            zIndex: options.zIndex ? null
+            fillColor: '#06f'
+            fillOpacity: 0.1
+            strokeColor: '#06f'
+            strokeOpacity: 0.5
+            strokeWeight: 2
 
     setPosition: (latLng) ->
-        super latLng
+        @marker.setPosition latLng
         @pulse.setCenter latLng
 
     setVisible: (visible) ->
-        super visible
+        @marker.setVisible visible
         @pulse.setVisible visible
 
     setMap: (map) ->
-        super map
+        @marker.setMap map
         @pulse.setMap map
 
     setRadius: (radius) -> @pulse.setRadius radius
+
+# delegate
+for name, method of google.maps.Marker.prototype when typeof method is 'function'
+    unless MarkerWithCircle.prototype[name]
+        MarkerWithCircle.prototype[name] = ((name) ->
+            -> @marker[name]())(name) # substantiation of name
