@@ -4,10 +4,35 @@
 # custom InfoWindow
 class MobileInfoWindow extends google.maps.OverlayView
     constructor: (options) -> @setOptions options
-    close: -> @setMap null
+
+    # accesssors
+
     getContent: -> @content
+    
     getPosition: -> @position
+    
     getZIndex: -> @zIndex
+    
+    setContent: (@content) ->
+        unless @element?
+            @element = document.createElement 'div'
+            @element.style['max-width'] = @maxWidth + 'px' if @maxWidth
+            @element.className = 'info-window'
+        if typeof @content is 'string'
+            @element.innerHTML = @content
+        else
+            @element.appendChild @content
+        google.maps.event.trigger this, 'content_changed'
+        
+    setPosition: (@position) ->
+        google.maps.event.trigger this, 'position_changed'
+        
+    setZIndex: (@zIndex) ->
+        @element.style['z-index'] = @zIndex.toString()
+        google.maps.event.trigger this, 'zindex_changed'
+
+    close: -> @setMap null
+    
     open: (map, @anchor) ->
         if anchor?
             @setPosition @anchor.getPosition()
@@ -21,17 +46,6 @@ class MobileInfoWindow extends google.maps.OverlayView
             @pixelOffset = new google.maps.Size Math.floor(markerSize.width / 2) - markerAnchor.x, - markerAnchor.y, 'px', 'px'            
         @setMap map
         
-    setContent: (@content) ->
-        unless @element?
-            @element = document.createElement 'div'
-            @element.style['max-width'] = @maxWidth + 'px' if @maxWidth
-            @element.className = 'info-window'
-        if typeof @content is 'string'
-            @element.innerHTML = @content
-        else
-            @element.appendChild @content
-        google.maps.event.trigger this, 'content_changed'
-        
     setOptions: (options) ->
         @maxWidth = options.maxWidth ? null
         @setContent options.content ? ''
@@ -40,17 +54,9 @@ class MobileInfoWindow extends google.maps.OverlayView
         @setPosition options.position ? null
         @setZIndex options.zIndex ? 0
         
-    setPosition: (@position) ->
-        google.maps.event.trigger this, 'position_changed'
-        
-    setZIndex: (@zIndex) ->
-        @element.style['z-index'] = @zIndex.toString()
-        google.maps.event.trigger this, 'zindex_changed'
-
     # overlayview
     onAdd: ->
         @getPanes().floatPane.appendChild @element
-        @listeners = []
         google.maps.event.trigger this, 'domready'
 
     draw: ->
@@ -59,7 +65,5 @@ class MobileInfoWindow extends google.maps.OverlayView
         @element.style.top = xy.y + @pixelOffset.height - @element.offsetHeight + 'px'
 
     onRemove: ->
-        @listeners.forEach (e) -> google.maps.event.removeListener e
         @element.parentNode.removeChild @element
         @element = null
-

@@ -12,10 +12,6 @@
       this.setOptions(options);
     }
 
-    MobileInfoWindow.prototype.close = function() {
-      return this.setMap(null);
-    };
-
     MobileInfoWindow.prototype.getContent = function() {
       return this.content;
     };
@@ -26,6 +22,38 @@
 
     MobileInfoWindow.prototype.getZIndex = function() {
       return this.zIndex;
+    };
+
+    MobileInfoWindow.prototype.setContent = function(content) {
+      this.content = content;
+      if (this.element == null) {
+        this.element = document.createElement('div');
+        if (this.maxWidth) {
+          this.element.style['max-width'] = this.maxWidth + 'px';
+        }
+        this.element.className = 'info-window';
+      }
+      if (typeof this.content === 'string') {
+        this.element.innerHTML = this.content;
+      } else {
+        this.element.appendChild(this.content);
+      }
+      return google.maps.event.trigger(this, 'content_changed');
+    };
+
+    MobileInfoWindow.prototype.setPosition = function(position) {
+      this.position = position;
+      return google.maps.event.trigger(this, 'position_changed');
+    };
+
+    MobileInfoWindow.prototype.setZIndex = function(zIndex) {
+      this.zIndex = zIndex;
+      this.element.style['z-index'] = this.zIndex.toString();
+      return google.maps.event.trigger(this, 'zindex_changed');
+    };
+
+    MobileInfoWindow.prototype.close = function() {
+      return this.setMap(null);
     };
 
     MobileInfoWindow.prototype.open = function(map, anchor) {
@@ -46,23 +74,6 @@
       return this.setMap(map);
     };
 
-    MobileInfoWindow.prototype.setContent = function(content) {
-      this.content = content;
-      if (this.element == null) {
-        this.element = document.createElement('div');
-        if (this.maxWidth) {
-          this.element.style['max-width'] = this.maxWidth + 'px';
-        }
-        this.element.className = 'info-window';
-      }
-      if (typeof this.content === 'string') {
-        this.element.innerHTML = this.content;
-      } else {
-        this.element.appendChild(this.content);
-      }
-      return google.maps.event.trigger(this, 'content_changed');
-    };
-
     MobileInfoWindow.prototype.setOptions = function(options) {
       var _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
       this.maxWidth = (_ref = options.maxWidth) != null ? _ref : null;
@@ -73,20 +84,8 @@
       return this.setZIndex((_ref5 = options.zIndex) != null ? _ref5 : 0);
     };
 
-    MobileInfoWindow.prototype.setPosition = function(position) {
-      this.position = position;
-      return google.maps.event.trigger(this, 'position_changed');
-    };
-
-    MobileInfoWindow.prototype.setZIndex = function(zIndex) {
-      this.zIndex = zIndex;
-      this.element.style['z-index'] = this.zIndex.toString();
-      return google.maps.event.trigger(this, 'zindex_changed');
-    };
-
     MobileInfoWindow.prototype.onAdd = function() {
       this.getPanes().floatPane.appendChild(this.element);
-      this.listeners = [];
       return google.maps.event.trigger(this, 'domready');
     };
 
@@ -98,9 +97,6 @@
     };
 
     MobileInfoWindow.prototype.onRemove = function() {
-      this.listeners.forEach(function(e) {
-        return google.maps.event.removeListener(e);
-      });
       this.element.parentNode.removeChild(this.element);
       return this.element = null;
     };
