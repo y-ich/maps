@@ -166,7 +166,16 @@
     function WatchPosition() {}
 
     WatchPosition.prototype.start = function(dummy) {
-      this.id = navigator.geolocation.watchPosition.apply(navigator.geolocation, Array.prototype.slice.call(arguments));
+      if (dummy != null) {
+        this.id = navigator.geolocation.watchPosition.apply(navigator.geolocation, Array.prototype.slice.call(arguments));
+      } else {
+        this.id = navigator.geolocation.watchPosition(traceHandler, function(error) {
+          return console.log(error.message, {
+            enableHighAccuracy: true,
+            timeout: 30000
+          });
+        });
+      }
       return this;
     };
 
@@ -1215,7 +1224,6 @@
     WatchPosition: WatchPosition,
     initializeDOM: initializeDOM,
     initializeGoogleMaps: initializeGoogleMaps,
-    traceHandler: traceHandler,
     saveMapStatus: saveMapStatus,
     saveOtherStatus: saveOtherStatus
   };

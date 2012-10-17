@@ -4,11 +4,7 @@
             
 app.initializeGoogleMaps()
 app.initializeDOM()
-watchPosition = new app.WatchPosition().start app.traceHandler
-    , (error) -> console.log error.message
-    ,
-        enableHighAccuracy: true
-        timeout: 30000
+watchPosition = new app.WatchPosition().start()
 
 window.onpagehide = ->
     watchPosition.stop()

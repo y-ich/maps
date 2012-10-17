@@ -112,7 +112,14 @@ class MobileInfoWindow extends google.maps.OverlayView
 # manages id for navigator.geolocation
 class WatchPosition
     start: (dummy) ->
-        @id = navigator.geolocation.watchPosition.apply navigator.geolocation, Array.prototype.slice.call(arguments)
+        if dummy?
+            @id = navigator.geolocation.watchPosition.apply navigator.geolocation, Array.prototype.slice.call(arguments)
+        else
+            @id = navigator.geolocation.watchPosition traceHandler
+                , (error) -> console.log error.message
+                ,
+                    enableHighAccuracy: true
+                    timeout: 30000
         @
 
     stop: ->
@@ -986,6 +993,5 @@ window.app =
     WatchPosition: WatchPosition
     initializeDOM: initializeDOM
     initializeGoogleMaps: initializeGoogleMaps
-    traceHandler: traceHandler
     saveMapStatus: saveMapStatus
     saveOtherStatus: saveOtherStatus
