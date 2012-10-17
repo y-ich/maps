@@ -4,58 +4,6 @@
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  PURPLE_DOT_IMAGE = 'http://maps.google.co.jp/mapfiles/ms/icons/purple-dot.png';
-
-  RED_DOT_IMAGE = 'http://maps.google.co.jp/mapfiles/ms/icons/red-dot.png';
-
-  MSMARKER_SHADOW = 'http://maps.google.co.jp/mapfiles/ms/icons/msmarker.shadow.png';
-
-  DEFAULT_ICON_SIZE = 32;
-
-  map = null;
-
-  geocoder = null;
-
-  directionsRenderer = null;
-
-  pulsatingMarker = null;
-
-  naviMarker = null;
-
-  infoWindow = null;
-
-  droppedBookmark = null;
-
-  searchBookmark = null;
-
-  currentBookmark = null;
-
-  $map = null;
-
-  $gps = null;
-
-  $addressField = null;
-
-  $originField = null;
-
-  $destinationField = null;
-
-  $pinList = null;
-
-  pinRowHeight = null;
-
-  mapFSM = null;
-
-  bookmarkContext = null;
-
-  bookmarks = [];
-
-  history = [];
-
-  maxHistory = 20;
-
-  isHold = true;
-
   MobileInfoWindow = (function(_super) {
 
     __extends(MobileInfoWindow, _super);
@@ -160,6 +108,58 @@
     return MobileInfoWindow;
 
   })(google.maps.OverlayView);
+
+  PURPLE_DOT_IMAGE = 'http://maps.google.co.jp/mapfiles/ms/icons/purple-dot.png';
+
+  RED_DOT_IMAGE = 'http://maps.google.co.jp/mapfiles/ms/icons/red-dot.png';
+
+  MSMARKER_SHADOW = 'http://maps.google.co.jp/mapfiles/ms/icons/msmarker.shadow.png';
+
+  DEFAULT_ICON_SIZE = 32;
+
+  map = null;
+
+  geocoder = null;
+
+  directionsRenderer = null;
+
+  pulsatingMarker = null;
+
+  naviMarker = null;
+
+  infoWindow = null;
+
+  droppedBookmark = null;
+
+  searchBookmark = null;
+
+  currentBookmark = null;
+
+  $map = null;
+
+  $gps = null;
+
+  $addressField = null;
+
+  $originField = null;
+
+  $destinationField = null;
+
+  $pinList = null;
+
+  pinRowHeight = null;
+
+  mapFSM = null;
+
+  bookmarkContext = null;
+
+  bookmarks = [];
+
+  history = [];
+
+  maxHistory = 20;
+
+  isHold = true;
 
   WatchPosition = (function() {
 
