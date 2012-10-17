@@ -979,16 +979,13 @@ initializeDOM = ->
         $route.trigger 'click'
         $('#container').css 'right', ''
         openRouteForm()
-            
-    watchPosition = new WatchPosition().start traceHandler
-        , (error) -> console.log error.message
-        , { enableHighAccuracy: true, timeout: 30000 }
 
-    window.onpagehide = ->
-        watchPosition.stop()
-        saveMapStatus()
-        saveOtherStatus()
-        
-initializeDOM()
-initializeGoogleMaps()
+# export
 
+window.app =
+    WatchPosition: WatchPosition
+    initializeDOM: initializeDOM
+    initializeGoogleMaps: initializeGoogleMaps
+    traceHandler: traceHandler
+    saveMapStatus: saveMapStatus
+    saveOtherStatus: saveOtherStatus

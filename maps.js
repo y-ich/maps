@@ -834,7 +834,7 @@
   };
 
   initializeDOM = function() {
-    var $bookmarkPage, $edit, $mapType, $naviHeader, $option, $route, $routeSearchFrame, $search, $traffic, $travelMode, $versatile, backToMap, e, layout, openRouteForm, otherStatus, trafficLayer, watchPosition, _i, _len, _ref4, _ref5, _ref6;
+    var $bookmarkPage, $edit, $mapType, $naviHeader, $option, $route, $routeSearchFrame, $search, $traffic, $travelMode, $versatile, backToMap, e, layout, openRouteForm, otherStatus, trafficLayer, _i, _len, _ref4, _ref5, _ref6;
     $map = $('#map');
     $gps = $('#gps');
     $addressField = $('#address input[name="address"]');
@@ -1203,27 +1203,21 @@
       $('#container').css('right', '');
       return openRouteForm();
     });
-    $('#from-here').on('click', function() {
+    return $('#from-here').on('click', function() {
       updateField($originField, currentBookmark.address);
       $route.trigger('click');
       $('#container').css('right', '');
       return openRouteForm();
     });
-    watchPosition = new WatchPosition().start(traceHandler, function(error) {
-      return console.log(error.message, {
-        enableHighAccuracy: true,
-        timeout: 30000
-      });
-    });
-    return window.onpagehide = function() {
-      watchPosition.stop();
-      saveMapStatus();
-      return saveOtherStatus();
-    };
   };
 
-  initializeDOM();
-
-  initializeGoogleMaps();
+  window.app = {
+    WatchPosition: WatchPosition,
+    initializeDOM: initializeDOM,
+    initializeGoogleMaps: initializeGoogleMaps,
+    traceHandler: traceHandler,
+    saveMapStatus: saveMapStatus,
+    saveOtherStatus: saveOtherStatus
+  };
 
 }).call(this);
