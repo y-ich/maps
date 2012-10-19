@@ -172,7 +172,7 @@ ordinal = (n) ->
         else
             n + 'th'
 
-# localize function
+# localize functions
 getRouteIndexMessage = window.getRouteIndexMessage ? (index, total) ->
     "#{ordinal(index + 1)} of #{total} Suggested Routes"
 
@@ -286,10 +286,10 @@ meterToString = (meter) ->
         parseFloat((meter / 1000).toPrecision(2)) + 'km'
 
 # returns current travel mode on display
-getTravelMode = -> google.maps.TravelMode[$('#travel-mode').children('.btn-primary').attr('id').toUpperCase()]
+getTravelMode = -> google.maps.TravelMode[$('#travel-mode > .btn-primary').attr('id').toUpperCase()]
 
 # returns current map type on display
-getMapType = -> google.maps.MapTypeId[$('#map-type').children('.btn-primary').attr('id').toUpperCase()]
+getMapType = -> google.maps.MapTypeId[$('#map-type > .btn-primary').attr('id').toUpperCase()]
 
 
 # search and display a place
@@ -320,6 +320,7 @@ searchAddress = (fromHistory) ->
             alert status
 
 updateMessage = ->
+    return unless directionsRenderer.getDirections()?
     index = directionsRenderer.getRouteIndex()
     result = directionsRenderer.getDirections()
     route = result.routes[index]

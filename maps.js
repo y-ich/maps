@@ -538,11 +538,11 @@
   };
 
   getTravelMode = function() {
-    return google.maps.TravelMode[$('#travel-mode').children('.btn-primary').attr('id').toUpperCase()];
+    return google.maps.TravelMode[$('#travel-mode > .btn-primary').attr('id').toUpperCase()];
   };
 
   getMapType = function() {
-    return google.maps.MapTypeId[$('#map-type').children('.btn-primary').attr('id').toUpperCase()];
+    return google.maps.MapTypeId[$('#map-type > .btn-primary').attr('id').toUpperCase()];
   };
 
   searchAddress = function(fromHistory) {
@@ -584,6 +584,9 @@
 
   updateMessage = function() {
     var $message, distance, duration, index, message, result, route, summary;
+    if (directionsRenderer.getDirections() == null) {
+      return;
+    }
     index = directionsRenderer.getRouteIndex();
     result = directionsRenderer.getDirections();
     route = result.routes[index];
