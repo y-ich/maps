@@ -97,8 +97,7 @@
     };
 
     MobileInfoWindow.prototype.onRemove = function() {
-      this.element.parentNode.removeChild(this.element);
-      return this.element = null;
+      return this.element.parentNode.removeChild(this.element);
     };
 
     return MobileInfoWindow;

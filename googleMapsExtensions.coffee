@@ -43,7 +43,7 @@ class MobileInfoWindow extends google.maps.OverlayView
             else
                 markerSize = new google.maps.Size DEFAULT_ICON_SIZE, DEFAULT_ICON_SIZE            
                 markerAnchor = new google.maps.Point DEFAULT_ICON_SIZE/2, DEFAULT_ICON_SIZE
-            @pixelOffset = new google.maps.Size Math.floor(markerSize.width / 2) - markerAnchor.x, - markerAnchor.y, 'px', 'px'            
+            @pixelOffset = new google.maps.Size Math.floor(markerSize.width / 2) - markerAnchor.x, - markerAnchor.y, 'px', 'px'
         @setMap map
         
     setOptions: (options) ->
@@ -66,8 +66,7 @@ class MobileInfoWindow extends google.maps.OverlayView
 
     onRemove: ->
         @element.parentNode.removeChild @element
-        @element = null
-
+        # @element should be re-used because setMap invokes onRemove prior onAdd.
 
 class MarkerWithCircle
     constructor: (options) ->
