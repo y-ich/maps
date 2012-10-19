@@ -190,7 +190,7 @@ input.name-query { /* you need specify input to over write bootsrap */
 }
 
 .btn-light {
-    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(38,100,219)), to(rgb(34, 98, 219)));
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(121,152,236)), color-stop(0.5,rgb(60,97,227)),color-stop(0.5,rgb(48,77,224)), to(rgb(34, 98, 219)));
 }
 		
 /* for glyph by external image */
