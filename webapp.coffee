@@ -4,9 +4,9 @@
             
 app.initializeGoogleMaps()
 app.initializeDOM()
-watchPosition = new app.WatchPosition().start()
+app.tracer.start()
 
 window.onpagehide = ->
-    watchPosition.stop()
+    app.tracer.stop()
     app.saveMapStatus()
     app.saveOtherStatus()

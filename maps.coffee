@@ -48,22 +48,31 @@ isHold = true # hold detection of touch. default is true for desktop
 #
 
 # manages id for navigator.geolocation
-class WatchPosition
-    start: (dummy) ->
-        if dummy?
-            @id = navigator.geolocation.watchPosition.apply navigator.geolocation, Array.prototype.slice.call(arguments)
-        else
-            @id = navigator.geolocation.watchPosition traceHandler
-                , (error) -> console.log error.message
-                ,
-                    enableHighAccuracy: true
-                    timeout: 30000
-        @
-
+tracer =
+    id: null
+    start: ->
+        @id = navigator.geolocation.watchPosition @success
+            , ((error) -> console.log error.message)
+            ,
+                enableHighAccuracy: true
+                timeout: 30000
     stop: ->
         navigator.geolocation.clearWatch @id unless @id
         @id = null
-        @
+    success: (position) ->
+        latLng = new google.maps.LatLng position.coords.latitude,position.coords.longitude
+        currentLocationMarker.setVisible true
+        currentLocationMarker.setPosition latLng
+        currentLocationMarker.setRadius position.coords.accuracy
+        map.setCenter latLng unless mapFSM.is MapState.NORMAL
+        if mapFSM.is MapState.TRACE_HEADING and position.coords.heading?
+            transform = $map.css('-webkit-transform')
+            if /rotate(-?[\d.]+deg)/.test(transform)
+                transform = transform.replace(/rotate(-?[\d.]+deg)/, "rotate(#{-position.coords.heading}deg)")
+            else
+                transform = transform + " rotate(#{-position.coords.heading}deg)"
+            $map.css('-webkit-transform', transform)
+
 
 # abstract class for map's trace state
 # Concrete instances are class constant.
@@ -457,20 +466,6 @@ getPanoramaHandler = (data, status) ->
             alert getLocalizedString 'There are no street views near here.'
         else
             alert getLocaliedString 'Sorry, an error occurred.'
-
-traceHandler = (position) ->
-    latLng = new google.maps.LatLng position.coords.latitude,position.coords.longitude
-    currentLocationMarker.setVisible true
-    currentLocationMarker.setPosition latLng
-    currentLocationMarker.setRadius position.coords.accuracy
-    map.setCenter latLng unless mapFSM.is MapState.NORMAL
-    if mapFSM.is MapState.TRACE_HEADING and position.coords.heading?
-        transform = $map.css('-webkit-transform')
-        if /rotate(-?[\d.]+deg)/.test(transform)
-            transform = transform.replace(/rotate(-?[\d.]+deg)/, "rotate(#{-position.coords.heading}deg)")
-        else
-            transform = transform + " rotate(#{-position.coords.heading}deg)"
-        $map.css('-webkit-transform', transform)
 
 # initializations
 
@@ -936,7 +931,7 @@ initializeDOM = ->
 # export
 
 window.app =
-    WatchPosition: WatchPosition
+    tracer: tracer
     initializeDOM: initializeDOM
     initializeGoogleMaps: initializeGoogleMaps
     saveMapStatus: saveMapStatus
