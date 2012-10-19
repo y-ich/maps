@@ -569,10 +569,9 @@ initializeGoogleMaps = ->
         searchBookmark.showInfoWindow() if not this.getAnimation()? # animation property becomes undefined after animation ends
 
     google.maps.event.addListener map, 'dragstart', -> mapFSM.setState MapState.NORMAL
-    # This is a workaround for web app on home screen. There is no onpagehide event.
+    # The followings are a workaround for web app on home screen. As there is no onpagehide event, saves statuses when updated.
     google.maps.event.addListener map, 'center_changed', saveMapStatus
     google.maps.event.addListener map, 'zoom_changed', saveMapStatus
-
 
 
 initializeDOM = ->
