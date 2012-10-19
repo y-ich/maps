@@ -161,18 +161,19 @@ class Bookmark
 #
 
 
+ordinal = (n) ->
+    switch n % 10
+        when 1
+            '1st'
+        when 2
+            '2nd'
+        when 3
+            '3rd'
+        else
+            n + 'th'
+
 # localize function
-window.getRouteIndexMessage = window.getRouteIndexMessage ? (index, total) ->
-    ordinal = (n) ->
-        switch n % 10
-            when 1
-                '1st'
-            when 2
-                '2nd'
-            when 3
-                '3rd'
-            else
-                n + 'th'
+getRouteIndexMessage = window.getRouteIndexMessage ? (index, total) ->
     "#{ordinal(index + 1)} of #{total} Suggested Routes"
 
 getDepartAtMessage = window.getDepartAtMessage ? (time) ->
