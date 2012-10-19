@@ -919,6 +919,7 @@
       history = (_ref7 = otherStatus.history) != null ? _ref7 : [];
     }
     localize();
+    $(document.body).css('display', 'block');
     layout = function() {
       var height, visibleSearchHeaderHeight;
       $('#option-page').css('bottom', $('#footer').outerHeight(true));

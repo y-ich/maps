@@ -611,6 +611,9 @@ initializeDOM = ->
     #localization
     localize()
     
+
+    $(document.body).css 'display', 'block'
+    
     # layouts dynamically
     layout = ->
         $('#option-page').css 'bottom', $('#footer').outerHeight(true)
