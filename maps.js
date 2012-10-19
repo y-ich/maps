@@ -831,15 +831,6 @@
       position: mapOptions.center,
       visible: false
     }), '');
-    google.maps.event.addListener(infoWindow, 'domready', function() {
-      $('#street-view').on('click', function(event) {
-        return new google.maps.StreetViewService().getPanoramaByLocation(currentBookmark.marker.getPosition(), 49, getPanoramaHandler);
-      });
-      return $('#button-info').on('click', function(event) {
-        setInfoPage(currentBookmark, currentBookmark === droppedBookmark);
-        return $('#container').css('right', '100%');
-      });
-    });
     naviMarker = new google.maps.Marker({
       flat: true,
       icon: new google.maps.MarkerImage('img/bluedot.png', null, null, new google.maps.Point(8, 8), new google.maps.Size(17, 17)),
@@ -950,6 +941,13 @@
       return setTimeout((function() {
         return isHold = true;
       }), 500);
+    });
+    $map.on('click', '#street-view', function(event) {
+      return new google.maps.StreetViewService().getPanoramaByLocation(currentBookmark.marker.getPosition(), 49, getPanoramaHandler);
+    });
+    $map.on('click', '#button-info', function(event) {
+      setInfoPage(currentBookmark, currentBookmark === droppedBookmark);
+      return $('#container').css('right', '100%');
     });
     $('.search-query').on('keyup', function() {
       var $this;

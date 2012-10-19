@@ -530,15 +530,6 @@ initializeGoogleMaps = ->
             visible: false
         ), ''
     
-    google.maps.event.addListener infoWindow, 'domready', ->
-        $('#street-view').on 'click' , (event) ->
-            new google.maps.StreetViewService().getPanoramaByLocation currentBookmark.marker.getPosition(), 49, getPanoramaHandler
-
-        $('#button-info').on 'click', (event) ->
-            setInfoPage(currentBookmark, currentBookmark is droppedBookmark)
-            $('#container').css 'right', '100%'
-
-        
     naviMarker = new google.maps.Marker
         flat: true
         icon: new google.maps.MarkerImage('img/bluedot.png', null, null, new google.maps.Point(8, 8), new google.maps.Size(17, 17))
@@ -651,6 +642,13 @@ initializeDOM = ->
     $map.on 'touchstart', ->
         isHold = false
         setTimeout (-> isHold = true), 500
+        
+    $map.on 'click', '#street-view', (event) ->
+        new google.maps.StreetViewService().getPanoramaByLocation currentBookmark.marker.getPosition(), 49, getPanoramaHandler
+
+    $map.on 'click', '#button-info', (event) ->
+        setInfoPage(currentBookmark, currentBookmark is droppedBookmark)
+        $('#container').css 'right', '100%'
         
     # input with reset button
     $('.search-query').on 'keyup', -> # textInput, keypress is before inputting a character.
