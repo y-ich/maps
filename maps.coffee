@@ -31,6 +31,7 @@ $addressField = null
 $originField = null
 $destinationField = null
 $pinList = null
+$message = null
 
 # layout parameter
 pinRowHeight = null
@@ -324,7 +325,6 @@ updateMessage = ->
     index = directionsRenderer.getRouteIndex()
     result = directionsRenderer.getDirections()
     route = result.routes[index]
-    $message = $('#message')
     message = ''
     message += getRouteIndexMessage(index, result.routes.length) + '<br>' if result.routes.length > 1
     if getTravelMode() is google.maps.TravelMode.TRANSIT
@@ -339,6 +339,7 @@ updateMessage = ->
             summary = "#{result.routes[index].summary}<br>#{secondToString duration} - #{meterToString distance}"
     message += summary
     $message.html message
+
 
 # invokes to search directions and displays a result.
 searchDirections = (fromHistory = false) ->
@@ -368,7 +369,7 @@ searchDirections = (fromHistory = false) ->
                     directionsRenderer.setMap null
                     mode = $('#travel-mode').children('.btn-primary').attr('id')
                     mode = mode[0].toUpperCase() + mode.substr 1
-                    $('#message').html getLocalizedString(mode + ' directions could not be found between these locations')
+                    $message.html getLocalizedString(mode + ' directions could not be found between these locations')
                     Alert getLocalizedString 'Directions Not Available\nDirections could not be found between these locations.'   
                 else
                     directionsRenderer.setMap null
@@ -407,7 +408,7 @@ navigate = (str) ->
     lengths = route.legs.map (e) -> e.steps.length
     steps = navigate.step + if navigate.leg == 0 then 0 else sum lengths[0...navigate.leg]
     $('#numbering').text (steps + 1) + '/' + mapSum route.legs, (e) -> e.steps.length
-    $('#message').html step.instructions
+    $message.html step.instructions
 
 navigate.leg = null
 navigate.step = null
@@ -415,6 +416,7 @@ navigate.step = null
 
 # DOM treat
 
+# updates an input field and takes care of bookmark button
 updateField = ($field, str) ->
     $field.val(str)
           .siblings('.btn-bookmark').css 'display', if str is '' then 'block' else 'none'
@@ -589,6 +591,7 @@ initializeDOM = ->
     $addressField = $('#address input[name="address"]')
     $originField = $('#origin input[name="origin"]')
     $destinationField = $('#destination input[name="destination"]')
+    $message = $('#message')
     $pinList = $('#pin-list')
     pinRowHeight = $('#pin-list tr').height()
 
