@@ -63,7 +63,7 @@ h5 {
     min-height: 42px;
     border-top: 1px solid rgb(204,213,224);	
     border-bottom: 1px solid rgb(71,85,104);
-    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(132,153,180)), to(rgb(120, 143, 172)));
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(174,187,206)), color-stop(0.5, rgb(133,154,180)), color-stop(0.5, rgb(126,148,176)), to(rgb(120,143,172)));
 }
 
 .mynavbar table.layout, .toolbar table.layout {
