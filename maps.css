@@ -37,11 +37,15 @@ h5 {
     text-shadow: none;
     background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(100,128,159)), to(rgb(106, 132, 165)));
 }
-			
-.btn-primary {
+
+.btn.btn-primary {
     background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(65,99,153)), to(rgb(69, 105, 157)));
 }
 
+.btn.btn-primary.gloss {
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(139,163,195)), color-stop(0.5,rgb(84,116,164)), color-stop(0.5,rgb(67,102,155)), to(rgb(69,105,157)));
+}
+    
 .btn-toolbar {
     margin-top: 0; /* 10px */
     margin-bottom: 0; /* 10px */
@@ -101,7 +105,7 @@ h5 {
 /* gloss */
 
 .btn.gloss {
-    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(139,163,195)), color-stop(0.5,rgb(84,116,164)), color-stop(0.5,rgb(67,102,155)), to(rgb(69,105,157)));
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(162,179,199)), color-stop(0.5,rgb(118,141,171)), color-stop(0.5,rgb(103,130,162)), to(rgb(106,132,165)));
 }
 
 /* my original toolbar */
