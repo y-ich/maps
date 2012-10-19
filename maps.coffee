@@ -133,16 +133,7 @@ class Bookmark
             currentBookmark = @
             @showInfoWindow()
 
-    setInfoWindow: ->
-        makeInfoMessage = (title, message) ->
-            """
-            <table id="info-window"><tr>
-                <td><button id="street-view" class="btn btn-mini"><i class="icon-user icon-white"></i></button></td>
-                <td style="white-space: nowrap;"><div style="max-width:160px;overflow:hidden;">#{title}<br><span id="dropped-message" style="font-size:10px">#{message}</span></div></td>
-                <td><button id="button-info" class="btn btn-mini btn-light"><i class="icon-chevron-right icon-white"></i></button></td>
-            </tr></table>
-            """
-        infoWindow.setContent makeInfoMessage @marker.getTitle(), @address        
+    setInfoWindow: -> infoWindow.setContent @infoMessage()
 
     showInfoWindow: ->
         @setInfoWindow()
@@ -157,6 +148,14 @@ class Bookmark
             address: @address
         }
 
+    infoMessage: ->
+        """
+        <table id="info-window"><tr>
+            <td><button id="street-view" class="btn btn-mini"><i class="icon-user icon-white"></i></button></td>
+            <td style="white-space: nowrap;"><div style="max-width:160px;overflow:hidden;">#{@marker.getTitle()}<br><span id="dropped-message" style="font-size:10px">#{@address}</span></div></td>
+            <td><button id="button-info" class="btn btn-mini btn-light"><i class="icon-chevron-right icon-white"></i></button></td>
+        </tr></table>
+        """
 #
 # functions 
 #

@@ -358,11 +358,7 @@
     }
 
     Bookmark.prototype.setInfoWindow = function() {
-      var makeInfoMessage;
-      makeInfoMessage = function(title, message) {
-        return "<table id=\"info-window\"><tr>\n    <td><button id=\"street-view\" class=\"btn btn-mini\"><i class=\"icon-user icon-white\"></i></button></td>\n    <td style=\"white-space: nowrap;\"><div style=\"max-width:160px;overflow:hidden;\">" + title + "<br><span id=\"dropped-message\" style=\"font-size:10px\">" + message + "</span></div></td>\n    <td><button id=\"button-info\" class=\"btn btn-mini btn-light\"><i class=\"icon-chevron-right icon-white\"></i></button></td>\n</tr></table>";
-      };
-      return infoWindow.setContent(makeInfoMessage(this.marker.getTitle(), this.address));
+      return infoWindow.setContent(this.infoMessage());
     };
 
     Bookmark.prototype.showInfoWindow = function() {
@@ -379,6 +375,10 @@
         title: this.marker.getTitle(),
         address: this.address
       };
+    };
+
+    Bookmark.prototype.infoMessage = function() {
+      return "<table id=\"info-window\"><tr>\n    <td><button id=\"street-view\" class=\"btn btn-mini\"><i class=\"icon-user icon-white\"></i></button></td>\n    <td style=\"white-space: nowrap;\"><div style=\"max-width:160px;overflow:hidden;\">" + (this.marker.getTitle()) + "<br><span id=\"dropped-message\" style=\"font-size:10px\">" + this.address + "</span></div></td>\n    <td><button id=\"button-info\" class=\"btn btn-mini btn-light\"><i class=\"icon-chevron-right icon-white\"></i></button></td>\n</tr></table>";
     };
 
     return Bookmark;
