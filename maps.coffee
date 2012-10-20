@@ -500,6 +500,21 @@ initializeGoogleMaps = ->
     infoWindow = new MobileInfoWindow
         maxWidth: Math.floor innerWidth*0.9
 
+    google.maps.event.addListener infoWindow, 'domready', ->
+        $('#street-view').on 'click' , (event) ->
+            if placeContext.svLatLng?
+                sv = map.getStreetView()
+                sv.setPosition placeContext.svLatLng
+                sv.setPov
+                    heading: map.getHeading() ? 0
+                    pitch: 0
+                    zoom: 1
+                sv.setVisible true
+
+        $('#button-info').on 'click', (event) ->
+            setInfoPage(placeContext, placeContext is droppedPlace)
+            $('#container').css 'right', '100%'
+        
     directionsRenderer = new google.maps.DirectionsRenderer
         hideRouteList: false
         infoWindow: infoWindow
@@ -649,20 +664,6 @@ initializeDOM = ->
     $map.on 'touchstart', ->
         isHold = false
         setTimeout (-> isHold = true), 500
-        
-    $map.on 'click', '#street-view', (event) ->
-        if placeContext.svLatLng?
-            sv = map.getStreetView()
-            sv.setPosition placeContext.svLatLng
-            sv.setPov
-                heading: map.getHeading() ? 0
-                pitch: 0
-                zoom: 1
-            sv.setVisible true
-
-    $map.on 'click', '#button-info', (event) ->
-        setInfoPage(placeContext, placeContext is droppedPlace)
-        $('#container').css 'right', '100%'
         
     # input with reset button
     $('.search-query').on 'keyup', -> # textInput, keypress is before inputting a character.

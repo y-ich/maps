@@ -790,6 +790,25 @@
     infoWindow = new MobileInfoWindow({
       maxWidth: Math.floor(innerWidth * 0.9)
     });
+    google.maps.event.addListener(infoWindow, 'domready', function() {
+      $('#street-view').on('click', function(event) {
+        var sv, _ref5;
+        if (placeContext.svLatLng != null) {
+          sv = map.getStreetView();
+          sv.setPosition(placeContext.svLatLng);
+          sv.setPov({
+            heading: (_ref5 = map.getHeading()) != null ? _ref5 : 0,
+            pitch: 0,
+            zoom: 1
+          });
+          return sv.setVisible(true);
+        }
+      });
+      return $('#button-info').on('click', function(event) {
+        setInfoPage(placeContext, placeContext === droppedPlace);
+        return $('#container').css('right', '100%');
+      });
+    });
     directionsRenderer = new google.maps.DirectionsRenderer({
       hideRouteList: false,
       infoWindow: infoWindow,
@@ -932,23 +951,6 @@
       return setTimeout((function() {
         return isHold = true;
       }), 500);
-    });
-    $map.on('click', '#street-view', function(event) {
-      var sv, _ref8;
-      if (placeContext.svLatLng != null) {
-        sv = map.getStreetView();
-        sv.setPosition(placeContext.svLatLng);
-        sv.setPov({
-          heading: (_ref8 = map.getHeading()) != null ? _ref8 : 0,
-          pitch: 0,
-          zoom: 1
-        });
-        return sv.setVisible(true);
-      }
-    });
-    $map.on('click', '#button-info', function(event) {
-      setInfoPage(placeContext, placeContext === droppedPlace);
-      return $('#container').css('right', '100%');
     });
     $('.search-query').on('keyup', function() {
       var $this;
