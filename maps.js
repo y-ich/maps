@@ -107,7 +107,8 @@
   MarkerWithCircle = (function() {
 
     function MarkerWithCircle(options) {
-      var _ref, _ref1, _ref2;
+      var _ref, _ref1, _ref2,
+        _this = this;
       this.marker = new google.maps.Marker(options);
       this.pulse = new google.maps.Circle({
         center: options.position,
@@ -121,6 +122,11 @@
         strokeOpacity: 0.5,
         strokeWeight: 2
       });
+      if (!((options.clickable != null) && !options.clickable)) {
+        google.maps.event.addListener(this.marker, 'click', function() {
+          return google.maps.event.trigger(_this, 'click');
+        });
+      }
     }
 
     MarkerWithCircle.prototype.setPosition = function(latLng) {
@@ -809,7 +815,7 @@
       map: map,
       optimized: false,
       position: mapOptions.center,
-      title: 'I might be here',
+      title: getLocalizedString('Current Location'),
       visible: false
     }), '');
     droppedPlace = new Place(new google.maps.Marker({

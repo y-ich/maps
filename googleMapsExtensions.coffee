@@ -68,6 +68,7 @@ class MobileInfoWindow extends google.maps.OverlayView
         @element.parentNode.removeChild @element
         # @element should be re-used because setMap invokes onRemove prior onAdd.
 
+
 class MarkerWithCircle
     constructor: (options) ->
         @marker = new google.maps.Marker options
@@ -82,6 +83,9 @@ class MarkerWithCircle
             strokeColor: '#06f'
             strokeOpacity: 0.5
             strokeWeight: 2
+        unless options.clickable? and not options.clickable
+            google.maps.event.addListener @marker, 'click', =>
+                google.maps.event.trigger @, 'click'
 
     setPosition: (latLng) ->
         @marker.setPosition latLng

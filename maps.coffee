@@ -525,7 +525,7 @@ initializeGoogleMaps = ->
             map: map
             optimized: false
             position: mapOptions.center
-            title: 'I might be here'
+            title: getLocalizedString 'Current Location'
             visible: false
         ), ''
 
