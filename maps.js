@@ -242,6 +242,7 @@
       currentPlace.marker.setVisible(true);
       currentPlace.marker.setPosition(latLng);
       currentPlace.marker.setRadius(position.coords.accuracy);
+      currentPlace.address = '';
       if (!mapFSM.is(MapState.NORMAL)) {
         return map.setCenter(latLng);
       }

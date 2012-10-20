@@ -65,6 +65,7 @@ tracer =
         currentPlace.marker.setVisible true
         currentPlace.marker.setPosition latLng
         currentPlace.marker.setRadius position.coords.accuracy
+        currentPlace.address = '' # because current address may become old.
         map.setCenter latLng unless mapFSM.is MapState.NORMAL
         # if mapFSM.is MapState.TRACE_HEADING and position.coords.heading?
         #     transform = $map.css('-webkit-transform')
