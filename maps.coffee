@@ -66,13 +66,13 @@ tracer =
         currentLocationMarker.setPosition latLng
         currentLocationMarker.setRadius position.coords.accuracy
         map.setCenter latLng unless mapFSM.is MapState.NORMAL
-        if mapFSM.is MapState.TRACE_HEADING and position.coords.heading?
-            transform = $map.css('-webkit-transform')
-            if /rotate(-?[\d.]+deg)/.test(transform)
-                transform = transform.replace(/rotate(-?[\d.]+deg)/, "rotate(#{-position.coords.heading}deg)")
-            else
-                transform = transform + " rotate(#{-position.coords.heading}deg)"
-            $map.css('-webkit-transform', transform)
+        # if mapFSM.is MapState.TRACE_HEADING and position.coords.heading?
+        #     transform = $map.css('-webkit-transform')
+        #     if /rotate(-?[\d.]+deg)/.test(transform)
+        #         transform = transform.replace(/rotate(-?[\d.]+deg)/, "rotate(#{-position.coords.heading}deg)")
+        #     else
+        #         transform = transform + " rotate(#{-position.coords.heading}deg)"
+        #     $map.css('-webkit-transform', transform)
 
 
 # abstract class for map's trace state
@@ -134,7 +134,14 @@ class Bookmark
             currentBookmark = @
             @showInfoWindow()
 
-    setInfoWindow: -> infoWindow.setContent @infoMessage()
+    setInfoWindow: ->
+        infoWindow.setContent """
+                              <table id="info-window"><tr>
+                                <td><button id="street-view" class="btn btn-mini"><i class="icon-user icon-white"></i></button></td>
+                                <td style="white-space: nowrap;"><div style="max-width:160px;overflow:hidden;">#{@marker.getTitle()}<br><span id="dropped-message" style="font-size:10px">#{@address}</span></div></td>
+                                <td><button id="button-info" class="btn btn-mini btn-light"><i class="icon-chevron-right icon-white"></i></button></td>
+                              </tr></table>
+                              """
 
     showInfoWindow: ->
         @setInfoWindow()
@@ -149,19 +156,23 @@ class Bookmark
             address: @address
         }
 
-    infoMessage: ->
-        """
-        <table id="info-window"><tr>
-            <td><button id="street-view" class="btn btn-mini"><i class="icon-user icon-white"></i></button></td>
-            <td style="white-space: nowrap;"><div style="max-width:160px;overflow:hidden;">#{@marker.getTitle()}<br><span id="dropped-message" style="font-size:10px">#{@address}</span></div></td>
-            <td><button id="button-info" class="btn btn-mini btn-light"><i class="icon-chevron-right icon-white"></i></button></td>
-        </tr></table>
-        """
+
 #
-# functions 
+# function definitions
 #
 
 
+# general
+
+# sums in an array
+sum = (array) ->
+    array.reduce (a, b) -> a + b
+    
+# sums after some transformation
+mapSum = (array, fn) ->
+    array.map(fn).reduce (a, b) -> a + b
+
+# returns ordinal number as String
 ordinal = (n) ->
     switch n % 10
         when 1
@@ -174,6 +185,9 @@ ordinal = (n) ->
             n + 'th'
 
 # localize functions
+
+# getRouteindexMessage, getDepartAtMessage, getArriveAtMessage should be defined in js for localization.
+
 getRouteIndexMessage = window.getRouteIndexMessage ? (index, total) ->
     "#{ordinal(index + 1)} of #{total} Suggested Routes"
 
@@ -253,13 +267,6 @@ saveOtherStatus = () ->
         destination: $destinationField.val()
         bookmarks: bookmarks.map (e) -> e.toObject()
         history: history
-
-sum = (array) ->
-    array.reduce (a, b) -> a + b
-    
-# sums after some transformation
-mapSum = (array, fn) ->
-    array.map(fn).reduce (a, b) -> a + b
 
 # returns formatted string '?日?時間?分' from sec(number)
 secondToString = (sec) ->
@@ -635,11 +642,12 @@ initializeDOM = ->
         # The above work around caused that address bar disappear to upper on iPhone.
         # I don't know any consistent work around, so gave up to correct slide on iPhone Safari.
     layout()
-    window.addEventListener 'resize', layout
     
     #
     # event handlers
     #
+
+    window.addEventListener 'resize', layout
 
     $map.on 'touchstart', ->
         isHold = false

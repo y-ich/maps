@@ -231,22 +231,13 @@
       return this.id = null;
     },
     success: function(position) {
-      var latLng, transform;
+      var latLng;
       latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
       currentLocationMarker.setVisible(true);
       currentLocationMarker.setPosition(latLng);
       currentLocationMarker.setRadius(position.coords.accuracy);
       if (!mapFSM.is(MapState.NORMAL)) {
-        map.setCenter(latLng);
-      }
-      if (mapFSM.is(MapState.TRACE_HEADING && (position.coords.heading != null))) {
-        transform = $map.css('-webkit-transform');
-        if (/rotate(-?[\d.]+deg)/.test(transform)) {
-          transform = transform.replace(/rotate(-?[\d.]+deg)/, "rotate(" + (-position.coords.heading) + "deg)");
-        } else {
-          transform = transform + (" rotate(" + (-position.coords.heading) + "deg)");
-        }
-        return $map.css('-webkit-transform', transform);
+        return map.setCenter(latLng);
       }
     }
   };
@@ -359,7 +350,7 @@
     }
 
     Bookmark.prototype.setInfoWindow = function() {
-      return infoWindow.setContent(this.infoMessage());
+      return infoWindow.setContent("<table id=\"info-window\"><tr>\n  <td><button id=\"street-view\" class=\"btn btn-mini\"><i class=\"icon-user icon-white\"></i></button></td>\n  <td style=\"white-space: nowrap;\"><div style=\"max-width:160px;overflow:hidden;\">" + (this.marker.getTitle()) + "<br><span id=\"dropped-message\" style=\"font-size:10px\">" + this.address + "</span></div></td>\n  <td><button id=\"button-info\" class=\"btn btn-mini btn-light\"><i class=\"icon-chevron-right icon-white\"></i></button></td>\n</tr></table>");
     };
 
     Bookmark.prototype.showInfoWindow = function() {
@@ -378,13 +369,21 @@
       };
     };
 
-    Bookmark.prototype.infoMessage = function() {
-      return "<table id=\"info-window\"><tr>\n    <td><button id=\"street-view\" class=\"btn btn-mini\"><i class=\"icon-user icon-white\"></i></button></td>\n    <td style=\"white-space: nowrap;\"><div style=\"max-width:160px;overflow:hidden;\">" + (this.marker.getTitle()) + "<br><span id=\"dropped-message\" style=\"font-size:10px\">" + this.address + "</span></div></td>\n    <td><button id=\"button-info\" class=\"btn btn-mini btn-light\"><i class=\"icon-chevron-right icon-white\"></i></button></td>\n</tr></table>";
-    };
-
     return Bookmark;
 
   })();
+
+  sum = function(array) {
+    return array.reduce(function(a, b) {
+      return a + b;
+    });
+  };
+
+  mapSum = function(array, fn) {
+    return array.map(fn).reduce(function(a, b) {
+      return a + b;
+    });
+  };
 
   ordinal = function(n) {
     switch (n % 10) {
@@ -496,18 +495,6 @@
         return e.toObject();
       }),
       history: history
-    });
-  };
-
-  sum = function(array) {
-    return array.reduce(function(a, b) {
-      return a + b;
-    });
-  };
-
-  mapSum = function(array, fn) {
-    return array.map(fn).reduce(function(a, b) {
-      return a + b;
     });
   };
 
