@@ -423,7 +423,7 @@ navigate.step = null
 
 # DOM treat
 
-# updates an input field and takes care of bookmark button
+# updates an input field with bookmark button
 updateField = ($field, str) ->
     $field.val(str)
           .siblings('.btn-bookmark').css 'display', if str is '' then 'block' else 'none'
@@ -437,6 +437,7 @@ setInfoPage = (bookmark, dropped) ->
     $('#bookmark-name input[name="bookmark-name"]').val if dropped then bookmark.address else title
     $('#info-address').text bookmark.address
     # $('#delete-pin').css 'display', if dropped then 'block' else 'none'
+    # The above was commented out because editing bookmark is not implemented yet.
     $('#send-place').attr 'href', "mailto:?subject=#{title}&body=<a href=\"https://maps.google.co.jp/maps?q=#{position.lat()},#{position.lng()}\">#{title}</a>"
 
 generateBookmarkList = ->
