@@ -213,9 +213,21 @@ img.icon {
 }
 
 .info-window button {
-    border-radius: 12px;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border-radius: 10px;
+    border: 1px solid white;
 }
 
+#street-view {
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(249,205,158)), to(rgb(210,49,0)));
+    opacity: 0.5;
+}
+
+#street-view.btn-primary {
+    opacity: 1;
+}
 
 /* intrinsic */
 

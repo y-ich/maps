@@ -128,8 +128,11 @@ for name, method of MapState.prototype when typeof method is 'function'
         -> this.setState this.state[name]())(name) # substantiation of name
 
 
+
 # place
 class Place
+    @streetViewService: new google.maps.StreetViewService()
+
     constructor: (@marker, @address) ->
         google.maps.event.addListener @marker, 'click', (event) =>
             placeContext = @
@@ -138,7 +141,7 @@ class Place
     setInfoWindow: ->
         infoWindow.setContent """
                               <table id="info-window"><tr>
-                                <td><button id="street-view" class="btn btn-mini"><i class="icon-user icon-white"></i></button></td>
+                                <td><button id="street-view" class="btn btn-mini#{if @svLatLng? then ' btn-primary' else ''}"><i class="icon-user icon-white"></i></button></td>
                                 <td style="white-space: nowrap;"><div style="max-width:160px;overflow:hidden;">#{@marker.getTitle()}<br><span id="dropped-message" style="font-size:10px">#{@address}</span></div></td>
                                 <td><button id="button-info" class="btn btn-mini btn-light"><i class="icon-chevron-right icon-white"></i></button></td>
                               </tr></table>
@@ -147,6 +150,12 @@ class Place
     showInfoWindow: ->
         @setInfoWindow()
         infoWindow.open map, @marker
+        unless @svLatLng?
+            Place.streetViewService.getPanoramaByLocation placeContext.marker.getPosition(), 49, (data, status) =>
+                if status is google.maps.StreetViewStatus.OK
+                    @svLatLng = data.location.latLng
+                    $('#street-view').addClass 'btn-primary'
+        
         unless @address? and @address isnt ''
             geocoder.geocode {latLng : @marker.getPosition() }, (result, status) =>
                 @address = if status is google.maps.GeocoderStatus.OK
@@ -467,24 +476,6 @@ generateHistoryList = ->
     list += Array(Math.max(1, Math.floor(innerHeight / pinRowHeight) - history.length)).join '<tr><td></td></tr>'
     $pinList.html list
 
-#
-# handlers
-#
-
-getPanoramaHandler = (data, status) ->
-    switch status
-        when google.maps.StreetViewStatus.OK
-            sv = map.getStreetView()
-            sv.setPosition data.location.latLng
-            sv.setPov
-                heading: map.getHeading() ? 0
-                pitch: 0
-                zoom: 1
-            sv.setVisible true
-        when google.maps.StreetViewStatus.ZERO_RESULTS
-            alert getLocalizedString 'There are no street views near here.'
-        else
-            alert getLocaliedString 'Sorry, an error occurred.'
 
 # initializations
 
@@ -568,6 +559,7 @@ initializeGoogleMaps = ->
                 
         infoWindow.close()
         droppedPlace.address = ''
+        droppedPlace.svLatLng = null
         droppedPlace.marker.setPosition event.latLng
         droppedPlace.marker.setVisible true
         droppedPlace.marker.setAnimation google.maps.Animation.DROP
@@ -658,7 +650,14 @@ initializeDOM = ->
         setTimeout (-> isHold = true), 500
         
     $map.on 'click', '#street-view', (event) ->
-        new google.maps.StreetViewService().getPanoramaByLocation placeContext.marker.getPosition(), 49, getPanoramaHandler
+        if placeContext.svLatLng?
+            sv = map.getStreetView()
+            sv.setPosition placeContext.svLatLng
+            sv.setPov
+                heading: map.getHeading() ? 0
+                pitch: 0
+                zoom: 1
+            sv.setVisible true
 
     $map.on 'click', '#button-info', (event) ->
         setInfoPage(placeContext, placeContext is droppedPlace)
