@@ -455,6 +455,7 @@
       'replace-pin': 'Replace Pin',
       'print': 'Print',
       'traffic': 'Show Traffic',
+      'panoramio': 'Show Panoramio',
       'roadmap': 'Standard',
       'satellite': 'Satellite',
       'panel': 'List',
@@ -872,7 +873,7 @@
   };
 
   initializeDOM = function() {
-    var $bookmarkPage, $edit, $mapType, $naviHeader, $option, $route, $routeSearchFrame, $search, $traffic, $travelMode, $versatile, backToMap, e, layout, openRouteForm, otherStatus, trafficLayer, _i, _len, _ref5, _ref6, _ref7;
+    var $bookmarkPage, $edit, $mapType, $naviHeader, $option, $panoramio, $route, $routeSearchFrame, $search, $traffic, $travelMode, $versatile, backToMap, e, layout, openRouteForm, otherStatus, panoramioLayer, trafficLayer, _i, _len, _ref5, _ref6, _ref7;
     $map = $('#map');
     $gps = $('#gps');
     $addressField = $('#address input[name="address"]');
@@ -1121,6 +1122,18 @@
       } else {
         trafficLayer.setMap(null);
         setLocalExpressionInto('traffic', 'Show Traffic');
+      }
+      return backToMap();
+    });
+    $panoramio = $('#panoramio');
+    panoramioLayer = new google.maps.panoramio.PanoramioLayer();
+    $panoramio.on('click', function() {
+      if ($panoramio.text() === getLocalizedString('Show Panoramio')) {
+        panoramioLayer.setMap(map);
+        setLocalExpressionInto('panoramio', 'Hide Panoramio');
+      } else {
+        panoramioLayer.setMap(null);
+        setLocalExpressionInto('panoramio', 'Show Panoramio');
       }
       return backToMap();
     });

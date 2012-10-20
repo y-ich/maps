@@ -225,6 +225,7 @@ localize = ->
         'replace-pin' : 'Replace Pin'
         'print' : 'Print'
         'traffic' : 'Show Traffic'
+        'panoramio' : 'Show Panoramio'
         'roadmap' : 'Standard'
         'satellite' : 'Satellite'
         'panel' : 'List'
@@ -811,6 +812,18 @@ initializeDOM = ->
             trafficLayer.setMap null
             setLocalExpressionInto 'traffic', 'Show Traffic'
         backToMap()
+
+    $panoramio = $('#panoramio')
+    panoramioLayer = new google.maps.panoramio.PanoramioLayer()
+    $panoramio.on 'click', ->
+        if $panoramio.text() is getLocalizedString 'Show Panoramio'
+            panoramioLayer.setMap map
+            setLocalExpressionInto 'panoramio', 'Hide Panoramio'
+        else
+            panoramioLayer.setMap null
+            setLocalExpressionInto 'panoramio', 'Show Panoramio'
+        backToMap()
+
 
     $('#replace-pin').on 'click', ->
         droppedPlace.marker.setPosition map.getCenter()
