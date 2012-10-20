@@ -16,13 +16,13 @@ map = null
 geocoder = null
 directionsRenderer = null
 
-currentLocationMarker = null # is a pin of current position
+currentPlace = null # is a pin of current position
 naviMarker = null # is a pin navigating a route.
 infoWindow = null # general purpose singlton of InfoWindow
 
-droppedBookmark = null # combination of dropped marker and address information
-searchBookmark = null # search result
-currentBookmark = null # context bookmark
+droppedPlace = null # combination of dropped marker and address information
+searchPlace = null # search result
+placeContext = null # context place
 
 # jQuery instances
 $map = null
@@ -39,7 +39,7 @@ pinRowHeight = null
 # state variables
 mapFSM = null
 bookmarkContext = null
-bookmarks = [] # an array of Bookmark instances
+bookmarks = [] # an array of Place instances
 history = [] # an array of Object instances. two formats. { type: 'search', address: }, { type: 'route', origin: ,destination: }
 maxHistory = 20 # max number of history
 isHold = true # hold detection of touch. default is true for desktop
@@ -62,9 +62,9 @@ tracer =
         @id = null
     success: (position) ->
         latLng = new google.maps.LatLng position.coords.latitude,position.coords.longitude
-        currentLocationMarker.setVisible true
-        currentLocationMarker.setPosition latLng
-        currentLocationMarker.setRadius position.coords.accuracy
+        currentPlace.marker.setVisible true
+        currentPlace.marker.setPosition latLng
+        currentPlace.marker.setRadius position.coords.accuracy
         map.setCenter latLng unless mapFSM.is MapState.NORMAL
         # if mapFSM.is MapState.TRACE_HEADING and position.coords.heading?
         #     transform = $map.css('-webkit-transform')
@@ -99,7 +99,7 @@ MapState.NORMAL.update = ->
 MapState.NORMAL.gpsClicked = -> MapState.TRACE_POSITION
 
 MapState.TRACE_POSITION.update = ->
-    map.setCenter currentLocationMarker.getPosition() if currentLocationMarker.getVisible()
+    map.setCenter currentPlace.marker.getPosition() if currentPlace.marker.getVisible()
     $gps.addClass 'btn-light'
     @
 MapState.TRACE_POSITION.gpsClicked = -> MapState.NORMAL # disabled TRACE_HEADING
@@ -127,11 +127,11 @@ for name, method of MapState.prototype when typeof method is 'function'
         -> this.setState this.state[name]())(name) # substantiation of name
 
 
-# bookmark
-class Bookmark
+# place
+class Place
     constructor: (@marker, @address) ->
         google.maps.event.addListener @marker, 'click', (event) =>
-            currentBookmark = @
+            placeContext = @
             @showInfoWindow()
 
     setInfoWindow: ->
@@ -312,7 +312,7 @@ searchAddress = (fromHistory) ->
     address = $addressField.val()
     return unless address? and address isnt ''
     infoWindow.close()
-    searchBookmark.marker.setVisible false
+    searchPlace.marker.setVisible false
     if not fromHistory
         history.unshift
             type: 'search'
@@ -320,17 +320,17 @@ searchAddress = (fromHistory) ->
     geocoder.geocode { address : address }, (result, status) ->
         if status is google.maps.GeocoderStatus.OK
             directionsRenderer.setMap null
-            latLng = currentLocationMarker.getPosition()
+            latLng = currentPlace.marker.getPosition()
             updateField $originField, "#{latLng.lat()}, #{latLng.lng()}"
             updateField $destinationField, result[0].formatted_address
             mapFSM.setState MapState.NORMAL
             map.setCenter result[0].geometry.location
-            searchBookmark.address = result[0].formatted_address
-            searchBookmark.marker.setPosition result[0].geometry.location
-            searchBookmark.marker.setTitle address
-            searchBookmark.marker.setVisible true
-            searchBookmark.marker.setAnimation google.maps.Animation.DROP
-            currentBookmark = searchBookmark
+            searchPlace.address = result[0].formatted_address
+            searchPlace.marker.setPosition result[0].geometry.location
+            searchPlace.marker.setTitle address
+            searchPlace.marker.setVisible true
+            searchPlace.marker.setAnimation google.maps.Animation.DROP
+            placeContext = searchPlace
         else
             alert status
 
@@ -436,20 +436,20 @@ updateField = ($field, str) ->
           .siblings('.btn-bookmark').css 'display', if str is '' then 'block' else 'none'
 
 # prepare page of bookmark information
-setInfoPage = (bookmark, dropped) ->
-    $('#info-marker img:first-child').attr 'src', bookmark.marker.getIcon()?.url ? 'http://maps.google.co.jp/mapfiles/ms/icons/red-dot.png'
-    title = bookmark.marker.getTitle()
-    position = bookmark.marker.getPosition()
+setInfoPage = (place, dropped) ->
+    $('#info-marker img:first-child').attr 'src', place.marker.getIcon()?.url ? 'http://maps.google.co.jp/mapfiles/ms/icons/red-dot.png'
+    title = place.marker.getTitle()
+    position = place.marker.getPosition()
     $('#info-name').text title
-    $('#bookmark-name input[name="bookmark-name"]').val if dropped then bookmark.address else title
-    $('#info-address').text bookmark.address
+    $('#bookmark-name input[name="bookmark-name"]').val if dropped then place.address else title
+    $('#info-address').text place.address
     # $('#delete-pin').css 'display', if dropped then 'block' else 'none'
     # The above was commented out because editing bookmark is not implemented yet.
     $('#send-place').attr 'href', "mailto:?subject=#{title}&body=<a href=\"https://maps.google.co.jp/maps?q=#{position.lat()},#{position.lng()}\">#{title}</a>"
 
 generateBookmarkList = ->
-    list = "<tr><td data-object-name=\"currentLocationMarker\">#{getLocalizedString 'Current Location'}</td></tr>"
-    list += "<tr><td data-object-name=\"droppedBookmark\">#{getLocalizedString 'Dropped Pin'}</td></tr>" if droppedBookmark.marker.getVisible()
+    list = "<tr><td data-object-name=\"currentPlace\">#{getLocalizedString 'Current Location'}</td></tr>"
+    list += "<tr><td data-object-name=\"droppedPlace\">#{getLocalizedString 'Dropped Pin'}</td></tr>" if droppedPlace.marker.getVisible()
     list += "<tr><td data-object-name=\"bookmarks[#{i}]\">#{e.marker.getTitle()}</td></tr>" for e, i in bookmarks
     list += Array(Math.max(1, Math.floor(innerHeight / pinRowHeight) - bookmarks.length)).join '<tr><td></td></tr>'
     $pinList.html list
@@ -519,16 +519,17 @@ initializeGoogleMaps = ->
         $('#navi-header2').css 'display', 'none'
         naviMarker.setVisible false
 
-    currentLocationMarker = new MarkerWithCircle
-        flat: true
-        icon: new google.maps.MarkerImage('img/bluedot.png', null, null, new google.maps.Point(8, 8), new google.maps.Size(17, 17))
-        map: map
-        optimized: false
-        position: mapOptions.center
-        title: 'I might be here'
-        visible: false
+    currentPlace = new Place new MarkerWithCircle(
+            flat: true
+            icon: new google.maps.MarkerImage('img/bluedot.png', null, null, new google.maps.Point(8, 8), new google.maps.Size(17, 17))
+            map: map
+            optimized: false
+            position: mapOptions.center
+            title: 'I might be here'
+            visible: false
+        ), ''
 
-    droppedBookmark = new Bookmark new google.maps.Marker(
+    droppedPlace = new Place new google.maps.Marker(
             animation: google.maps.Animation.DROP
             map: map
             icon: new google.maps.MarkerImage(PURPLE_DOT_IMAGE)
@@ -538,7 +539,7 @@ initializeGoogleMaps = ->
             visible: false
         ), ''
 
-    searchBookmark = new Bookmark new google.maps.Marker(
+    searchPlace = new Place new google.maps.Marker(
             animation: google.maps.Animation.DROP
             map: map
             position: mapOptions.center
@@ -565,17 +566,17 @@ initializeGoogleMaps = ->
             return if (position.left <= xy.x <= position.left + $infoWindow.width()) and (position.top <= xy.y <= position.top + $infoWindow.height())
                 
         infoWindow.close()
-        droppedBookmark.address = ''
-        droppedBookmark.marker.setPosition event.latLng
-        droppedBookmark.marker.setVisible true
-        droppedBookmark.marker.setAnimation google.maps.Animation.DROP
-        currentBookmark = droppedBookmark
+        droppedPlace.address = ''
+        droppedPlace.marker.setPosition event.latLng
+        droppedPlace.marker.setVisible true
+        droppedPlace.marker.setAnimation google.maps.Animation.DROP
+        placeContext = droppedPlace
 
-    google.maps.event.addListener droppedBookmark.marker, 'animation_changed', ->
-        droppedBookmark.showInfoWindow() if not this.getAnimation()? # animation property becomes undefined after animation ends
+    google.maps.event.addListener droppedPlace.marker, 'animation_changed', ->
+        droppedPlace.showInfoWindow() if not this.getAnimation()? # animation property becomes undefined after animation ends
 
-    google.maps.event.addListener searchBookmark.marker, 'animation_changed', ->
-        searchBookmark.showInfoWindow() if not this.getAnimation()? # animation property becomes undefined after animation ends
+    google.maps.event.addListener searchPlace.marker, 'animation_changed', ->
+        searchPlace.showInfoWindow() if not this.getAnimation()? # animation property becomes undefined after animation ends
 
     google.maps.event.addListener map, 'dragstart', -> mapFSM.setState MapState.NORMAL
     # The followings are a workaround for web app on home screen. As there is no onpagehide event, saves statuses when updated.
@@ -609,7 +610,7 @@ initializeDOM = ->
         if otherStatus.destination? and otherStatus.destination isnt ''
             updateField $destinationField, otherStatus.destination
         for e in otherStatus.bookmarks ? []
-            bookmarks.push new Bookmark new google.maps.Marker(
+            bookmarks.push new Place new google.maps.Marker(
                     map: map
                     position: new google.maps.LatLng e.lat, e.lng
                     title: e.title
@@ -656,10 +657,10 @@ initializeDOM = ->
         setTimeout (-> isHold = true), 500
         
     $map.on 'click', '#street-view', (event) ->
-        new google.maps.StreetViewService().getPanoramaByLocation currentBookmark.marker.getPosition(), 49, getPanoramaHandler
+        new google.maps.StreetViewService().getPanoramaByLocation placeContext.marker.getPosition(), 49, getPanoramaHandler
 
     $map.on 'click', '#button-info', (event) ->
-        setInfoPage(currentBookmark, currentBookmark is droppedBookmark)
+        setInfoPage(placeContext, placeContext is droppedPlace)
         $('#container').css 'right', '100%'
         
     # input with reset button
@@ -695,8 +696,8 @@ initializeDOM = ->
 
     $('#clear, #address .btn-reset').on 'click', ->
         setLocalExpressionInto 'done', 'Done'
-        searchBookmark.marker.setVisible false
-        infoWindow.setVisible false if currentBookmark is searchBookmark
+        searchPlace.marker.setVisible false
+        infoWindow.setVisible false if placeContext is searchPlace
         
 
     $naviHeader = $('#navi-header1')
@@ -812,8 +813,8 @@ initializeDOM = ->
         backToMap()
 
     $('#replace-pin').on 'click', ->
-        droppedBookmark.marker.setPosition map.getCenter()
-        droppedBookmark.marker.setVisible true
+        droppedPlace.marker.setPosition map.getCenter()
+        droppedPlace.marker.setVisible true
         backToMap()
 
     $('#print').on 'click', ->
@@ -852,31 +853,31 @@ initializeDOM = ->
                     searchDirections true
                 
         else # bookmark list
-            bookmarkOrMarker = eval(name)
+            place = eval(name)
             switch bookmarkContext
                 when 'address'
                     map.getStreetView().setVisible(false)
-                    if name is 'currentLocationMarker'
+                    if place is currentPlace
                         mapFSM.setState(MapState.TRACE_POSITION)
                     else
                         mapFSM.setState(MapState.NORMAL)
-                        updateField $addressField, bookmarkOrMarker.address if bookmarkOrMarker isnt droppedBookmark
-                        bookmarkOrMarker.marker.setVisible true
-                        map.setCenter bookmarkOrMarker.marker.getPosition()
-                        currentBookmark = bookmarkOrMarker
-                        bookmarkOrMarker.showInfoWindow()
+                        updateField $addressField, place.address if place isnt droppedPlace
+                        place.marker.setVisible true
+                        map.setCenter place.marker.getPosition()
+                        placeContext = place
+                        place.showInfoWindow()
                 when 'origin'
-                    updateField $originField, if name is 'currentLocationMarker'
-                            latLng = bookmarkOrMarker.getPosition()
+                    updateField $originField, if place is currentPlace
+                            latLng = place.getPosition()
                             "#{latLng.lat()}, #{latLng.lng()}"
                         else
-                            bookmarkOrMarker.address            
+                            place.address            
                 when 'destination'
-                    updateField $destinationField, if name is 'currentLocationMarker'
-                            latLng = bookmarkOrMarker.getPosition()
+                    updateField $destinationField, if place is currentPlace
+                            latLng = place.getPosition()
                             "#{latLng.lat()}, #{latLng.lng()}"
                         else
-                            bookmarkOrMarker.address            
+                            place.address            
 
         $bookmarkPage.css 'bottom', '-100%'
 
@@ -885,23 +886,23 @@ initializeDOM = ->
     $('#cancel-add-bookmark').on 'click', -> $('#add-bookmark-page').css 'top', ''
 
     $('#delete-pin').on 'click', ->
-        if currentBookmark is droppedBookmark
-            droppedBookmark.marker.setVisible false
+        if placeContext is droppedPlace
+            droppedPlace.marker.setVisible false
         else
-            index = bookmarks.indexOf currentBookmark
+            index = bookmarks.indexOf placeContext
             bookmarks.splice index, 1
-            currentBookmark.marker.setMap null
+            placeContext.marker.setMap null
         infoWindow.close()
         $('#container').css 'right', ''
         
     $('#save-bookmark').on 'click', ->
-        bookmark = new Bookmark new google.maps.Marker(
+        place = new Place new google.maps.Marker(
                 map: map
-                position: currentBookmark.marker.getPosition()
+                position: placeContext.marker.getPosition()
                 title: $('#bookmark-name input[name="bookmark-name"]').val()
             ), $('#info-address').text() 
-        bookmarks.push bookmark
-        bookmark.showInfoWindow()
+        bookmarks.push place
+        place.showInfoWindow()
         saveOtherStatus()
         $('#add-bookmark-page').css 'top', ''
         $('#container').css 'right', ''
@@ -931,13 +932,13 @@ initializeDOM = ->
                     generateHistoryList()
 
     $('#to-here').on 'click', ->
-        updateField $destinationField, currentBookmark.address
+        updateField $destinationField, placeContext.address
         $route.trigger 'click'
         $('#container').css 'right', ''
         openRouteForm()
         
     $('#from-here').on 'click', ->
-        updateField $originField, currentBookmark.address
+        updateField $originField, placeContext.address
         $route.trigger 'click'
         $('#container').css 'right', ''
         openRouteForm()
