@@ -573,6 +573,7 @@
         type: 'search',
         address: address
       });
+      saveOtherStatus();
     }
     return geocoder.geocode({
       address: address
@@ -646,6 +647,7 @@
         origin: origin,
         destination: destination
       });
+      saveOtherStatus();
     }
     travelMode = getTravelMode();
     return searchDirections.service.route({
@@ -1226,6 +1228,7 @@
       } else {
         index = bookmarks.indexOf(placeContext);
         bookmarks.splice(index, 1);
+        saveOtherStatus();
         placeContext.marker.setMap(null);
       }
       infoWindow.close();
@@ -1239,8 +1242,8 @@
         title: $('#bookmark-name input[name="bookmark-name"]').val()
       }), $('#info-address').text());
       bookmarks.push(place);
-      place.showInfoWindow();
       saveOtherStatus();
+      place.showInfoWindow();
       $('#add-bookmark-page').css('top', '');
       return $('#container').css('right', '');
     });

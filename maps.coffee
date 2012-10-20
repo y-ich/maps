@@ -328,6 +328,7 @@ searchAddress = (fromHistory) ->
         history.unshift
             type: 'search'
             address: address
+        saveOtherStatus()
     geocoder.geocode { address : address }, (result, status) ->
         if status is google.maps.GeocoderStatus.OK
             directionsRenderer.setMap null
@@ -378,6 +379,7 @@ searchDirections = (fromHistory = false) ->
             type: 'route'
             origin: origin
             destination: destination
+        saveOtherStatus()
     travelMode = getTravelMode()
     searchDirections.service.route
             destination: destination
@@ -905,6 +907,7 @@ initializeDOM = ->
         else
             index = bookmarks.indexOf placeContext
             bookmarks.splice index, 1
+            saveOtherStatus()
             placeContext.marker.setMap null
         infoWindow.close()
         $('#container').css 'right', ''
@@ -916,8 +919,8 @@ initializeDOM = ->
                 title: $('#bookmark-name input[name="bookmark-name"]').val()
             ), $('#info-address').text() 
         bookmarks.push place
-        place.showInfoWindow()
         saveOtherStatus()
+        place.showInfoWindow()
         $('#add-bookmark-page').css 'top', ''
         $('#container').css 'right', ''
 
