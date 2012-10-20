@@ -146,6 +146,13 @@ class Bookmark
     showInfoWindow: ->
         @setInfoWindow()
         infoWindow.open map, @marker
+        unless @address? and @address isnt ''
+            geocoder.geocode {latLng : @marker.getPosition() }, (result, status) =>
+                @address = if status is google.maps.GeocoderStatus.OK
+                        result[0].formatted_address.replace(/日本, /, '')
+                    else
+                        getLocalizedString 'No information'
+                @setInfoWindow()
         
     toObject: () ->
         pos = @marker.getPosition()
@@ -559,16 +566,10 @@ initializeGoogleMaps = ->
                 
         infoWindow.close()
         droppedBookmark.address = ''
-        droppedBookmark.marker.setVisible true
         droppedBookmark.marker.setPosition event.latLng
+        droppedBookmark.marker.setVisible true
         droppedBookmark.marker.setAnimation google.maps.Animation.DROP
         currentBookmark = droppedBookmark
-        geocoder.geocode {latLng : event.latLng }, (result, status) ->
-            droppedBookmark.address = if status is google.maps.GeocoderStatus.OK
-                    result[0].formatted_address.replace(/日本, /, '')
-                else
-                    getLocalizedString 'No information'
-            droppedBookmark.setInfoWindow()
 
     google.maps.event.addListener droppedBookmark.marker, 'animation_changed', ->
         droppedBookmark.showInfoWindow() if not this.getAnimation()? # animation property becomes undefined after animation ends

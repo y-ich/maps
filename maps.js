@@ -354,8 +354,17 @@
     };
 
     Bookmark.prototype.showInfoWindow = function() {
+      var _this = this;
       this.setInfoWindow();
-      return infoWindow.open(map, this.marker);
+      infoWindow.open(map, this.marker);
+      if (!((this.address != null) && this.address !== '')) {
+        return geocoder.geocode({
+          latLng: this.marker.getPosition()
+        }, function(result, status) {
+          _this.address = status === google.maps.GeocoderStatus.OK ? result[0].formatted_address.replace(/日本, /, '') : getLocalizedString('No information');
+          return _this.setInfoWindow();
+        });
+      }
     };
 
     Bookmark.prototype.toObject = function() {
@@ -841,16 +850,10 @@
       }
       infoWindow.close();
       droppedBookmark.address = '';
-      droppedBookmark.marker.setVisible(true);
       droppedBookmark.marker.setPosition(event.latLng);
+      droppedBookmark.marker.setVisible(true);
       droppedBookmark.marker.setAnimation(google.maps.Animation.DROP);
-      currentBookmark = droppedBookmark;
-      return geocoder.geocode({
-        latLng: event.latLng
-      }, function(result, status) {
-        droppedBookmark.address = status === google.maps.GeocoderStatus.OK ? result[0].formatted_address.replace(/日本, /, '') : getLocalizedString('No information');
-        return droppedBookmark.setInfoWindow();
-      });
+      return currentBookmark = droppedBookmark;
     });
     google.maps.event.addListener(droppedBookmark.marker, 'animation_changed', function() {
       if (!(this.getAnimation() != null)) {
