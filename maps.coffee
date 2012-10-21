@@ -141,10 +141,21 @@ class Place
     setInfoWindow: ->
         infoWindow.setContent """
                               <table id="info-window"><tr>
-                                <td><button id="street-view" class="btn btn-mini#{if @svLatLng? then ' btn-primary' else ''}"><i class="icon-user icon-white"></i></button></td>
-                                <td style="white-space: nowrap;"><div style="max-width:160px;overflow:hidden;">#{@marker.getTitle()}<br><span id="dropped-message" style="font-size:10px">#{@address}</span></div></td>
-                                <td><button id="button-info" class="btn btn-mini btn-light"><i class="icon-chevron-right icon-white"></i></button></td>
-                              </tr></table>
+                                  <td>
+                                      <button id="street-view" class="btn btn-mini#{if @svLatLng? then ' btn-primary' else ''}">
+                                          <i class="icon-user icon-white"></i>
+                                      </button>
+                                  </td>
+                                  <td style="white-space: nowrap;"><div style="max-width:160px;overflow:hidden;">#{@marker.getTitle()}<br><span id="dropped-message" style="font-size:10px">#{@address}</span></div></td>
+                                  <td>
+                                      <button id="button-info" class="btn btn-mini btn-light">
+                                          <i class="icon-chevron-right icon-white"></i>
+                                      </button>
+                                  </td>
+                                  </tr>
+                              </table>
+                              <div id="street-view-real" class="button-wrapper wrapper-left"></div>
+                              <div id="button-info-real" class="button-wrapper wrapper-right"></div>
                               """
 
     showInfoWindow: ->
@@ -503,7 +514,7 @@ initializeGoogleMaps = ->
         maxWidth: Math.floor innerWidth*0.9
 
     google.maps.event.addListener infoWindow, 'domready', ->
-        $('#street-view').on 'click' , (event) ->
+        $('#street-view-real').on 'click' , (event) ->
             if placeContext.svLatLng?
                 sv = map.getStreetView()
                 sv.setPosition placeContext.svLatLng
@@ -513,7 +524,7 @@ initializeGoogleMaps = ->
                     zoom: 1
                 sv.setVisible true
 
-        $('#button-info').on 'click', (event) ->
+        $('#button-info-real').on 'click', (event) ->
             setInfoPage(placeContext, placeContext is droppedPlace)
             $('#container').css 'right', '100%'
         
@@ -573,7 +584,7 @@ initializeGoogleMaps = ->
         if $infoWindow.length > 0
             xy = infoWindow.getProjection().fromLatLngToDivPixel event.latLng
             position = $infoWindow.position()
-            return if (position.left <= xy.x <= position.left + $infoWindow.width()) and (position.top <= xy.y <= position.top + $infoWindow.height())
+            return if (position.left <= xy.x <= position.left + $infoWindow.outerWidth(true)) and (position.top <= xy.y <= position.top + $infoWindow.outerHeight(true))
                 
         infoWindow.close()
         droppedPlace.address = ''

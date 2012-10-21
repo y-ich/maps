@@ -359,7 +359,7 @@
     }
 
     Place.prototype.setInfoWindow = function() {
-      return infoWindow.setContent("<table id=\"info-window\"><tr>\n  <td><button id=\"street-view\" class=\"btn btn-mini" + (this.svLatLng != null ? ' btn-primary' : '') + "\"><i class=\"icon-user icon-white\"></i></button></td>\n  <td style=\"white-space: nowrap;\"><div style=\"max-width:160px;overflow:hidden;\">" + (this.marker.getTitle()) + "<br><span id=\"dropped-message\" style=\"font-size:10px\">" + this.address + "</span></div></td>\n  <td><button id=\"button-info\" class=\"btn btn-mini btn-light\"><i class=\"icon-chevron-right icon-white\"></i></button></td>\n</tr></table>");
+      return infoWindow.setContent("<table id=\"info-window\"><tr>\n    <td>\n        <button id=\"street-view\" class=\"btn btn-mini" + (this.svLatLng != null ? ' btn-primary' : '') + "\">\n            <i class=\"icon-user icon-white\"></i>\n        </button>\n    </td>\n    <td style=\"white-space: nowrap;\"><div style=\"max-width:160px;overflow:hidden;\">" + (this.marker.getTitle()) + "<br><span id=\"dropped-message\" style=\"font-size:10px\">" + this.address + "</span></div></td>\n    <td>\n        <button id=\"button-info\" class=\"btn btn-mini btn-light\">\n            <i class=\"icon-chevron-right icon-white\"></i>\n        </button>\n    </td>\n    </tr>\n</table>\n<div id=\"street-view-real\" class=\"button-wrapper wrapper-left\"></div>\n<div id=\"button-info-real\" class=\"button-wrapper wrapper-right\"></div>");
     };
 
     Place.prototype.showInfoWindow = function() {
@@ -793,7 +793,7 @@
       maxWidth: Math.floor(innerWidth * 0.9)
     });
     google.maps.event.addListener(infoWindow, 'domready', function() {
-      $('#street-view').on('click', function(event) {
+      $('#street-view-real').on('click', function(event) {
         var sv, _ref5;
         if (placeContext.svLatLng != null) {
           sv = map.getStreetView();
@@ -806,7 +806,7 @@
           return sv.setVisible(true);
         }
       });
-      return $('#button-info').on('click', function(event) {
+      return $('#button-info-real').on('click', function(event) {
         setInfoPage(placeContext, placeContext === droppedPlace);
         return $('#container').css('right', '100%');
       });
@@ -864,7 +864,7 @@
       if ($infoWindow.length > 0) {
         xy = infoWindow.getProjection().fromLatLngToDivPixel(event.latLng);
         position = $infoWindow.position();
-        if (((position.left <= (_ref5 = xy.x) && _ref5 <= position.left + $infoWindow.width())) && ((position.top <= (_ref6 = xy.y) && _ref6 <= position.top + $infoWindow.height()))) {
+        if (((position.left <= (_ref5 = xy.x) && _ref5 <= position.left + $infoWindow.outerWidth(true))) && ((position.top <= (_ref6 = xy.y) && _ref6 <= position.top + $infoWindow.outerHeight(true)))) {
           return;
         }
       }

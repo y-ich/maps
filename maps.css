@@ -220,6 +220,22 @@ img.icon {
     border: 1px solid white;
 }
 
+.info-window .button-wrapper {
+    position: absolute;
+    width: 25px;
+    height: 100%;
+    border: 1px solid black;
+    top: -1px;
+}
+
+.info-window .button-wrapper.wrapper-left {
+    left: 0;
+}
+
+.info-window .button-wrapper.wrapper-right {
+    right: 0;
+}
+
 #street-view {
     background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(249,205,158)), to(rgb(210,49,0)));
     opacity: 0.5;
