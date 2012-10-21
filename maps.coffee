@@ -132,6 +132,18 @@ for name, method of MapState.prototype when typeof method is 'function'
 # place
 class Place
     @streetViewService: new google.maps.StreetViewService()
+    @streetViewButtonWrapper: $('<div class="button-wrapper wrapper-left"></div>').on('click', ->
+        if placeContext.svLatLng?
+            sv = map.getStreetView()
+            sv.setPosition placeContext.svLatLng
+            sv.setPov
+                heading: map.getHeading() ? 0
+                pitch: 0
+                zoom: 1
+            sv.setVisible true)
+    @infoButtonWrapper: $('<div class="button-wrapper wrapper-right"></div>').on('click', ->
+        setInfoPage(placeContext, placeContext is droppedPlace)
+        $('#container').css 'right', '100%')
 
     constructor: (@marker, @address) ->
         google.maps.event.addListener @marker, 'click', (event) =>
@@ -139,24 +151,24 @@ class Place
             @showInfoWindow()
 
     setInfoWindow: ->
-        infoWindow.setContent """
-                              <table id="info-window"><tr>
-                                  <td>
-                                      <button id="street-view" class="btn btn-mini#{if @svLatLng? then ' btn-primary' else ''}">
-                                          <i class="icon-user icon-white"></i>
-                                      </button>
-                                  </td>
-                                  <td style="white-space: nowrap;"><div style="max-width:160px;overflow:hidden;">#{@marker.getTitle()}<br><span id="dropped-message" style="font-size:10px">#{@address}</span></div></td>
-                                  <td>
-                                      <button id="button-info" class="btn btn-mini btn-light">
-                                          <i class="icon-chevron-right icon-white"></i>
-                                      </button>
-                                  </td>
-                                  </tr>
-                              </table>
-                              <div id="street-view-real" class="button-wrapper wrapper-left"></div>
-                              <div id="button-info-real" class="button-wrapper wrapper-right"></div>
-                              """
+        $container = $('<div>')
+        $container.html """
+                        <table id="info-window"><tr>
+                            <td>
+                                <button id="street-view" class="btn btn-mini#{if @svLatLng? then ' btn-primary' else ''}">
+                                    <i class="icon-user icon-white"></i>
+                                </button>
+                            </td>
+                            <td style="white-space: nowrap;"><div style="max-width:160px;overflow:hidden;">#{@marker.getTitle()}<br><span id="dropped-message" style="font-size:10px">#{@address}</span></div></td>
+                            <td>
+                                <button id="button-info" class="btn btn-mini btn-light">
+                                    <i class="icon-chevron-right icon-white"></i>
+                                </button>
+                            </td>
+                        </tr></table>
+                        """
+        infoWindow.setContent $container.append(Place.streetViewButtonWrapper, Place.infoButtonWrapper)[0]
+        
 
     showInfoWindow: ->
         @setInfoWindow()
@@ -513,21 +525,6 @@ initializeGoogleMaps = ->
     infoWindow = new MobileInfoWindow
         maxWidth: Math.floor innerWidth*0.9
 
-    google.maps.event.addListener infoWindow, 'domready', ->
-        $('#street-view-real').on 'click' , (event) ->
-            if placeContext.svLatLng?
-                sv = map.getStreetView()
-                sv.setPosition placeContext.svLatLng
-                sv.setPov
-                    heading: map.getHeading() ? 0
-                    pitch: 0
-                    zoom: 1
-                sv.setVisible true
-
-        $('#button-info-real').on 'click', (event) ->
-            setInfoPage(placeContext, placeContext is droppedPlace)
-            $('#container').css 'right', '100%'
-        
     directionsRenderer = new google.maps.DirectionsRenderer
         hideRouteList: false
         infoWindow: infoWindow

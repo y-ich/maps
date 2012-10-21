@@ -21,6 +21,7 @@ class MobileInfoWindow extends google.maps.OverlayView
         if typeof @content is 'string'
             @element.innerHTML = @content
         else
+            @element.innerHTML = ''
             @element.appendChild @content
         google.maps.event.trigger this, 'content_changed'
         

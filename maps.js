@@ -36,6 +36,7 @@
       if (typeof this.content === 'string') {
         this.element.innerHTML = this.content;
       } else {
+        this.element.innerHTML = '';
         this.element.appendChild(this.content);
       }
       return google.maps.event.trigger(this, 'content_changed');
@@ -348,6 +349,25 @@
 
     Place.streetViewService = new google.maps.StreetViewService();
 
+    Place.streetViewButtonWrapper = $('<div class="button-wrapper wrapper-left"></div>').on('click', function() {
+      var sv, _ref2;
+      if (placeContext.svLatLng != null) {
+        sv = map.getStreetView();
+        sv.setPosition(placeContext.svLatLng);
+        sv.setPov({
+          heading: (_ref2 = map.getHeading()) != null ? _ref2 : 0,
+          pitch: 0,
+          zoom: 1
+        });
+        return sv.setVisible(true);
+      }
+    });
+
+    Place.infoButtonWrapper = $('<div class="button-wrapper wrapper-right"></div>').on('click', function() {
+      setInfoPage(placeContext, placeContext === droppedPlace);
+      return $('#container').css('right', '100%');
+    });
+
     function Place(marker, address) {
       var _this = this;
       this.marker = marker;
@@ -359,7 +379,10 @@
     }
 
     Place.prototype.setInfoWindow = function() {
-      return infoWindow.setContent("<table id=\"info-window\"><tr>\n    <td>\n        <button id=\"street-view\" class=\"btn btn-mini" + (this.svLatLng != null ? ' btn-primary' : '') + "\">\n            <i class=\"icon-user icon-white\"></i>\n        </button>\n    </td>\n    <td style=\"white-space: nowrap;\"><div style=\"max-width:160px;overflow:hidden;\">" + (this.marker.getTitle()) + "<br><span id=\"dropped-message\" style=\"font-size:10px\">" + this.address + "</span></div></td>\n    <td>\n        <button id=\"button-info\" class=\"btn btn-mini btn-light\">\n            <i class=\"icon-chevron-right icon-white\"></i>\n        </button>\n    </td>\n    </tr>\n</table>\n<div id=\"street-view-real\" class=\"button-wrapper wrapper-left\"></div>\n<div id=\"button-info-real\" class=\"button-wrapper wrapper-right\"></div>");
+      var $container;
+      $container = $('<div>');
+      $container.html("<table id=\"info-window\"><tr>\n    <td>\n        <button id=\"street-view\" class=\"btn btn-mini" + (this.svLatLng != null ? ' btn-primary' : '') + "\">\n            <i class=\"icon-user icon-white\"></i>\n        </button>\n    </td>\n    <td style=\"white-space: nowrap;\"><div style=\"max-width:160px;overflow:hidden;\">" + (this.marker.getTitle()) + "<br><span id=\"dropped-message\" style=\"font-size:10px\">" + this.address + "</span></div></td>\n    <td>\n        <button id=\"button-info\" class=\"btn btn-mini btn-light\">\n            <i class=\"icon-chevron-right icon-white\"></i>\n        </button>\n    </td>\n</tr></table>");
+      return infoWindow.setContent($container.append(Place.streetViewButtonWrapper, Place.infoButtonWrapper)[0]);
     };
 
     Place.prototype.showInfoWindow = function() {
@@ -791,25 +814,6 @@
     geocoder = new google.maps.Geocoder();
     infoWindow = new MobileInfoWindow({
       maxWidth: Math.floor(innerWidth * 0.9)
-    });
-    google.maps.event.addListener(infoWindow, 'domready', function() {
-      $('#street-view-real').on('click', function(event) {
-        var sv, _ref5;
-        if (placeContext.svLatLng != null) {
-          sv = map.getStreetView();
-          sv.setPosition(placeContext.svLatLng);
-          sv.setPov({
-            heading: (_ref5 = map.getHeading()) != null ? _ref5 : 0,
-            pitch: 0,
-            zoom: 1
-          });
-          return sv.setVisible(true);
-        }
-      });
-      return $('#button-info-real').on('click', function(event) {
-        setInfoPage(placeContext, placeContext === droppedPlace);
-        return $('#container').css('right', '100%');
-      });
     });
     directionsRenderer = new google.maps.DirectionsRenderer({
       hideRouteList: false,
