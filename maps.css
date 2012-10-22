@@ -259,8 +259,14 @@ img.icon {
 /* disable tracing heading, so commented out the below. */
 /*    left: 50%; /* for centering. margin will be defined by javascript. */
 /*    top: 50%; /* for centering. margin will be defined by javascript. */ 
-    -webkit-transition: -webkit-transform 0.1s;
+/*    -webkit-transition: -webkit-transform 0.1s; */
     -webkit-transition: top 0.5s;
+}
+
+#map.streetview {
+    top: 0px;
+    height: 100%;
+    z-index: 1;
 }
 
 #map img {
