@@ -228,13 +228,13 @@ ordinal = (n) ->
 
 # getRouteindexMessage, getDepartAtMessage, getArriveAtMessage should be defined in js for localization.
 
-getRouteIndexMessage = window.getRouteIndexMessage ? (index, total) ->
+window.getRouteIndexMessage ?= (index, total) ->
     "#{ordinal(index + 1)} of #{total} Suggested Routes"
 
-getDepartAtMessage = window.getDepartAtMessage ? (time) ->
+window.getDepartAtMessage ?= (time) ->
     'Departs at ' + time
 
-getArriveAtMessage = window.getArriveAtMessage ? (time) ->
+window.getArriveAtMessage ?= (time) ->
     'Arrives at ' + time
     
 getLocalizedString = (key) ->
