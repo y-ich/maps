@@ -134,9 +134,7 @@ class Place
     @streetViewService: new google.maps.StreetViewService()
     @streetViewButtonWrapper: $('<div class="button-wrapper wrapper-left"></div>').on('click', ->
         if placeContext.svLatLng?
-            $map.addClass('streetview')
-                .css('top', '')
-                .css('height', '')
+            $map.addClass 'streetview'
             sv = map.getStreetView()
             sv.setPosition placeContext.svLatLng
             sv.setPov
@@ -469,13 +467,6 @@ navigate.step = null
 
 # DOM treat
 
-fitMapBewteenHeaderAndFooter = ->
-    visibleSearchHeaderHeight = $('#search-header').outerHeight(true) + parseInt $('#search-header').css 'top'
-    $map.css 'top', visibleSearchHeaderHeight + 'px'
-    height = innerHeight - visibleSearchHeaderHeight - $('#footer').outerHeight(true)
-    $map.height height
-    $('#directions-panel').height height
-
 # updates an input field with bookmark button
 updateField = ($field, str) ->
     $field.val(str)
@@ -615,7 +606,6 @@ initializeGoogleMaps = ->
     google.maps.event.addListener map.getStreetView(), 'visible_changed', ->
         unless @getVisible()
             $map.removeClass 'streetview'
-            fitMapBewteenHeaderAndFooter() 
             
 initializeDOM = ->
     # initializes global variables
@@ -666,8 +656,6 @@ initializeDOM = ->
         # $map.width(squareSize)
         #     .height(squareSize)
         #     .css('margin', - squareSize / 2 + 'px')
-        # fits map between header and footer
-        fitMapBewteenHeaderAndFooter()
         # fits list frame between header and footer. should be rewritten.
         $('#pin-list-frame').css 'height', innerHeight - mapSum($('#bookmark-page > div:not(#pin-list-frame)').toArray(), (e) -> $(e).outerHeight(true)) + 'px'
         document.body.scrollLeft = 0 unless /iPhone/.test(navigator.userAgent) and /Safari/.test(navigator.userAgent) # Rotation back to portait causes slight left slide of page. correct it. 

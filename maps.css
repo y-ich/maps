@@ -254,8 +254,9 @@ img.icon {
 
 #map {
     position: absolute;
-    top: 44px; /* $('#search-header .toolbar').outerHeight() */
     width: 100%;
+    top: 44px; /* $('#search-header .toolbar').outerHeight(true) */
+    bottom: 46px; /* $('#footer').outerHeight(true) */
 /* disable tracing heading, so commented out the below. */
 /*    left: 50%; /* for centering. margin will be defined by javascript. */
 /*    top: 50%; /* for centering. margin will be defined by javascript. */ 
@@ -265,7 +266,7 @@ img.icon {
 
 #map.streetview {
     top: 0px;
-    height: 100%;
+    bottom: 0px;
     z-index: 1;
 }
 
@@ -284,8 +285,9 @@ img.icon {
 #directions-panel {
     background-color: white;
     position: absolute;
-    top: 44px;
     width: 100%;
+    top: 44px;
+    bottom: 46px;
     overflow: scroll;
     -webkit-transition: top 0.5s;
 }
