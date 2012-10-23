@@ -53,7 +53,7 @@ tracer =
     id: null
     start: ->
         @id = navigator.geolocation.watchPosition @success
-            , ((error) -> console.log error.message)
+            , ((error) -> console.log error.message + '(' + error.code + ')')
             ,
                 enableHighAccuracy: true
                 timeout: 30000
@@ -647,28 +647,15 @@ initializeDOM = ->
 
     $(document.body).css 'display', 'block'
     
-    # layouts dynamically
-    layout = ->
-        $('#option-page').css 'bottom', $('#footer').outerHeight(true)
-        # disabled heading trace
-        # makes map large square for rotation of heading
-        # squareSize = Math.floor(Math.sqrt(Math.pow(innerWidth, 2) + Math.pow(innerHeight, 2)))
-        # $map.width(squareSize)
-        #     .height(squareSize)
-        #     .css('margin', - squareSize / 2 + 'px')
-        # fits list frame between header and footer. should be rewritten.
-        $('#pin-list-frame').css 'height', innerHeight - mapSum($('#bookmark-page > div:not(#pin-list-frame)').toArray(), (e) -> $(e).outerHeight(true)) + 'px'
-        document.body.scrollLeft = 0 unless /iPhone/.test(navigator.userAgent) and /Safari/.test(navigator.userAgent) # Rotation back to portait causes slight left slide of page. correct it. 
-        # The above work around caused that address bar disappear to upper on iPhone.
-        # I don't know any consistent work around, so gave up to correct slide on iPhone Safari.
-    layout()
-    
     #
     # event handlers
     #
 
-    window.addEventListener 'resize', layout
-
+    window.addEventListener 'orientationchange', ->
+        document.body.scrollLeft = 0 unless /iPhone/.test(navigator.userAgent) and /Safari/.test(navigator.userAgent) # Rotation back to portait causes slight left slide of page. correct it. 
+        # The above work around caused that address bar disappear to upper on iPhone.
+        # I don't know any consistent work around, so gave up to correct slide on iPhone Safari.
+ 
     $map.on 'touchstart', ->
         isHold = false
         setTimeout (-> isHold = true), 500
@@ -778,18 +765,21 @@ initializeDOM = ->
 
     backToMap = ->
         $map.css 'top', ''
+        $map.css 'bottom', ''
         $('#directions-panel').css 'top', ''
+        $('#directions-panel').css 'bottom', ''
         $option.removeClass 'btn-primary'
         
     $option = $('#option')
     $option.on 'click', ->
-        $('#option-page').css 'display', 'block' # option-page is not visible in order to let startup clear.
-
+        $('#option-page').css 'display', 'block'
         if $option.hasClass 'btn-primary'
             backToMap()
         else
-            $map.css 'top', $('#search-header .toolbar').outerHeight() - $('#option-page').outerHeight(true) + 'px'
-            $('#directions-panel').css 'top', $('#directions-header').outerHeight() - $('#option-page').outerHeight(true) + 'px'
+            $map.css 'top', $('#search-header .toolbar').outerHeight(true) - $('#option-page').outerHeight(true) + 'px'
+            $map.css 'bottom', $('#footer').outerHeight(true) + $('#option-page').outerHeight(true) + 'px'
+            $('#directions-panel').css 'top', $('#directions-header').outerHeight(true) - $('#option-page').outerHeight(true) + 'px'
+            $('#directions-panel').css 'bottom', $('#footer').outerHeight(true) + $('#option-page').outerHeight(true) + 'px'
             $option.addClass 'btn-primary'
 
     $mapType = $('#map-type')

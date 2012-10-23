@@ -225,7 +225,7 @@
     id: null,
     start: function() {
       return this.id = navigator.geolocation.watchPosition(this.success, (function(error) {
-        return console.log(error.message);
+        return console.log(error.message + '(' + error.code + ')');
       }), {
         enableHighAccuracy: true,
         timeout: 30000
@@ -910,7 +910,7 @@
   };
 
   initializeDOM = function() {
-    var $bookmarkPage, $edit, $mapType, $naviHeader, $option, $panoramio, $route, $routeSearchFrame, $search, $traffic, $travelMode, $versatile, backToMap, e, layout, openRouteForm, otherStatus, panoramioLayer, trafficLayer, _i, _len, _ref5, _ref6, _ref7;
+    var $bookmarkPage, $edit, $mapType, $naviHeader, $option, $panoramio, $route, $routeSearchFrame, $search, $traffic, $travelMode, $versatile, backToMap, e, openRouteForm, otherStatus, panoramioLayer, trafficLayer, _i, _len, _ref5, _ref6, _ref7;
     $map = $('#map');
     $gps = $('#gps');
     $addressField = $('#address input[name="address"]');
@@ -947,17 +947,11 @@
     }
     localize();
     $(document.body).css('display', 'block');
-    layout = function() {
-      $('#option-page').css('bottom', $('#footer').outerHeight(true));
-      $('#pin-list-frame').css('height', innerHeight - mapSum($('#bookmark-page > div:not(#pin-list-frame)').toArray(), function(e) {
-        return $(e).outerHeight(true);
-      }) + 'px');
+    window.addEventListener('orientationchange', function() {
       if (!(/iPhone/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent))) {
         return document.body.scrollLeft = 0;
       }
-    };
-    layout();
-    window.addEventListener('resize', layout);
+    });
     $map.on('touchstart', function() {
       isHold = false;
       return setTimeout((function() {
@@ -1088,7 +1082,9 @@
     });
     backToMap = function() {
       $map.css('top', '');
+      $map.css('bottom', '');
       $('#directions-panel').css('top', '');
+      $('#directions-panel').css('bottom', '');
       return $option.removeClass('btn-primary');
     };
     $option = $('#option');
@@ -1097,8 +1093,10 @@
       if ($option.hasClass('btn-primary')) {
         return backToMap();
       } else {
-        $map.css('top', $('#search-header .toolbar').outerHeight() - $('#option-page').outerHeight(true) + 'px');
-        $('#directions-panel').css('top', $('#directions-header').outerHeight() - $('#option-page').outerHeight(true) + 'px');
+        $map.css('top', $('#search-header .toolbar').outerHeight(true) - $('#option-page').outerHeight(true) + 'px');
+        $map.css('bottom', $('#footer').outerHeight(true) + $('#option-page').outerHeight(true) + 'px');
+        $('#directions-panel').css('top', $('#directions-header').outerHeight(true) - $('#option-page').outerHeight(true) + 'px');
+        $('#directions-panel').css('bottom', $('#footer').outerHeight(true) + $('#option-page').outerHeight(true) + 'px');
         return $option.addClass('btn-primary');
       }
     });
