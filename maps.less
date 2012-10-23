@@ -3,7 +3,9 @@
 # Copyright (C) ICHIKAWA, Yuji (New 3 Rs) 2012
 */
 
-@header-height: 44px; // $('#search-header .toolbar').outerHeight(true)
+@header-height: 42px;
+@header-border: 1px;
+@header-outer-height: (@header-height + @header-border * 2);
 @footer-height: 46px; // $('#footer').outerHeight(true)
 
 html, body {
@@ -63,7 +65,7 @@ h5 {
     color: white;
     width: 100%;
     position: relative;
-    min-height: 42px;
+    min-height: @header-height;
     border-top: 1px solid rgb(204,213,224);	
     border-bottom: 1px solid rgb(71,85,104);
     background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(174,187,206)), color-stop(0.5, rgb(133,154,180)), color-stop(0.5, rgb(126,148,176)), to(rgb(120,143,172)));
@@ -76,29 +78,25 @@ h5 {
 }
 
 .mynavbar table.layout td, .toolbar table.layout td {
-    height: 42px; /* min-height of td */
+    height: @header-height;
     text-align: center;
     vertical-align: middle;
 }
 
 .mynavbar table.layout td:first-child, .toolbar table.layout td:first-child {
     width: 100px;
-    height: 42px; /* min-height of td */
     text-align: left;
     padding-left: 4px;
-    vertical-align: middle;
 }
 
 .mynavbar table.layout td:last-child, .toolbar table.layout td:last-child {
     width: 100px;
-    height: 42px; /* min-height of td */
     text-align: right;
     padding-right: 4px;
-    vertical-align: middle;
 }
 
 #footer.mynavbar td:first-child, #footer.mynavbar td:last-child, #nav-bookmark.mynavbar td:first-child, #nav-bookmark.mynavbar td:last-child {
-    width: 50px; /* side width is reduced because center button group is large in footer */
+    width: 50px; /* width of both side is reduced because center button group is large in footer */
 }
 
 /* gloss */
@@ -116,7 +114,7 @@ h5 {
 .toolbar {
     width: 100%;
     position: relative;
-    min-height: 42px;
+    min-height: @header-height;
     border-top: 1px solid rgb(147,164,189);	
     border-bottom: 1px solid rgb(43,53,67);			
     background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(120,142,171)), to(rgb(107,131,163)));
@@ -258,7 +256,7 @@ img.icon {
 #map {
     position: absolute;
     width: 100%;
-    top: @header-height; 
+    top: @header-outer-height;
     bottom: @footer-height;
 /* disable tracing heading, so commented out the below. */
 /*    left: 50%; /* for centering. margin will be defined by javascript. */
@@ -289,7 +287,7 @@ img.icon {
     background-color: white;
     position: absolute;
     width: 100%;
-    top: @header-height;
+    top: @header-outer-height;
     bottom: @footer-height;
     overflow: scroll;
     -webkit-transition: top 0.5s, bottom 0.5s;
@@ -361,7 +359,7 @@ img.icon {
 }
 
 #search, #route {
-width: 100px;
+    width: 100px;
 }
 
 #option-page {
