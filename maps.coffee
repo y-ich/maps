@@ -15,6 +15,8 @@ DEFAULT_ICON_SIZE = 32
 map = null
 geocoder = null
 directionsRenderer = null
+trafficLayer = null
+panoramioLayer = null
 
 currentPlace = null # is a pin of current position
 naviMarker = null # is a pin navigating a route.
@@ -607,6 +609,17 @@ initializeGoogleMaps = ->
         unless @getVisible()
             $map.removeClass 'streetview'
             
+    trafficLayer = new google.maps.TrafficLayer()
+
+    panoramioLayer = new google.maps.panoramio.PanoramioLayer
+        suppressInfoWindows: true
+
+    google.maps.event.addListener panoramioLayer, 'click', (event) ->
+        infoWindow.setPosition event.latLng
+        infoWindow.setContent event.infoWindowHtml
+        infoWindow.open map
+
+
 initializeDOM = ->
     # initializes global variables
     $map = $('#map')
@@ -802,7 +815,6 @@ initializeDOM = ->
         backToMap()
 
     $traffic = $('#traffic')
-    trafficLayer = new google.maps.TrafficLayer()
     $traffic.on 'click', ->
         if $traffic.text() is getLocalizedString 'Show Traffic'
             trafficLayer.setMap map
@@ -813,7 +825,6 @@ initializeDOM = ->
         backToMap()
 
     $panoramio = $('#panoramio')
-    panoramioLayer = new google.maps.panoramio.PanoramioLayer()
     $panoramio.on 'click', ->
         if $panoramio.text() is getLocalizedString 'Show Panoramio'
             panoramioLayer.setMap map
