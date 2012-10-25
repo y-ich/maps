@@ -51,7 +51,7 @@ class MobileInfoWindow extends google.maps.OverlayView
         @maxWidth = options.maxWidth ? null
         @setContent options.content ? ''
         @disableAutoPan = options.disableAutoPan ? null
-        @pixelOffset = options.pixelOffset ? google.maps.Size 0, 0, 'px', 'px'
+        @pixelOffset = options.pixelOffset ? new google.maps.Size 0, 0, 'px', 'px'
         @setPosition options.position ? null
         @setZIndex options.zIndex ? 0
         
