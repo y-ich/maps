@@ -660,6 +660,8 @@ initializeDOM = ->
     
 
     $(document.body).css 'display', 'block'
+    window.scrollTo 0, 0
+    $('html, body').height innerHeight if /iPhone/.test(navigator.userAgent) and /Safari/.test(navigator.userAgent)
     
     #
     # event handlers
@@ -692,6 +694,13 @@ initializeDOM = ->
     
     $gps.on 'click', -> mapFSM.gpsClicked()
             
+    $('input').on 'focus', ->
+        left = document.body.scrollLeft
+        setTimeout (-> window.scrollTo left, 0), 0
+
+    $('input').on 'blur', ->
+        left = document.body.scrollLeft
+        window.scrollTo left, 0
 
     # search header
 

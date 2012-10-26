@@ -962,6 +962,10 @@
     }
     localize();
     $(document.body).css('display', 'block');
+    window.scrollTo(0, 0);
+    if (/iPhone/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent)) {
+      $('html, body').height(innerHeight);
+    }
     window.addEventListener('orientationchange', function() {
       if (!(/iPhone/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent))) {
         return document.body.scrollLeft = 0;
@@ -993,6 +997,18 @@
     });
     $gps.on('click', function() {
       return mapFSM.gpsClicked();
+    });
+    $('input').on('focus', function() {
+      var left;
+      left = document.body.scrollLeft;
+      return setTimeout((function() {
+        return window.scrollTo(left, 0);
+      }), 0);
+    });
+    $('input').on('blur', function() {
+      var left;
+      left = document.body.scrollLeft;
+      return window.scrollTo(left, 0);
     });
     $addressField.on('focus', function() {
       return $('#search-header').css('top', '0');
