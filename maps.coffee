@@ -37,6 +37,7 @@ $message = null
 
 # layout parameter
 pinRowHeight = null
+scrollLeft = false
 
 # state variables
 mapFSM = null
@@ -147,6 +148,7 @@ class Place
     @infoButtonWrapper: $('<div class="button-wrapper wrapper-right"></div>').on('click', ->
             setInfoPage(placeContext, placeContext is droppedPlace)
             $('body').animate {scrollLeft: innerWidth}, 1000
+            scrollLeft = true
         )
 
     constructor: (@marker, @address) ->
@@ -660,18 +662,18 @@ initializeDOM = ->
     
 
     $(document.body).css 'display', 'block'
-    window.scrollTo 0, 0
-    $('html, body').height innerHeight if /iPhone/.test(navigator.userAgent) and /Safari/.test(navigator.userAgent)
-    
+    if /iPhone/.test(navigator.userAgent) and /Safari/.test(navigator.userAgent)
+        window.scrollTo 0, 0
+        $('html, body').height innerHeight
+
     #
     # event handlers
     #
 
     window.addEventListener 'orientationchange', ->
-        document.body.scrollLeft = 0 unless /iPhone/.test(navigator.userAgent) and /Safari/.test(navigator.userAgent) # Rotation back to portait causes slight left slide of page. correct it. 
-        # The above work around caused that address bar disappear to upper on iPhone.
-        # I don't know any consistent work around, so gave up to correct slide on iPhone Safari.
+        document.body.scrollLeft = if scrollLeft then innerWidth else 0
  
+    # hold detection
     $map.on 'touchstart', ->
         isHold = false
         setTimeout (-> isHold = true), 500
@@ -850,7 +852,9 @@ initializeDOM = ->
         setTimeout window.print, 0
         backToMap()
         
-    $('#button-map').on 'click', -> $('body').animate {scrollLeft: 0}, 1000
+    $('#button-map').on 'click', ->
+        $('body').animate {scrollLeft: 0}, 1000
+        scrollLeft = false
         
     $bookmarkPage = $('#bookmark-page')    
     $('.btn-bookmark').on 'click', ->
