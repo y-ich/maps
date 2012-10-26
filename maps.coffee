@@ -145,8 +145,9 @@ class Place
                 zoom: 1
             sv.setVisible true)
     @infoButtonWrapper: $('<div class="button-wrapper wrapper-right"></div>').on('click', ->
-        setInfoPage(placeContext, placeContext is droppedPlace)
-        $('#container').css 'right', '100%')
+            setInfoPage(placeContext, placeContext is droppedPlace)
+            $('body').animate {scrollLeft: innerWidth}, 1000
+        )
 
     constructor: (@marker, @address) ->
         google.maps.event.addListener @marker, 'click', (event) =>
@@ -844,8 +845,7 @@ initializeDOM = ->
         setTimeout window.print, 0
         backToMap()
         
-    $('#button-map').on 'click', ->
-        $('#container').css 'right', ''
+    $('#button-map').on 'click', -> $('body').animate {scrollLeft: 0}, 1000
         
     $bookmarkPage = $('#bookmark-page')    
     $('.btn-bookmark').on 'click', ->

@@ -370,7 +370,9 @@
 
     Place.infoButtonWrapper = $('<div class="button-wrapper wrapper-right"></div>').on('click', function() {
       setInfoPage(placeContext, placeContext === droppedPlace);
-      return $('#container').css('right', '100%');
+      return $('body').animate({
+        scrollLeft: innerWidth
+      }, 1000);
     });
 
     function Place(marker, address) {
@@ -1170,7 +1172,9 @@
       return backToMap();
     });
     $('#button-map').on('click', function() {
-      return $('#container').css('right', '');
+      return $('body').animate({
+        scrollLeft: 0
+      }, 1000);
     });
     $bookmarkPage = $('#bookmark-page');
     $('.btn-bookmark').on('click', function() {
