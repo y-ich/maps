@@ -696,7 +696,7 @@ initializeDOM = ->
             
     $('input').on 'focus', ->
         left = document.body.scrollLeft
-        setTimeout (-> window.scrollTo left, 0), 0
+        setTimeout (-> window.scrollTo left, 0), 0 # work around for iPad. ugly.
 
     $('input').on 'blur', ->
         left = document.body.scrollLeft
