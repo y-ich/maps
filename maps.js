@@ -998,13 +998,6 @@
     $gps.on('click', function() {
       return mapFSM.gpsClicked();
     });
-    $('input').on('focus', function() {
-      var left;
-      left = document.body.scrollLeft;
-      return setTimeout((function() {
-        return window.scrollTo(left, 0);
-      }), 0);
-    });
     $('input').on('blur', function() {
       var left;
       left = document.body.scrollLeft;

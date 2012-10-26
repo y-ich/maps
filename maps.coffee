@@ -694,14 +694,10 @@ initializeDOM = ->
     
     $gps.on 'click', -> mapFSM.gpsClicked()
             
-    $('input').on 'focus', ->
-        left = document.body.scrollLeft
-        setTimeout (-> window.scrollTo left, 0), 0 # work around for iPad. ugly.
-
     $('input').on 'blur', ->
         left = document.body.scrollLeft
-        window.scrollTo left, 0
-
+        window.scrollTo left, 0 # I wanted to animate but, animation was flickery on iphone as left always reset to 0 during animation. 
+        
     # search header
 
     $addressField.on 'focus', -> $('#search-header').css 'top', '0' # down form
