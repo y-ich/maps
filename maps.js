@@ -228,20 +228,30 @@
   isHold = true;
 
   tracer = {
-    id: null,
+    NORMAL: 0,
+    DISABLED: 1,
+    UNAVAILABLE: 2,
+    TIMEOUT: 3,
+    state: 0,
+    watchId: null,
     start: function() {
-      return this.id = navigator.geolocation.watchPosition(this.success, (function(error) {
-        return console.log(error.message + '(' + error.code + ')');
-      }), {
+      this.watchId = navigator.geolocation.watchPosition(this.success, this.error, {
         enableHighAccuracy: true,
-        timeout: 30000
+        timeout: 60000
       });
+      return this.setState(this.NORMAL);
     },
     stop: function() {
-      if (!this.id) {
-        navigator.geolocation.clearWatch(this.id);
+      if (!this.watchId) {
+        navigator.geolocation.clearWatch(this.watchId);
       }
-      return this.id = null;
+      return this.watchId = null;
+    },
+    setState: function(state) {
+      if (this.state !== state) {
+        this.state = state;
+        return mapFSM.tracerChanged();
+      }
     },
     success: function(position) {
       var latLng;
@@ -251,7 +261,19 @@
       currentPlace.marker.setRadius(position.coords.accuracy);
       currentPlace.address = '';
       if (!mapFSM.is(MapState.NORMAL)) {
-        return map.setCenter(latLng);
+        map.setCenter(latLng);
+      }
+      return tracer.setState(tracer.NORMAL);
+    },
+    error: function(error) {
+      switch (error.code) {
+        case error.PERMISSION_DENIED:
+          tracer.stop();
+          return tracer.setState(tracer.DISABLED);
+        case error.POSITION_UNAVAILABLE:
+          return tracer.setState(tracer.UNAVAILABLE);
+        case error.TIMEOUT:
+          return tracer.setState(tracer.TIMEOUT);
       }
     }
   };
@@ -262,13 +284,17 @@
       this.name = name;
     }
 
+    MapState.DISABLED = new MapState('disabled');
+
     MapState.NORMAL = new MapState('normal');
 
     MapState.TRACE_POSITION = new MapState('trace_position');
 
-    MapState.TRACE_HEADING = new MapState('trace_heading');
+    MapState.UNAVAILABLE = new MapState('unavailable');
 
-    MapState.prototype.update = function() {
+    MapState.TIMEOUT = new MapState('timout');
+
+    MapState.prototype.update = function(fsm) {
       return this;
     };
 
@@ -280,9 +306,23 @@
       return this;
     };
 
+    MapState.prototype.tracerChanged = function() {
+      switch (tracer.state) {
+        case tracer.DISABLED:
+          return MapState.DISABLED;
+        default:
+          return this;
+      }
+    };
+
     return MapState;
 
   })();
+
+  MapState.DISABLED.update = function() {
+    $gps.removeClass('btn-light').addClass('disabled');
+    return this;
+  };
 
   MapState.NORMAL.update = function() {
     $gps.removeClass('btn-light');
@@ -290,7 +330,19 @@
   };
 
   MapState.NORMAL.gpsClicked = function() {
-    return MapState.TRACE_POSITION;
+    switch (tracer.state) {
+      case tracer.DISABLED:
+        return MapState.DISABLED;
+      case tracer.NORMAL:
+        return MapState.TRACE_POSITION;
+      case tracer.UNAVAILABLE:
+        return MapState.UNAVAILABLE;
+      case tracer.TIMEOUT:
+        return MapState.TIMEOUT;
+      default:
+        console.log('unknown tracer state');
+        return this;
+    }
   };
 
   MapState.TRACE_POSITION.update = function() {
@@ -305,22 +357,76 @@
     return MapState.NORMAL;
   };
 
-  MapState.TRACE_HEADING.update = function() {
+  MapState.TRACE_POSITION.tracerChanged = MapState.NORMAL.gpsClicked;
+
+  MapState.UNAVAILABLE.update = function(fsm) {
+    console.log(fsm);
+    fsm.timerId = setInterval((function() {
+      return $gps.toggleClass('btn-light');
+    }), 1000);
     return this;
   };
 
-  MapState.TRACE_HEADING.gpsClicked = function() {
+  MapState.UNAVAILABLE.gpsClicked = function(fsm) {
+    clearInterval(fsm.timerId);
+    fsm.timerId = null;
     return MapState.NORMAL;
   };
 
-  MapState.TRACE_HEADING.bookmarkClicked = function() {
-    return MapState.TRACE_POSITION;
+  MapState.UNAVAILABLE.tracerChanged = function(fsm) {
+    if (tracer.state !== tracer.UNAVAILABLE) {
+      clearInterval(fsm.timerId);
+      fsm.timerId = null;
+    }
+    switch (tracer.state) {
+      case tracer.DISABLED:
+        return MapState.DISABLED;
+      case tracer.NORMAL:
+        return MapState.TRACE_POSITION;
+      case tracer.UNAVAILABLE:
+        return MapState.UNAVAILABLE;
+      case tracer.TIMEOUT:
+        return MapState.TIMEOUT;
+      default:
+        console.log('unknown tracer state');
+        return this;
+    }
+  };
+
+  MapState.TIMEOUT.update = function(fsm) {
+    fsm.timerId = setInterval((function() {
+      return $gps.toggleClass('btn-light');
+    }), 2000);
+    return this;
+  };
+
+  MapState.TIMEOUT.gpsClicked = MapState.UNAVAILABLE.gpsClicked;
+
+  MapState.TIMEOUT.tracerChanged = function(fsm) {
+    if (tracer.state !== tracer.TIMEOUT) {
+      clearInterval(fsm.timerId);
+      fsm.timerId = null;
+    }
+    switch (tracer.state) {
+      case tracer.DISABLED:
+        return MapState.DISABLED;
+      case tracer.NORMAL:
+        return MapState.TRACE_POSITION;
+      case tracer.UNAVAILABLE:
+        return MapState.UNAVAILABLE;
+      case tracer.TIMEOUT:
+        return MapState.TIMEOUT;
+      default:
+        console.log('unknown tracer state');
+        return this;
+    }
   };
 
   MapFSM = (function() {
 
     function MapFSM(state) {
       this.state = state;
+      this.timerId = null;
     }
 
     MapFSM.prototype.is = function(state) {
@@ -332,7 +438,7 @@
         return;
       }
       this.state = state;
-      return this.state.update();
+      return this.state.update(this);
     };
 
     return MapFSM;
@@ -345,7 +451,7 @@
     if (typeof method === 'function') {
       MapFSM.prototype[name] = (function(name) {
         return function() {
-          return this.setState(this.state[name]());
+          return this.setState(this.state[name](this));
         };
       })(name);
     }

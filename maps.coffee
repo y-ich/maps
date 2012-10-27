@@ -53,16 +53,30 @@ isHold = true # hold detection of touch. default is true for desktop
 
 # manages id for navigator.geolocation
 tracer =
-    id: null
+    NORMAL: 0
+    DISABLED: 1
+    UNAVAILABLE: 2
+    TIMEOUT: 3
+    state: 0
+    watchId: null
+
     start: ->
-        @id = navigator.geolocation.watchPosition @success
-            , ((error) -> console.log error.message + '(' + error.code + ')')
+        @watchId = navigator.geolocation.watchPosition @success
+            , @error
             ,
                 enableHighAccuracy: true
-                timeout: 30000
+                timeout: 60000
+        @setState @NORMAL
+
     stop: ->
-        navigator.geolocation.clearWatch @id unless @id
-        @id = null
+        navigator.geolocation.clearWatch @watchId unless @watchId
+        @watchId = null
+
+    setState: (state) ->
+        if @state isnt state
+            @state = state
+            mapFSM.tracerChanged()
+        
     success: (position) ->
         latLng = new google.maps.LatLng position.coords.latitude,position.coords.longitude
         currentPlace.marker.setVisible true
@@ -70,14 +84,17 @@ tracer =
         currentPlace.marker.setRadius position.coords.accuracy
         currentPlace.address = '' # because current address may become old.
         map.setCenter latLng unless mapFSM.is MapState.NORMAL
-        # if mapFSM.is MapState.TRACE_HEADING and position.coords.heading?
-        #     transform = $map.css('-webkit-transform')
-        #     if /rotate(-?[\d.]+deg)/.test(transform)
-        #         transform = transform.replace(/rotate(-?[\d.]+deg)/, "rotate(#{-position.coords.heading}deg)")
-        #     else
-        #         transform = transform + " rotate(#{-position.coords.heading}deg)"
-        #     $map.css('-webkit-transform', transform)
+        tracer.setState tracer.NORMAL
 
+    error: (error) ->
+        switch error.code
+            when error.PERMISSION_DENIED
+                tracer.stop()                
+                tracer.setState tracer.DISABLED
+            when error.POSITION_UNAVAILABLE
+                tracer.setState tracer.UNAVAILABLE
+            when error.TIMEOUT
+                tracer.setState tracer.TIMEOUT
 
 # abstract class for map's trace state
 # Concrete instances are class constant.
@@ -85,50 +102,121 @@ class MapState
     constructor: (@name)-> 
 
     # concrete instances
+    @DISABLED: new MapState('disabled')
     @NORMAL: new MapState('normal')
     @TRACE_POSITION: new MapState('trace_position')
-    @TRACE_HEADING: new MapState('trace_heading')
+    @UNAVAILABLE: new MapState('unavailable')
+    @TIMEOUT: new MapState('timout')
 
     # all methods should return a state for a kind of delegation
-    update: -> @
+    update: (fsm) -> @
     gpsClicked: -> @
     bookmarkClicked: -> @
+    tracerChanged: ->
+        switch tracer.state
+            when tracer.DISABLED
+                MapState.DISABLED        
+            else
+                @
 
+MapState.DISABLED.update = ->
+    $gps.removeClass('btn-light')
+        .addClass('disabled')
+    @
+    
 MapState.NORMAL.update = ->
     $gps.removeClass('btn-light')
-    # disabled trace heading
-    # $map.css '-webkit-transform', $map.css('-webkit-transform').replace(/\s*rotate(-?[\d.]+deg)/, '')
-    # need to restore icon if implementing TRACE_HEADING
     @
-MapState.NORMAL.gpsClicked = -> MapState.TRACE_POSITION
+
+MapState.NORMAL.gpsClicked = ->
+    switch tracer.state
+        when tracer.DISABLED
+            MapState.DISABLED        
+        when tracer.NORMAL
+            MapState.TRACE_POSITION
+        when tracer.UNAVAILABLE
+            MapState.UNAVAILABLE
+        when tracer.TIMEOUT
+            MapState.TIMEOUT
+        else
+            console.log 'unknown tracer state'
+            @
 
 MapState.TRACE_POSITION.update = ->
     map.setCenter currentPlace.marker.getPosition() if currentPlace.marker.getVisible()
     $gps.addClass 'btn-light'
     @
-MapState.TRACE_POSITION.gpsClicked = -> MapState.NORMAL # disabled TRACE_HEADING
 
-MapState.TRACE_HEADING.update = ->
-    # need to change icon
+MapState.TRACE_POSITION.gpsClicked = -> MapState.NORMAL
+
+MapState.TRACE_POSITION.tracerChanged = MapState.NORMAL.gpsClicked
+
+MapState.UNAVAILABLE.update = (fsm) ->
+    console.log fsm
+    fsm.timerId = setInterval (-> $gps.toggleClass 'btn-light'), 1000
     @
-MapState.TRACE_HEADING.gpsClicked = -> MapState.NORMAL
-MapState.TRACE_HEADING.bookmarkClicked = -> MapState.TRACE_POSITION
+
+MapState.UNAVAILABLE.gpsClicked = (fsm) ->
+    clearInterval fsm.timerId
+    fsm.timerId = null
+    MapState.NORMAL
+
+MapState.UNAVAILABLE.tracerChanged = (fsm) ->
+    if tracer.state isnt tracer.UNAVAILABLE
+        clearInterval fsm.timerId
+        fsm.timerId = null
+    switch tracer.state
+        when tracer.DISABLED
+            MapState.DISABLED        
+        when tracer.NORMAL
+            MapState.TRACE_POSITION
+        when tracer.UNAVAILABLE
+            MapState.UNAVAILABLE
+        when tracer.TIMEOUT
+            MapState.TIMEOUT
+        else
+            console.log 'unknown tracer state'
+            @
+
+MapState.TIMEOUT.update = (fsm) ->
+    fsm.timerId = setInterval (-> $gps.toggleClass 'btn-light'), 2000
+    @
+
+MapState.TIMEOUT.gpsClicked = MapState.UNAVAILABLE.gpsClicked
+
+MapState.TIMEOUT.tracerChanged = (fsm) ->
+    if tracer.state isnt tracer.TIMEOUT
+        clearInterval fsm.timerId
+        fsm.timerId = null
+    switch tracer.state
+        when tracer.DISABLED
+            MapState.DISABLED        
+        when tracer.NORMAL
+            MapState.TRACE_POSITION
+        when tracer.UNAVAILABLE
+            MapState.UNAVAILABLE
+        when tracer.TIMEOUT
+            MapState.TIMEOUT
+        else
+            console.log 'unknown tracer state'
+            @
 
 
 # state machine for map
 class MapFSM
     constructor: (@state) ->
+        @timerId = null
 
     is: (state) -> @state is state
 
     setState: (state) ->
         return if @state is state
         @state = state
-        @state.update()
+        @state.update(@)
 # delegate
 for name, method of MapState.prototype when typeof method is 'function'
     MapFSM.prototype[name] = ((name) ->
-        -> this.setState this.state[name]())(name) # substantiation of name
+        -> @setState @state[name](@))(name) # substantiation of name
 
 
 
