@@ -360,7 +360,6 @@
   MapState.TRACE_POSITION.tracerChanged = MapState.NORMAL.gpsClicked;
 
   MapState.UNAVAILABLE.update = function(fsm) {
-    console.log(fsm);
     fsm.timerId = setInterval((function() {
       return $gps.toggleClass('btn-light');
     }), 1000);
@@ -378,19 +377,7 @@
       clearInterval(fsm.timerId);
       fsm.timerId = null;
     }
-    switch (tracer.state) {
-      case tracer.DISABLED:
-        return MapState.DISABLED;
-      case tracer.NORMAL:
-        return MapState.TRACE_POSITION;
-      case tracer.UNAVAILABLE:
-        return MapState.UNAVAILABLE;
-      case tracer.TIMEOUT:
-        return MapState.TIMEOUT;
-      default:
-        console.log('unknown tracer state');
-        return this;
-    }
+    return MapState.TRACE_POSITION.tracerChanged();
   };
 
   MapState.TIMEOUT.update = function(fsm) {
@@ -407,19 +394,7 @@
       clearInterval(fsm.timerId);
       fsm.timerId = null;
     }
-    switch (tracer.state) {
-      case tracer.DISABLED:
-        return MapState.DISABLED;
-      case tracer.NORMAL:
-        return MapState.TRACE_POSITION;
-      case tracer.UNAVAILABLE:
-        return MapState.UNAVAILABLE;
-      case tracer.TIMEOUT:
-        return MapState.TIMEOUT;
-      default:
-        console.log('unknown tracer state');
-        return this;
-    }
+    return MapState.TRACE_POSITION.tracerChanged();
   };
 
   MapFSM = (function() {

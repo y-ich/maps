@@ -57,7 +57,7 @@ tracer =
     DISABLED: 1
     UNAVAILABLE: 2
     TIMEOUT: 3
-    state: 0
+    state: 0 # NORMAL
     watchId: null
 
     start: ->
@@ -152,7 +152,6 @@ MapState.TRACE_POSITION.gpsClicked = -> MapState.NORMAL
 MapState.TRACE_POSITION.tracerChanged = MapState.NORMAL.gpsClicked
 
 MapState.UNAVAILABLE.update = (fsm) ->
-    console.log fsm
     fsm.timerId = setInterval (-> $gps.toggleClass 'btn-light'), 1000
     @
 
@@ -165,18 +164,7 @@ MapState.UNAVAILABLE.tracerChanged = (fsm) ->
     if tracer.state isnt tracer.UNAVAILABLE
         clearInterval fsm.timerId
         fsm.timerId = null
-    switch tracer.state
-        when tracer.DISABLED
-            MapState.DISABLED        
-        when tracer.NORMAL
-            MapState.TRACE_POSITION
-        when tracer.UNAVAILABLE
-            MapState.UNAVAILABLE
-        when tracer.TIMEOUT
-            MapState.TIMEOUT
-        else
-            console.log 'unknown tracer state'
-            @
+    MapState.TRACE_POSITION.tracerChanged()
 
 MapState.TIMEOUT.update = (fsm) ->
     fsm.timerId = setInterval (-> $gps.toggleClass 'btn-light'), 2000
@@ -188,18 +176,7 @@ MapState.TIMEOUT.tracerChanged = (fsm) ->
     if tracer.state isnt tracer.TIMEOUT
         clearInterval fsm.timerId
         fsm.timerId = null
-    switch tracer.state
-        when tracer.DISABLED
-            MapState.DISABLED        
-        when tracer.NORMAL
-            MapState.TRACE_POSITION
-        when tracer.UNAVAILABLE
-            MapState.UNAVAILABLE
-        when tracer.TIMEOUT
-            MapState.TIMEOUT
-        else
-            console.log 'unknown tracer state'
-            @
+    MapState.TRACE_POSITION.tracerChanged()
 
 
 # state machine for map
