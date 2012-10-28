@@ -1350,6 +1350,7 @@
       return $('#container').css('right', '');
     });
     $('#bookmark-name').on('submit', function() {
+      $('#bookmark-name input[name="bookmark-name"]').blur();
       $('#save-bookmark').trigger('click');
       return false;
     });

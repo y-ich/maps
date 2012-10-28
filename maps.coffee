@@ -994,6 +994,7 @@ initializeDOM = ->
         $('#container').css 'right', ''
         
     $('#bookmark-name').on 'submit', ->
+        $('#bookmark-name input[name="bookmark-name"]').blur()
         $('#save-bookmark').trigger 'click'
         false
 
