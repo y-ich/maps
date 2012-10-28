@@ -1283,7 +1283,7 @@
     $('#bookmark-done').on('click', function() {
       return $bookmarkPage.css('bottom', '-100%');
     });
-    $(document).on('click', '#pin-list td', function() {
+    $('#pin-list').on('click', 'td', function() {
       var item, latLng, place;
       name = $(this).data('object-name');
       if (!((name != null) && name !== '')) {

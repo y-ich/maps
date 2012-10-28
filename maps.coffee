@@ -933,7 +933,7 @@ initializeDOM = ->
     $('#bookmark-done').on 'click', ->
         $bookmarkPage.css 'bottom', '-100%'
     
-    $(document).on 'click', '#pin-list td', ->
+    $('#pin-list').on 'click', 'td', ->
         name = $(this).data('object-name')
         return unless name? and name isnt ''
         if /history/.test name # history list
