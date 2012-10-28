@@ -15,7 +15,7 @@
 
   app.initializeDOM();
 
-  $('#version').html('(C) 2012 ICHIKAWA, Yuji (New 3 Rs)<br>Maps ver. 1.2.3');
+  $('#version').html('(C) 2012 ICHIKAWA, Yuji (New 3 Rs)<br>Maps ver. 1.2.4');
 
   app.tracer.start();
 

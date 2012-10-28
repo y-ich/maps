@@ -1046,8 +1046,8 @@
     }
     localize();
     $(document.body).css('display', 'block');
+    window.scrollTo(0, 0);
     if (/iPhone/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent)) {
-      window.scrollTo(0, 0);
       $('html, body').height(innerHeight);
     }
     window.addEventListener('orientationchange', function() {
@@ -1348,6 +1348,10 @@
       }
       infoWindow.close();
       return $('#container').css('right', '');
+    });
+    $('#bookmark-name').on('submit', function() {
+      $('#save-bookmark').trigger('click');
+      return false;
     });
     $('#save-bookmark').on('click', function() {
       var place;

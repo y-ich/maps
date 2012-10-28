@@ -727,9 +727,9 @@ initializeDOM = ->
     
 
     $(document.body).css 'display', 'block'
-    if /iPhone/.test(navigator.userAgent) and /Safari/.test(navigator.userAgent)
-        window.scrollTo 0, 0
-        $('html, body').height innerHeight
+    window.scrollTo 0, 0
+    $('html, body').height innerHeight if /iPhone/.test(navigator.userAgent) and /Safari/.test(navigator.userAgent)
+        
 
     #
     # event handlers
@@ -993,6 +993,10 @@ initializeDOM = ->
         infoWindow.close()
         $('#container').css 'right', ''
         
+    $('#bookmark-name').on 'submit', ->
+        $('#save-bookmark').trigger 'click'
+        false
+
     $('#save-bookmark').on 'click', ->
         place = new Place new google.maps.Marker(
                 map: map
