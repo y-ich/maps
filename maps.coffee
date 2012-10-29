@@ -17,6 +17,7 @@ geocoder = null
 directionsRenderer = null
 trafficLayer = null
 panoramioLayer = null
+kmlLayer = null
 
 currentPlace = null # is a pin of current position
 naviMarker = null # is a pin navigating a route.
@@ -423,22 +424,46 @@ searchAddress = (fromHistory) ->
             type: 'search'
             address: address
         saveOtherStatus()
-    geocoder.geocode { address : address }, (result, status) ->
-        if status is google.maps.GeocoderStatus.OK
-            directionsRenderer.setMap null
-            latLng = currentPlace.marker.getPosition()
-            updateField $originField, "#{latLng.lat()}, #{latLng.lng()}"
-            updateField $destinationField, result[0].formatted_address
-            mapFSM.setState MapState.NORMAL
-            map.setCenter result[0].geometry.location
-            searchPlace.address = result[0].formatted_address
-            searchPlace.marker.setPosition result[0].geometry.location
-            searchPlace.marker.setTitle address
-            searchPlace.marker.setVisible true
-            searchPlace.marker.setAnimation google.maps.Animation.DROP
-            placeContext = searchPlace
-        else
-            alert status
+    if /^[a-z]+:\/\//.test address
+        kmlLayer = new google.maps.KmlLayer address, { map: map }
+        google.maps.event.addListener kmlLayer, 'status_changed', ->
+            return if kmlLayer.getStatus() is google.maps.KmlLayerStatus.OK
+            switch kmlLayer.getStatus()
+                when google.maps.KmlLayerStatus.DOCUMENT_NOT_FOUND
+                    alert 'DOCUMENT_NOT_FOUND'
+                when google.maps.KmlLayerStatus.DOCUMENT_TOO_LARGE
+                    alert 'DOCUMENT_TOO_LARGE'
+                when google.maps.KmlLayerStatus.FETCH_ERROR
+                    alert 'FETCH_ERROR'
+                when google.maps.KmlLayerStatus.INVALID_DOCUMENT
+                    alert 'INVALID_DOCUMENT'
+                when google.maps.KmlLayerStatus.INVALID_REQUEST
+                    alert 'INVALID_REQUEST'
+                when google.maps.KmlLayerStatus.LIMITS_EXCEEDED
+                    alert 'LIMITS_EXCEEDED'
+                when google.maps.KmlLayerStatus.TIMED_OUT
+                    alert 'TIMED_OUT'
+                when google.maps.KmlLayerStatus.UNKNOWN
+                    alert 'UNKNOWN'
+            kmlLayer.setMap null
+            kmlLayer = null
+    else
+        geocoder.geocode { address : address }, (result, status) ->
+            if status is google.maps.GeocoderStatus.OK
+                directionsRenderer.setMap null
+                latLng = currentPlace.marker.getPosition()
+                updateField $originField, "#{latLng.lat()}, #{latLng.lng()}"
+                updateField $destinationField, result[0].formatted_address
+                mapFSM.setState MapState.NORMAL
+                map.setCenter result[0].geometry.location
+                searchPlace.address = result[0].formatted_address
+                searchPlace.marker.setPosition result[0].geometry.location
+                searchPlace.marker.setTitle address
+                searchPlace.marker.setVisible true
+                searchPlace.marker.setAnimation google.maps.Animation.DROP
+                placeContext = searchPlace
+            else
+                alert status
 
 updateMessage = ->
     return unless directionsRenderer.getDirections()?
@@ -869,22 +894,19 @@ initializeDOM = ->
             $option.addClass 'btn-primary'
 
     $mapType = $('#map-type')
-    $mapType.children(':not(#panel)').on 'click', ->
+    $mapType.children().on 'click', ->
         $this = $(this)
-        return if $this.hasClass 'btn-primary'
+        if $this.hasClass 'btn-primary'
+            kmlLayer?.setMap null
+            return
         $mapType.children().removeClass 'btn-primary'
         $this.addClass 'btn-primary'
-        map.setMapTypeId getMapType()
-        $('#directions-window').css 'display', 'none'
-        updateMessage() # in order to let message correspond to current route.
-        backToMap()
-
-    $('#panel').on 'click', ->
-        $this = $(this)
-        return if $this.hasClass 'btn-primary'
-        $mapType.children().removeClass 'btn-primary'
-        $this.addClass 'btn-primary'
-        $('#directions-window').css 'display', 'block'
+        if $this.attr('id') is 'panel'
+            $('#directions-window').css 'display', 'block'
+        else
+            map.setMapTypeId getMapType()
+            $('#directions-window').css 'display', 'none'
+            updateMessage() # in order to let message correspond to current route.
         backToMap()
 
     $traffic = $('#traffic')

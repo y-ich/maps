@@ -15,14 +15,14 @@
 
   app.initializeDOM();
 
-  $('#version').html('(C) 2012 ICHIKAWA, Yuji (New 3 Rs)<br>Maps ver. 1.2.4');
-
-  app.tracer.start();
+  $('#version').html('(C) 2012 ICHIKAWA, Yuji (New 3 Rs)<br>Maps ver. 1.2.5');
 
   window.onpagehide = function() {
     app.tracer.stop();
     app.saveMapStatus();
     return app.saveOtherStatus();
   };
+
+  app.tracer.start();
 
 }).call(this);
