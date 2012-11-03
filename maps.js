@@ -760,21 +760,24 @@
         address: address
       }, function(result, status) {
         var latLng;
-        if (status === google.maps.GeocoderStatus.OK) {
-          directionsRenderer.setMap(null);
-          latLng = currentPlace.marker.getPosition();
-          updateField($originField, "" + (latLng.lat()) + ", " + (latLng.lng()));
-          updateField($destinationField, result[0].formatted_address);
-          mapFSM.setState(MapState.NORMAL);
-          map.setCenter(result[0].geometry.location);
-          searchPlace.address = result[0].formatted_address;
-          searchPlace.marker.setPosition(result[0].geometry.location);
-          searchPlace.marker.setTitle(address);
-          searchPlace.marker.setVisible(true);
-          searchPlace.marker.setAnimation(google.maps.Animation.DROP);
-          return placeContext = searchPlace;
-        } else {
-          return alert(status);
+        switch (status) {
+          case google.maps.GeocoderStatus.OK:
+            directionsRenderer.setMap(null);
+            latLng = currentPlace.marker.getPosition();
+            updateField($originField, "" + (latLng.lat()) + ", " + (latLng.lng()));
+            updateField($destinationField, result[0].formatted_address);
+            mapFSM.setState(MapState.NORMAL);
+            map.setCenter(result[0].geometry.location);
+            searchPlace.address = result[0].formatted_address;
+            searchPlace.marker.setPosition(result[0].geometry.location);
+            searchPlace.marker.setTitle(address);
+            searchPlace.marker.setVisible(true);
+            searchPlace.marker.setAnimation(google.maps.Animation.DROP);
+            return placeContext = searchPlace;
+          case google.maps.GeocoderStatus.ZERO_RESULTS:
+            return alert(getLocalizedString('No Results Found'));
+          default:
+            return alert(status);
         }
       });
     }
@@ -849,7 +852,7 @@
           mode = $('#travel-mode').children('.btn-primary').attr('id');
           mode = mode[0].toUpperCase() + mode.substr(1);
           $message.html(getLocalizedString(mode + ' directions could not be found between these locations'));
-          return Alert(getLocalizedString('Directions Not Available\nDirections could not be found between these locations.'));
+          return alert(getLocalizedString('Directions Not Available\nDirections could not be found between these locations.'));
         default:
           directionsRenderer.setMap(null);
           return console.log(status);

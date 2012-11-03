@@ -57,6 +57,7 @@ localizedStrings['Transit directions could not be found between these locations'
 localizedStrings['Walking directions could not be found between these locations'] = '2地点間の徒歩経路が見つかりませんでした';
 localizedStrings['There are no street views near here.'] = '近くにストリートビューが見つかりませんでした。';
 localizedStrings['Sorry, an error occurred.'] = 'すいません、エラーが起こりました。';
+localizedStrings['No Results Found'] = '結果が見つかりません';
 
 var getRouteIndexMessage = function(index, total) {
     return '候補経路：全' + total +'件中' +(index + 1) + '件目';
