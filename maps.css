@@ -478,3 +478,8 @@ img.icon {
   min-width: 78px;
   padding: 4px 4px;
 }
+#option .badge {
+  position: absolute;
+  right: 0px;
+  top: 0px;
+}

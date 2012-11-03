@@ -54,11 +54,12 @@ isHold = true # hold detection of touch. default is true for desktop
 
 # manages id for navigator.geolocation
 tracer =
-    NORMAL: 0
-    DISABLED: 1
-    UNAVAILABLE: 2
-    TIMEOUT: 3
-    state: 0 # NORMAL
+    START: 0
+    NORMAL: 1
+    DISABLED: 2
+    UNAVAILABLE: 3
+    TIMEOUT: 4
+    state: 0 # START
     watchId: null
 
     start: ->
@@ -67,7 +68,7 @@ tracer =
             ,
                 enableHighAccuracy: true
                 timeout: 60000
-        @setState @NORMAL
+        @setState @START
 
     stop: ->
         navigator.geolocation.clearWatch @watchId unless @watchId
@@ -105,6 +106,7 @@ class MapState
     # concrete instances
     @DISABLED: new MapState('disabled')
     @NORMAL: new MapState('normal')
+    @TRACE_START: new MapState('trace_start')
     @TRACE_POSITION: new MapState('trace_position')
     @UNAVAILABLE: new MapState('unavailable')
     @TIMEOUT: new MapState('timout')
@@ -120,6 +122,23 @@ class MapState
             else
                 @
 
+
+tracer2State = ->
+    switch tracer.state
+        when tracer.START
+            MapState.TRACE_START
+        when tracer.NORMAL
+            MapState.TRACE_POSITION
+        when tracer.DISABLED
+            MapState.DISABLED        
+        when tracer.UNAVAILABLE
+            MapState.UNAVAILABLE
+        when tracer.TIMEOUT
+            MapState.TIMEOUT
+        else
+            console.log 'unknown tracer state'
+            @
+
 MapState.DISABLED.update = ->
     $gps.removeClass('btn-light')
         .addClass('disabled')
@@ -129,19 +148,21 @@ MapState.NORMAL.update = ->
     $gps.removeClass('btn-light')
     @
 
-MapState.NORMAL.gpsClicked = ->
-    switch tracer.state
-        when tracer.DISABLED
-            MapState.DISABLED        
-        when tracer.NORMAL
-            MapState.TRACE_POSITION
-        when tracer.UNAVAILABLE
-            MapState.UNAVAILABLE
-        when tracer.TIMEOUT
-            MapState.TIMEOUT
-        else
-            console.log 'unknown tracer state'
-            @
+MapState.NORMAL.gpsClicked = tracer2State
+
+MapState.TRACE_START.update = (fsm) ->
+    fsm.timerId = setInterval (-> $gps.toggleClass 'btn-light'), 250
+    @
+
+MapState.TRACE_START.gpsClicked = (fsm) ->
+    clearInterval fsm.timerId
+    fsm.timerId = null
+    MapState.NORMAL
+
+MapState.TRACE_START.tracerChanged = (fsm) ->
+    clearInterval fsm.timerId
+    fsm.timerId = null
+    tracer2State()
 
 MapState.TRACE_POSITION.update = ->
     map.setCenter currentPlace.marker.getPosition() if currentPlace.marker.getVisible()
@@ -150,7 +171,7 @@ MapState.TRACE_POSITION.update = ->
 
 MapState.TRACE_POSITION.gpsClicked = -> MapState.NORMAL
 
-MapState.TRACE_POSITION.tracerChanged = MapState.NORMAL.gpsClicked
+MapState.TRACE_POSITION.tracerChanged = tracer2State
 
 MapState.UNAVAILABLE.update = (fsm) ->
     fsm.timerId = setInterval (-> $gps.toggleClass 'btn-light'), 1000
@@ -162,10 +183,9 @@ MapState.UNAVAILABLE.gpsClicked = (fsm) ->
     MapState.NORMAL
 
 MapState.UNAVAILABLE.tracerChanged = (fsm) ->
-    if tracer.state isnt tracer.UNAVAILABLE
-        clearInterval fsm.timerId
-        fsm.timerId = null
-    MapState.TRACE_POSITION.tracerChanged()
+    clearInterval fsm.timerId
+    fsm.timerId = null
+    tracer2State()
 
 MapState.TIMEOUT.update = (fsm) ->
     fsm.timerId = setInterval (-> $gps.toggleClass 'btn-light'), 2000
@@ -174,10 +194,9 @@ MapState.TIMEOUT.update = (fsm) ->
 MapState.TIMEOUT.gpsClicked = MapState.UNAVAILABLE.gpsClicked
 
 MapState.TIMEOUT.tracerChanged = (fsm) ->
-    if tracer.state isnt tracer.TIMEOUT
-        clearInterval fsm.timerId
-        fsm.timerId = null
-    MapState.TRACE_POSITION.tracerChanged()
+    clearInterval fsm.timerId
+    fsm.timerId = null
+    tracer2State()
 
 
 # state machine for map
