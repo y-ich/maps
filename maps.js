@@ -983,6 +983,7 @@
       mapOptions.zoom = 14;
     }
     map = new google.maps.Map(document.getElementById("map"), mapOptions);
+    map.setTilt(45);
     mapFSM = new MapFSM(MapState.NORMAL);
     infoWindow = new MobileInfoWindow({
       maxWidth: Math.floor(innerWidth * 0.9)
@@ -991,7 +992,11 @@
     autocomplete = new google.maps.places.Autocomplete($('#address input[name="address"]')[0]);
     autocomplete.bindTo('bounds', map);
     google.maps.event.addListener(autocomplete, 'place_changed', function() {
-      return setSearchResult(autocomplete.getPlace());
+      var place;
+      place = autocomplete.getPlace();
+      if (__indexOf.call(place, 'geometry') >= 0) {
+        return setSearchResult(place);
+      }
     });
     directionsRenderer = new google.maps.DirectionsRenderer({
       hideRouteList: false,

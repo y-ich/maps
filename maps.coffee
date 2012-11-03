@@ -647,6 +647,7 @@ initializeGoogleMaps = ->
         mapOptions.zoom = 14
 
     map = new google.maps.Map document.getElementById("map"), mapOptions
+    map.setTilt 45
     mapFSM = new MapFSM(MapState.NORMAL)
     infoWindow = new MobileInfoWindow
         maxWidth: Math.floor innerWidth*0.9
@@ -655,7 +656,9 @@ initializeGoogleMaps = ->
 
     autocomplete = new google.maps.places.Autocomplete $('#address input[name="address"]')[0]
     autocomplete.bindTo 'bounds', map
-    google.maps.event.addListener autocomplete, 'place_changed', -> setSearchResult autocomplete.getPlace()
+    google.maps.event.addListener autocomplete, 'place_changed', ->
+        place = autocomplete.getPlace()
+        setSearchResult place if 'geometry' in place 
     
     directionsRenderer = new google.maps.DirectionsRenderer
         hideRouteList: false
