@@ -21,7 +21,7 @@
     }), 500);
   });
 
-  window.applicationCache.addEventListener('error', function() {
+  window.applicationCache.addEventListener('cached', function() {
     clearInterval(id);
     if ($option.hasClass('btn-light')) {
       return $option.removeClass('btn-light');
@@ -34,6 +34,14 @@
       $option.addClass('btn-light');
     }
     return $('#version').html($('#version').html() + ' (new version available)');
+  });
+
+  window.applicationCache.addEventListener('error', function() {
+    clearInterval(id);
+    if (!$option.hasClass('btn-light')) {
+      $option.addClass('btn-light');
+    }
+    return $('#version').html($('#version').html() + ' (cache error)');
   });
 
   app.initializeGoogleMaps();
