@@ -18,6 +18,7 @@ directionsRenderer = null
 trafficLayer = null
 panoramioLayer = null
 kmlLayer = null
+autocomplete = null
 
 currentPlace = null # is a pin of current position
 naviMarker = null # is a pin navigating a route.
@@ -432,6 +433,25 @@ getTravelMode = -> google.maps.TravelMode[$('#travel-mode > .btn-primary').attr(
 getMapType = -> google.maps.MapTypeId[$('#map-type > .btn-primary').attr('id').toUpperCase()]
 
 
+setSearchResult = (place) ->
+    directionsRenderer.setMap null
+
+    latLng = currentPlace.marker.getPosition()
+    updateField $originField, "#{latLng.lat()}, #{latLng.lng()}"
+    updateField $destinationField, place.formatted_address
+
+    mapFSM.setState MapState.NORMAL
+    if 'viewport' in place.geometry and place.geometry.viewport?
+        map.fitBounds place.geometry.viewport
+    else
+        map.setCenter place.geometry.location
+    searchPlace.address = place.formatted_address
+    searchPlace.marker.setPosition place.geometry.location
+    searchPlace.marker.setTitle place.name ? $addressField.val()
+    searchPlace.marker.setVisible true
+    searchPlace.marker.setAnimation google.maps.Animation.DROP
+    placeContext = searchPlace
+
 # search and display a place
 searchAddress = (fromHistory) ->
     address = $addressField.val()
@@ -470,18 +490,7 @@ searchAddress = (fromHistory) ->
         geocoder.geocode { address : address }, (result, status) ->
             switch status
                 when google.maps.GeocoderStatus.OK
-                    directionsRenderer.setMap null
-                    latLng = currentPlace.marker.getPosition()
-                    updateField $originField, "#{latLng.lat()}, #{latLng.lng()}"
-                    updateField $destinationField, result[0].formatted_address
-                    mapFSM.setState MapState.NORMAL
-                    map.setCenter result[0].geometry.location
-                    searchPlace.address = result[0].formatted_address
-                    searchPlace.marker.setPosition result[0].geometry.location
-                    searchPlace.marker.setTitle address
-                    searchPlace.marker.setVisible true
-                    searchPlace.marker.setAnimation google.maps.Animation.DROP
-                    placeContext = searchPlace
+                    setSearchResult result[0]
                 when google.maps.GeocoderStatus.ZERO_RESULTS
                     alert getLocalizedString 'No Results Found'
                 else
@@ -639,10 +648,15 @@ initializeGoogleMaps = ->
 
     map = new google.maps.Map document.getElementById("map"), mapOptions
     mapFSM = new MapFSM(MapState.NORMAL)
-    geocoder = new google.maps.Geocoder()
     infoWindow = new MobileInfoWindow
         maxWidth: Math.floor innerWidth*0.9
 
+    geocoder = new google.maps.Geocoder()
+
+    autocomplete = new google.maps.places.Autocomplete $('#address input[name="address"]')[0]
+    autocomplete.bindTo 'bounds', map
+    google.maps.event.addListener autocomplete, 'place_changed', -> setSearchResult autocomplete.getPlace()
+    
     directionsRenderer = new google.maps.DirectionsRenderer
         hideRouteList: false
         infoWindow: infoWindow
@@ -720,9 +734,7 @@ initializeGoogleMaps = ->
     google.maps.event.addListener map, 'center_changed', saveMapStatus
     google.maps.event.addListener map, 'zoom_changed', saveMapStatus
 
-    google.maps.event.addListener map.getStreetView(), 'visible_changed', ->
-        unless @getVisible()
-            $map.removeClass 'streetview'
+    google.maps.event.addListener map.getStreetView(), 'visible_changed', -> $map.removeClass 'streetview' unless @getVisible()
             
     trafficLayer = new google.maps.TrafficLayer()
 
@@ -827,7 +839,7 @@ initializeDOM = ->
     $('#clear, #address .btn-reset').on 'click', ->
         setLocalExpressionInto 'done', 'Done'
         searchPlace.marker.setVisible false
-        infoWindow.setVisible false if placeContext is searchPlace
+        infoWindow.close() if placeContext is searchPlace
         
 
     $naviHeader = $('#navi-header1')
