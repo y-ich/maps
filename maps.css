@@ -250,14 +250,7 @@ img.icon {
   width: 100%;
   top: 44px;
   bottom: 46px;
-  /* disable tracing heading, so commented out the below. */
-
-  /*    left: 50%; /* for centering. margin will be defined by javascript. */
-
-  /*    top: 50%; /* for centering. margin will be defined by javascript. */
-  /*    -webkit-transition: -webkit-transform 0.1s; */
-
-  -webkit-transition: top 0.5s, bottom 0.5s;
+  -webkit-transition: top 0.3s, bottom 0.3s;
 }
 #map.streetview {
   top: 0px;
@@ -283,13 +276,13 @@ img.icon {
   top: 44px;
   bottom: 46px;
   overflow: scroll;
-  -webkit-transition: top 0.5s, bottom 0.5s;
+  -webkit-transition: top 0.3s, bottom 0.3s;
 }
 #search-header {
   width: 100%;
   position: absolute;
   top: -46px;
-  -webkit-transition: top 0.5s;
+  -webkit-transition: top 0.3s;
 }
 #navi-header1 {
   display: none;
@@ -340,7 +333,7 @@ img.icon {
   top: -88px;
   /* should be same as height. Setting this initial value by JavaScript causes a little complicated implementation because ancester is not displayed and it has transition effect. */
 
-  -webkit-transition: top 0.5s;
+  -webkit-transition: top 0.3s;
 }
 #route-search-frame .form-horizontal {
   margin: 10px;
@@ -370,7 +363,7 @@ img.icon {
   height: 100%;
   position: absolute;
   bottom: -100%;
-  -webkit-transition: bottom 1s;
+  -webkit-transition: bottom 0.3s;
 }
 #nav-bookmark {
   position: absolute;
@@ -457,7 +450,7 @@ img.icon {
   height: 100%;
   position: absolute;
   top: 100%;
-  -webkit-transition: top 1s;
+  -webkit-transition: top 0.3s;
   background-color: #c4ccd4;
   background-image: -webkit-gradient(linear, 0 0, 100% 0, color-stop(0.25, #cad2d8), color-stop(0.25, transparent), to(transparent));
   -webkit-background-size: 8px;

@@ -233,7 +233,7 @@ class Place
             sv.setVisible true)
     @infoButtonWrapper: $('<div class="button-wrapper wrapper-right"></div>').on('click', ->
             setInfoPage(placeContext, placeContext is droppedPlace)
-            $('body').animate {scrollLeft: innerWidth}, 1000
+            $('body').animate {scrollLeft: innerWidth}, 300
             scrollLeft = true
         )
 
@@ -758,7 +758,8 @@ initializeDOM = ->
     $pinList = $('#pin-list')
     pinRowHeight = $('#pin-list tr').height()
 
-
+    new NoClickDelay $('#container')[0]
+    
     # prevents default page scroll, but scroll bookmark/history list.
     document.addEventListener 'touchmove', (event) ->
         event.preventDefault()
@@ -974,7 +975,7 @@ initializeDOM = ->
         backToMap()
         
     $('#button-map').on 'click', ->
-        $('body').animate {scrollLeft: 0}, 1000
+        $('body').animate {scrollLeft: 0}, 300
         scrollLeft = false
         
     $bookmarkPage = $('#bookmark-page')    

@@ -7,6 +7,7 @@
 @header-border: 1px;
 @header-outer-height: (@header-height + @header-border * 2);
 @footer-height: 46px; // $('#footer').outerHeight(true)
+@transition-time: 0.3s;
 
 html, body {
     width: 100%;
@@ -257,11 +258,7 @@ img.icon {
     width: 100%;
     top: @header-outer-height;
     bottom: @footer-height;
-/* disable tracing heading, so commented out the below. */
-/*    left: 50%; /* for centering. margin will be defined by javascript. */
-/*    top: 50%; /* for centering. margin will be defined by javascript. */ 
-/*    -webkit-transition: -webkit-transform 0.1s; */
-    -webkit-transition: top 0.5s, bottom 0.5s;
+    -webkit-transition: top @transition-time, bottom @transition-time;
 }
 
 #map.streetview {
@@ -289,14 +286,14 @@ img.icon {
     top: @header-outer-height;
     bottom: @footer-height;
     overflow: scroll;
-    -webkit-transition: top 0.5s, bottom 0.5s;
+    -webkit-transition: top @transition-time, bottom @transition-time;
 }
 
 #search-header {
     width: 100%;
     position :absolute;
     top: -@footer-height;
-    -webkit-transition: top 0.5s;
+    -webkit-transition: top @transition-time;
 }
 
 #navi-header1 {
@@ -347,7 +344,7 @@ img.icon {
 #route-search-frame {
     position: absolute;
     top: -88px; /* should be same as height. Setting this initial value by JavaScript causes a little complicated implementation because ancester is not displayed and it has transition effect. */
-    -webkit-transition: top 0.5s;
+    -webkit-transition: top @transition-time;
 }
 
 #route-search-frame .form-horizontal {
@@ -382,7 +379,7 @@ img.icon {
     height: 100%;
     position: absolute;
     bottom: -100%;
-    -webkit-transition: bottom 1s;
+    -webkit-transition: bottom @transition-time;
 }
 
 #nav-bookmark {
@@ -483,7 +480,7 @@ img.icon {
     height: 100%;
     position: absolute;
     top: 100%;
-    -webkit-transition: top 1s;
+    -webkit-transition: top @transition-time;
     background-color: rgb(196,204,212);
     background-image: -webkit-gradient(linear, 0 0, 100% 0, color-stop(.25, rgb(202, 210, 216)), color-stop(.25, transparent), to(transparent));
     -webkit-background-size: 8px;

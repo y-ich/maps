@@ -482,7 +482,7 @@
       setInfoPage(placeContext, placeContext === droppedPlace);
       $('body').animate({
         scrollLeft: innerWidth
-      }, 1000);
+      }, 300);
       return scrollLeft = true;
     });
 
@@ -1099,6 +1099,7 @@
     $message = $('#message');
     $pinList = $('#pin-list');
     pinRowHeight = $('#pin-list tr').height();
+    new NoClickDelay($('#container')[0]);
     document.addEventListener('touchmove', function(event) {
       return event.preventDefault();
     });
@@ -1342,7 +1343,7 @@
     $('#button-map').on('click', function() {
       $('body').animate({
         scrollLeft: 0
-      }, 1000);
+      }, 300);
       return scrollLeft = false;
     });
     $bookmarkPage = $('#bookmark-page');
