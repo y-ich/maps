@@ -20,7 +20,9 @@ trafficLayer = null
 bicycleLayer = null
 panoramioLayer = null
 kmlLayer = null
-autocomplete = null
+autoAddressField = null
+autoOriginField = null
+autoDestinationField = null
 
 currentPlace = null # is a pin of current position
 naviMarker = null # is a pin navigating a route.
@@ -664,12 +666,18 @@ initializeGoogleMaps = ->
 
     geocoder = new google.maps.Geocoder()
 
-    autocomplete = new google.maps.places.Autocomplete $('#address input[name="address"]')[0]
-    autocomplete.bindTo 'bounds', map
-    google.maps.event.addListener autocomplete, 'place_changed', ->
-        place = autocomplete.getPlace()
+    autoAddressField = new google.maps.places.Autocomplete $('#address input[name="address"]')[0]
+    autoAddressField.bindTo 'bounds', map
+    google.maps.event.addListener autoAddressField, 'place_changed', ->
+        place = autoAddressField.getPlace()
         setSearchResult place if 'geometry' in place 
     
+    autoOriginField = new google.maps.places.Autocomplete $('#origin input[name="origin"]')[0]
+    autoOriginField.bindTo 'bounds', map 
+    
+    autoDestinationField = new google.maps.places.Autocomplete $('#destination input[name="destination"]')[0]
+    autoDestinationField.bindTo 'bounds', map 
+
     directionsRenderer = new google.maps.DirectionsRenderer
         hideRouteList: false
         infoWindow: infoWindow
