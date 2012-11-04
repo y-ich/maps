@@ -17,6 +17,7 @@ geocoder = null
 directionsRenderer = null
 transitLayer = null
 trafficLayer = null
+bicycleLayer = null
 panoramioLayer = null
 kmlLayer = null
 autocomplete = null
@@ -457,8 +458,9 @@ setRouteMap = ->
     travelMode = getTravelMode()
     trafficLayer.setMap if travelMode is google.maps.TravelMode.DRIVING then map else null
     transitLayer.setMap if travelMode is google.maps.TravelMode.TRANSIT then map else null
+    bicycleLayer.setMap if travelMode is google.maps.TravelMode.BICYCLING then map else null
     if getMapType() is google.maps.MapTypeId.ROADMAP
-        if travelMode is google.maps.TravelMode.WALKING
+        if travelMode is google.maps.TravelMode.WALKING or travelMode is google.maps.TravelMode.BICYCLING
             map.setMapTypeId google.maps.MapTypeId.TERRAIN
         else
             map.setMapTypeId google.maps.MapTypeId.ROADMAP
@@ -754,6 +756,8 @@ initializeGoogleMaps = ->
 
     transitLayer = new google.maps.TransitLayer()
 
+    bicycleLayer = new google.maps.BicyclingLayer()
+
     panoramioLayer = new google.maps.panoramio.PanoramioLayer
         suppressInfoWindows: true
 
@@ -864,6 +868,7 @@ initializeDOM = ->
     $search.on 'click', ->
         trafficLayer.setMap null
         transitLayer.setMap null
+        bicycleLayer.setMap null
         map.setMapTypeId google.maps.MapTypeId.ROADMAP if getMapType() is google.maps.MapTypeId.ROADMAP
         directionsRenderer.setMap null
         naviMarker.setVisible false
