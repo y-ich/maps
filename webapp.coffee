@@ -29,7 +29,7 @@ window.applicationCache.addEventListener 'error', ->
     
 app.initializeGoogleMaps()
 app.initializeDOM()
-$('#version').html '(C) 2012 ICHIKAWA, Yuji (New 3 Rs)<br>Maps ver. 1.2.7'
+$('#version').html '(C) 2012 ICHIKAWA, Yuji (New 3 Rs)<br>Maps ver. 1.2.8'
 
 window.onpagehide = ->
     app.tracer.stop()
