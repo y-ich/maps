@@ -453,6 +453,16 @@ setSearchResult = (place) ->
     searchPlace.marker.setAnimation google.maps.Animation.DROP
     placeContext = searchPlace
 
+setRouteMap = ->
+    travelMode = getTravelMode()
+    trafficLayer.setMap if travelMode is google.maps.TravelMode.DRIVING then map else null
+    transitLayer.setMap if travelMode is google.maps.TravelMode.TRANSIT then map else null
+    if getMapType() is google.maps.MapTypeId.ROADMAP
+        if travelMode is google.maps.TravelMode.WALKING
+            map.setMapTypeId google.maps.MapTypeId.TERRAIN
+        else
+            map.setMapTypeId google.maps.MapTypeId.ROADMAP
+
 # search and display a place
 searchAddress = (fromHistory) ->
     address = $addressField.val()
@@ -852,6 +862,9 @@ initializeDOM = ->
     $naviHeader = $('#navi-header1')
     $search = $('#search')
     $search.on 'click', ->
+        trafficLayer.setMap null
+        transitLayer.setMap null
+        map.setMapTypeId google.maps.MapTypeId.ROADMAP if getMapType() is google.maps.MapTypeId.ROADMAP
         directionsRenderer.setMap null
         naviMarker.setVisible false
         $route.removeClass 'btn-primary'
@@ -862,6 +875,7 @@ initializeDOM = ->
         $search.removeClass 'btn-primary'
         $route.addClass 'btn-primary'
         $naviHeader.css 'display', 'block'
+        setRouteMap()
         directionsRenderer.setMap map
 
     $edit = $('#edit')
@@ -901,16 +915,7 @@ initializeDOM = ->
         return if $this.hasClass 'btn-primary'
         $travelMode.children().removeClass 'btn-primary'
         $this.addClass 'btn-primary'
-        switch $this.attr 'id'
-            when 'driving'
-                transitLayer.setMap null
-                map.setMapTypeId google.maps.MapTypeId.ROADMAP if map.getMapTypeId() is google.maps.MapTypeId.TERRAIN
-            when 'transit'
-                map.setMapTypeId google.maps.MapTypeId.ROADMAP if map.getMapTypeId() is google.maps.MapTypeId.TERRAIN
-                transitLayer.setMap map
-            when 'walking'
-                transitLayer.setMap null
-                map.setMapTypeId google.maps.MapTypeId.TERRAIN if map.getMapTypeId() is google.maps.MapTypeId.ROADMAP
+        setRouteMap()
         
     $versatile.on 'click', ->
         switch $versatile.text().replace(/^\s*|\s*$/, '')
