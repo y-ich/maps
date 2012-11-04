@@ -15,6 +15,7 @@ DEFAULT_ICON_SIZE = 32
 map = null
 geocoder = null
 directionsRenderer = null
+transitLayer = null
 trafficLayer = null
 panoramioLayer = null
 kmlLayer = null
@@ -741,6 +742,8 @@ initializeGoogleMaps = ->
             
     trafficLayer = new google.maps.TrafficLayer()
 
+    transitLayer = new google.maps.TransitLayer()
+
     panoramioLayer = new google.maps.panoramio.PanoramioLayer
         suppressInfoWindows: true
 
@@ -898,6 +901,16 @@ initializeDOM = ->
         return if $this.hasClass 'btn-primary'
         $travelMode.children().removeClass 'btn-primary'
         $this.addClass 'btn-primary'
+        switch $this.attr 'id'
+            when 'driving'
+                transitLayer.setMap null
+                map.setMapTypeId google.maps.MapTypeId.ROADMAP if map.getMapTypeId() is google.maps.MapTypeId.TERRAIN
+            when 'transit'
+                map.setMapTypeId google.maps.MapTypeId.ROADMAP if map.getMapTypeId() is google.maps.MapTypeId.TERRAIN
+                transitLayer.setMap map
+            when 'walking'
+                transitLayer.setMap null
+                map.setMapTypeId google.maps.MapTypeId.TERRAIN if map.getMapTypeId() is google.maps.MapTypeId.ROADMAP
         
     $versatile.on 'click', ->
         switch $versatile.text().replace(/^\s*|\s*$/, '')
