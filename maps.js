@@ -877,15 +877,12 @@
           directionsRenderer.setMap(map);
           directionsRenderer.setDirections(result);
           return updateMessage();
-        case google.maps.DirectionsStatus.ZERO_RESULTS:
+        default:
           directionsRenderer.setMap(null);
           mode = $('#travel-mode').children('.btn-primary').attr('id');
           mode = mode[0].toUpperCase() + mode.substr(1);
           $message.html(getLocalizedString(mode + ' directions could not be found between these locations'));
-          return alert(getLocalizedString('Directions Not Available\nDirections could not be found between these locations.'));
-        default:
-          directionsRenderer.setMap(null);
-          return console.log(status);
+          return alert(getLocalizedString('Directions Not Available\nDirections could not be found between these locations.') + ("(" + status + ")"));
       }
     });
   };

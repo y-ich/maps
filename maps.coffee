@@ -555,15 +555,12 @@ searchDirections = (fromHistory = false) ->
                     directionsRenderer.setMap map
                     directionsRenderer.setDirections result
                     updateMessage()
-                when google.maps.DirectionsStatus.ZERO_RESULTS
+                else
                     directionsRenderer.setMap null
                     mode = $('#travel-mode').children('.btn-primary').attr('id')
                     mode = mode[0].toUpperCase() + mode.substr 1
                     $message.html getLocalizedString(mode + ' directions could not be found between these locations')
-                    alert getLocalizedString 'Directions Not Available\nDirections could not be found between these locations.'   
-                else
-                    directionsRenderer.setMap null
-                    console.log status
+                    alert getLocalizedString('Directions Not Available\nDirections could not be found between these locations.') + "(#{status})"
 
 searchDirections.service = new google.maps.DirectionsService()
 
