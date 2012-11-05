@@ -671,6 +671,7 @@
   saveOtherStatus = function() {
     history.splice(maxHistory);
     return localStorage['maps-other-status'] = JSON.stringify({
+      address: $addressField.val(),
       origin: $originField.val(),
       destination: $destinationField.val(),
       bookmarks: bookmarks.map(function(e) {
@@ -1139,6 +1140,9 @@
     });
     if (localStorage['maps-other-status'] != null) {
       otherStatus = JSON.parse(localStorage['maps-other-status']);
+      if ((otherStatus.address != null) && otherStatus.address !== '') {
+        updateField($addressField, otherStatus.address);
+      }
       if ((otherStatus.origin != null) && otherStatus.origin !== '') {
         updateField($originField, otherStatus.origin);
       }

@@ -400,6 +400,7 @@ saveMapStatus = () ->
 saveOtherStatus = () ->
     history.splice maxHistory
     localStorage['maps-other-status'] = JSON.stringify
+        address: $addressField.val()
         origin: $originField.val()
         destination: $destinationField.val()
         bookmarks: bookmarks.map (e) -> e.toObject()
@@ -794,6 +795,8 @@ initializeDOM = ->
     # restores from localStorage
     if localStorage['maps-other-status']?
         otherStatus = JSON.parse localStorage['maps-other-status']
+        if otherStatus.address? and otherStatus.address isnt ''
+            updateField $addressField, otherStatus.address
         if otherStatus.origin? and otherStatus.origin isnt ''
             updateField $originField, otherStatus.origin
         if otherStatus.destination? and otherStatus.destination isnt ''
