@@ -129,9 +129,7 @@ h5 {
 input.search-query {
   /* you need specify input to over write bootsrap */
 
-  width: 285px;
-  /* width = 320 - (border*2 + margin-left + margin-right + padding-left) */
-
+  width: 259px;
   height: 28px;
   margin: 5px 4px 7px;
   padding: 0 26px 0 25px;
@@ -158,9 +156,7 @@ input.search-query {
 input.route-query {
   /* you need specify input to over write bootsrap */
 
-  width: 168px;
-  /* width = 320 - (border*2 + margin-left + margin-right + padding-left + left td.width(32) but in order to avoid centering input at focus on iPhone, shorter width */
-
+  width: 172px;
   height: 28px;
   margin: 2px 4px 2px 7px;
   padding: 0 26px 0 40px;
@@ -169,7 +165,7 @@ input.route-query {
 input.name-query {
   /* you need specify input to over write bootsrap */
 
-  width: 277px;
+  width: 276px;
   height: 28px;
   margin: 5px 4px 7px 7px;
   padding: 0 26px 0 5px;

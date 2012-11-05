@@ -8,6 +8,7 @@
 @header-outer-height: (@header-height + @header-border * 2);
 @footer-height: 46px; // $('#footer').outerHeight(true)
 @transition-time: 0.3s;
+@padding-clear: 26px;
 
 html, body {
     width: 100%;
@@ -130,10 +131,10 @@ h5 {
 }
 
 input.search-query { /* you need specify input to over write bootsrap */
-    width: 285px; /* width = 320 - (border*2 + margin-left + margin-right + padding-left) */
+    width: (320px - (1px * 2 + 4px * 2 + @padding-clear + 25px));
     height: 28px;
     margin: 5px 4px 7px;
-    padding: 0 26px 0 25px;
+    padding: 0 @padding-clear 0 25px;
 }
 
 .icon-search {
@@ -153,18 +154,18 @@ input.search-query { /* you need specify input to over write bootsrap */
 }
 
 input.route-query { /* you need specify input to over write bootsrap */
-    width: 168px; /* width = 320 - (border*2 + margin-left + margin-right + padding-left + left td.width(32) but in order to avoid centering input at focus on iPhone, shorter width */
+    width: (320px - (32px + 1px * 2 + 4px + 2px + @padding-clear + 40px) - 42px);
     height: 28px;
     margin: 2px 4px 2px 7px;
-    padding: 0 26px 0 40px;
+    padding: 0 @padding-clear 0 40px;
     border-radius: 5px;    
 }
 
 input.name-query { /* you need specify input to over write bootsrap */
-    width: 277px; 
+    width: (320px - (1px * 2 + 4px + 7px + @padding-clear + 5px)); 
     height: 28px;
     margin: 5px 4px 7px 7px;
-    padding: 0 26px 0 5px;
+    padding: 0 @padding-clear 0 5px;
     border-radius: 5px;
 }
 
