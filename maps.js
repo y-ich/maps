@@ -1014,7 +1014,7 @@
     google.maps.event.addListener(autoAddressField, 'place_changed', function() {
       var place;
       place = autoAddressField.getPlace();
-      if (__indexOf.call(place, 'geometry') >= 0) {
+      if ('geometry' in place) {
         return setSearchResult(place);
       }
     });

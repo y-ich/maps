@@ -670,7 +670,7 @@ initializeGoogleMaps = ->
     autoAddressField.bindTo 'bounds', map
     google.maps.event.addListener autoAddressField, 'place_changed', ->
         place = autoAddressField.getPlace()
-        setSearchResult place if 'geometry' in place 
+        setSearchResult place if 'geometry' of place 
     
     autoOriginField = new google.maps.places.Autocomplete $('#origin input[name="origin"]')[0]
     autoOriginField.bindTo 'bounds', map 
