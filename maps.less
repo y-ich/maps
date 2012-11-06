@@ -61,6 +61,35 @@ h5 {
 
 /* end of cancel */
 
+/* from Ratchet */
+
+/* Prev/next button base styles */
+.button-prev {
+  margin-left: 7px; /* Push over to make room for :before content */
+  border-left: 0;
+  border-bottom-left-radius: 10px 15px;
+  border-top-left-radius: 10px 15px;
+}
+
+/* Pointed part of directional button */
+.button-prev:before {
+  position: absolute;
+  top: 14px;
+  width: 16px;
+  height: 16px;
+  border-radius: 30px 100px 2px 40px / 2px 40px 30px 100px;
+  content: '';
+  border: 1px solid rgba(0,0,0,0.15);
+  -webkit-mask-image: -webkit-gradient(linear, left top, right bottom, from(#000), color-stop(.33, #000), color-stop(.5, transparent), to(transparent));
+                  mask-image: gradient(linear, left top, right bottom, from(#000), color-stop(.33, #000), color-stop(.5, transparent), to(transparent));
+  left: 8px;
+  background-image: -webkit-gradient(linear, right top, left bottom, from(rgb(162,179,199)), color-stop(0.5,rgb(118,141,171)), color-stop(0.5,rgb(103,130,162)), to(rgb(106,132,165)));
+  background-image: gradient(linear, right top, left bottom, from(rgb(162,179,199)), color-stop(0.5,rgb(118,141,171)), color-stop(0.5,rgb(103,130,162)), to(rgb(106,132,165)));
+  border-left: 1.5px solid rgba(255, 255, 255, .25);
+  -webkit-transform: rotate(-45deg) skew(-10deg, -10deg);
+          transform: rotate(-45deg) skew(-10deg, -10deg);
+}
+
 /* my original navbar to layout buttons */
 
 .mynavbar {
