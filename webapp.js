@@ -48,7 +48,7 @@
 
   app.initializeDOM();
 
-  $('#version').html('(C) 2012 ICHIKAWA, Yuji (New 3 Rs)<br>Maps ver. 1.2.8');
+  $('#version').html('(C) 2012 ICHIKAWA, Yuji (New 3 Rs)<br>Maps ver. 1.2.9');
 
   window.onpagehide = function() {
     app.tracer.stop();
