@@ -1208,6 +1208,11 @@
     $addressField.on('blur', function() {
       return $('#search-header').css('top', '');
     });
+    $('#search-header, #route-search-frame').on('webkitTransitionEnd', function() {
+      var $this;
+      $this = $(this);
+      return $('.pac-container:visible').css('top', $this.offset().top + $this.outerHeight(true) + 'px');
+    });
     $('#address').on('submit', function() {
       searchAddress(false);
       $addressField.blur();

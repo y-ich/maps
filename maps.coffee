@@ -857,6 +857,10 @@ initializeDOM = ->
 
     $addressField.on 'focus', -> $('#search-header').css 'top', '0' # down form
     $addressField.on 'blur', -> $('#search-header').css 'top', '' # up form
+
+    $('#search-header, #route-search-frame').on 'webkitTransitionEnd', ->
+        $this = $(this)
+        $('.pac-container:visible').css 'top', $this.offset().top + $this.outerHeight(true) + 'px'
         
     $('#address').on 'submit', ->
         searchAddress(false)
