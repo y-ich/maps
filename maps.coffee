@@ -667,6 +667,7 @@ initializeGoogleMaps = ->
 
     geocoder = new google.maps.Geocoder()
 
+    ###
     autoAddressField = new google.maps.places.Autocomplete $('#address input[name="address"]')[0]
     autoAddressField.bindTo 'bounds', map
     google.maps.event.addListener autoAddressField, 'place_changed', ->
@@ -678,7 +679,8 @@ initializeGoogleMaps = ->
     
     autoDestinationField = new google.maps.places.Autocomplete $('#destination input[name="destination"]')[0]
     autoDestinationField.bindTo 'bounds', map 
-
+    ###
+    
     directionsRenderer = new google.maps.DirectionsRenderer
         hideRouteList: false
         infoWindow: infoWindow
@@ -868,7 +870,7 @@ initializeDOM = ->
         false # to prevent submit action
 
     $addressField.on 'keyup', -> setLocalExpressionInto 'done', if $(this).val() is '' then 'Done' else 'Cancel'
-
+    
     $('#clear, #address .btn-reset').on 'click', ->
         setLocalExpressionInto 'done', 'Done'
         searchPlace.marker.setVisible false

@@ -1010,19 +1010,20 @@
       maxWidth: Math.floor(innerWidth * 0.9)
     });
     geocoder = new google.maps.Geocoder();
-    autoAddressField = new google.maps.places.Autocomplete($('#address input[name="address"]')[0]);
-    autoAddressField.bindTo('bounds', map);
-    google.maps.event.addListener(autoAddressField, 'place_changed', function() {
-      var place;
-      place = autoAddressField.getPlace();
-      if ('geometry' in place) {
-        return setSearchResult(place);
-      }
-    });
-    autoOriginField = new google.maps.places.Autocomplete($('#origin input[name="origin"]')[0]);
-    autoOriginField.bindTo('bounds', map);
-    autoDestinationField = new google.maps.places.Autocomplete($('#destination input[name="destination"]')[0]);
-    autoDestinationField.bindTo('bounds', map);
+    /*
+        autoAddressField = new google.maps.places.Autocomplete $('#address input[name="address"]')[0]
+        autoAddressField.bindTo 'bounds', map
+        google.maps.event.addListener autoAddressField, 'place_changed', ->
+            place = autoAddressField.getPlace()
+            setSearchResult place if 'geometry' of place 
+        
+        autoOriginField = new google.maps.places.Autocomplete $('#origin input[name="origin"]')[0]
+        autoOriginField.bindTo 'bounds', map 
+        
+        autoDestinationField = new google.maps.places.Autocomplete $('#destination input[name="destination"]')[0]
+        autoDestinationField.bindTo 'bounds', map
+    */
+
     directionsRenderer = new google.maps.DirectionsRenderer({
       hideRouteList: false,
       infoWindow: infoWindow,
