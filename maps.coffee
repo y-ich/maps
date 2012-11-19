@@ -667,7 +667,6 @@ initializeGoogleMaps = ->
 
     geocoder = new google.maps.Geocoder()
 
-    ###
     autoAddressField = new google.maps.places.Autocomplete $('#address input[name="address"]')[0]
     autoAddressField.bindTo 'bounds', map
     google.maps.event.addListener autoAddressField, 'place_changed', ->
@@ -679,7 +678,6 @@ initializeGoogleMaps = ->
     
     autoDestinationField = new google.maps.places.Autocomplete $('#destination input[name="destination"]')[0]
     autoDestinationField.bindTo 'bounds', map 
-    ###
     
     directionsRenderer = new google.maps.DirectionsRenderer
         hideRouteList: false
@@ -793,6 +791,17 @@ initializeDOM = ->
         event.preventDefault()
     $('#pin-list-frame, #info, #directions-panel').on 'touchmove', (event) ->
         event.stopPropagation()
+
+    # Here is a work around for google.maps.places.Autocomplete on iOS.
+    # Type Enter after IME transformation causes input value to restore the one before transformation.
+    # The difference between desktop and iOS is keydown and keyup events after textInput(IME transformation) event.
+    # There are neither keydown nor keyup on iOS.
+    # So emulate this events after textInput.
+    $('input[type="search"], input[type="text"]').on 'textInput', ->
+        for event in ['keydown', 'keyup']
+            e = document.createEvent 'KeyboardEvent'
+            e.initKeyboardEvent event, true, true, window, 'Enter', 0, ''
+            this.dispatchEvent(e)
 
     # restores from localStorage
     if localStorage['maps-other-status']?

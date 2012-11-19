@@ -1010,20 +1010,19 @@
       maxWidth: Math.floor(innerWidth * 0.9)
     });
     geocoder = new google.maps.Geocoder();
-    /*
-        autoAddressField = new google.maps.places.Autocomplete $('#address input[name="address"]')[0]
-        autoAddressField.bindTo 'bounds', map
-        google.maps.event.addListener autoAddressField, 'place_changed', ->
-            place = autoAddressField.getPlace()
-            setSearchResult place if 'geometry' of place 
-        
-        autoOriginField = new google.maps.places.Autocomplete $('#origin input[name="origin"]')[0]
-        autoOriginField.bindTo 'bounds', map 
-        
-        autoDestinationField = new google.maps.places.Autocomplete $('#destination input[name="destination"]')[0]
-        autoDestinationField.bindTo 'bounds', map
-    */
-
+    autoAddressField = new google.maps.places.Autocomplete($('#address input[name="address"]')[0]);
+    autoAddressField.bindTo('bounds', map);
+    google.maps.event.addListener(autoAddressField, 'place_changed', function() {
+      var place;
+      place = autoAddressField.getPlace();
+      if ('geometry' in place) {
+        return setSearchResult(place);
+      }
+    });
+    autoOriginField = new google.maps.places.Autocomplete($('#origin input[name="origin"]')[0]);
+    autoOriginField.bindTo('bounds', map);
+    autoDestinationField = new google.maps.places.Autocomplete($('#destination input[name="destination"]')[0]);
+    autoDestinationField.bindTo('bounds', map);
     directionsRenderer = new google.maps.DirectionsRenderer({
       hideRouteList: false,
       infoWindow: infoWindow,
@@ -1138,6 +1137,18 @@
     });
     $('#pin-list-frame, #info, #directions-panel').on('touchmove', function(event) {
       return event.stopPropagation();
+    });
+    $('input[type="search"], input[type="text"]').on('textInput', function() {
+      var e, event, _i, _len, _ref5, _results;
+      _ref5 = ['keydown', 'keyup'];
+      _results = [];
+      for (_i = 0, _len = _ref5.length; _i < _len; _i++) {
+        event = _ref5[_i];
+        e = document.createEvent('KeyboardEvent');
+        e.initKeyboardEvent(event, true, true, window, 'Enter', 0, '');
+        _results.push(this.dispatchEvent(e));
+      }
+      return _results;
     });
     if (localStorage['maps-other-status'] != null) {
       otherStatus = JSON.parse(localStorage['maps-other-status']);
