@@ -797,7 +797,7 @@ initializeDOM = ->
     # The difference between desktop and iOS is keydown and keyup events after textInput(IME transformation) event.
     # There are neither keydown nor keyup on iOS.
     # So emulate this events after textInput.
-    $('input[type="search"], input[type="text"]').on 'textInput', ->
+    $('input.places-auto').on 'textInput', ->
         for event in ['keydown', 'keyup']
             e = document.createEvent 'KeyboardEvent'
             e.initKeyboardEvent event, true, true, window, 'Enter', 0, ''

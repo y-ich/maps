@@ -1138,7 +1138,7 @@
     $('#pin-list-frame, #info, #directions-panel').on('touchmove', function(event) {
       return event.stopPropagation();
     });
-    $('input[type="search"], input[type="text"]').on('textInput', function() {
+    $('input.places-auto').on('textInput', function() {
       var e, event, _i, _len, _ref5, _results;
       _ref5 = ['keydown', 'keyup'];
       _results = [];
