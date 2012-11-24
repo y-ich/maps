@@ -32,6 +32,16 @@ droppedPlace = null # combination of dropped marker and address information
 searchPlace = null # search result
 placeContext = null # context place
 
+norikaeServices = [
+    ['MapFan+', 'mapfanplus:', '', '']
+    ['乗換ナビ', 'navitimetransfer:', '', '']
+    ['乗換案内', 'NrkjFree:', '', '']
+    ['Yahoo! ロコ 乗換案内', 'yjtransit:']
+    ['駅.Locky', 'com.ubigraph.ekilocky:']
+    ['Google乗換案内', 'https://www.google.co.jp/maps?ie=UTF8&f=d&dirflg=r&', 'saddr', 'daddr']
+    ['ジョルダン', 'http://www.jorudan.co.jp/norikae/cgi/nori.cgi?', 'eki1', 'eki2']
+]
+
 # jQuery instances
 $map = null
 $gps = null
@@ -540,12 +550,14 @@ searchDirections = (fromHistory = false) ->
     return unless origin? and origin isnt '' and destination? and destination isnt ''
 
     infoWindow.close()
+
     if not fromHistory
         history.unshift
             type: 'route'
             origin: origin
             destination: destination
         saveOtherStatus()
+
     travelMode = getTravelMode()
     searchDirections.service.route
             destination: destination
