@@ -1144,17 +1144,25 @@
     $('#pin-list-frame, #info, #directions-panel').on('touchmove', function(event) {
       return event.stopPropagation();
     });
+    $('input.places-auto').on('keydown', function() {
+      return $(this).data('keydown', true);
+    });
+    $('input.places-auto').on('keyup', function() {
+      return $(this).data('keydown', false);
+    });
     $('input.places-auto').on('textInput', function() {
       var event, _j, _len1, _ref6, _results;
-      _ref6 = ['keydown', 'keyup'];
-      _results = [];
-      for (_j = 0, _len1 = _ref6.length; _j < _len1; _j++) {
-        event = _ref6[_j];
-        e = document.createEvent('KeyboardEvent');
-        e.initKeyboardEvent(event, true, true, window, 'Enter', 0, '');
-        _results.push(this.dispatchEvent(e));
+      if (!$(this).data('keydown')) {
+        _ref6 = ['keydown', 'keyup'];
+        _results = [];
+        for (_j = 0, _len1 = _ref6.length; _j < _len1; _j++) {
+          event = _ref6[_j];
+          e = document.createEvent('KeyboardEvent');
+          e.initKeyboardEvent(event, true, true, window, 'Enter', 0, '');
+          _results.push(this.dispatchEvent(e));
+        }
+        return _results;
       }
-      return _results;
     });
     if (localStorage['maps-other-status'] != null) {
       otherStatus = JSON.parse(localStorage['maps-other-status']);

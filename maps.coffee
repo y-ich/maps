@@ -806,16 +806,20 @@ initializeDOM = ->
         event.stopPropagation()
 
     # Here is a work around for google.maps.places.Autocomplete on iOS.
-    # Type Enter after IME transformation causes input value to restore the one before transformation.
+    # Type Enter after Japanese IME transformation causes input value to restore the one before transformation unexpectedly.
     # The difference between desktop and iOS is keydown and keyup events after textInput(IME transformation) event.
     # There are neither keydown nor keyup on iOS.
-    # So emulate this events after textInput.
+    # So emulate this events after textInput without keydown.
+    # note: textInput always happens when English. So you need check with or without keydown.
+    $('input.places-auto').on 'keydown', -> $(this).data 'keydown', true
+    $('input.places-auto').on 'keyup', -> $(this).data 'keydown', false        
     $('input.places-auto').on 'textInput', ->
-        for event in ['keydown', 'keyup']
-            e = document.createEvent 'KeyboardEvent'
-            e.initKeyboardEvent event, true, true, window, 'Enter', 0, ''
-            this.dispatchEvent(e)
-
+        unless $(this).data 'keydown' # if textInput without keydown
+            for event in ['keydown', 'keyup']
+                e = document.createEvent 'KeyboardEvent'
+                e.initKeyboardEvent event, true, true, window, 'Enter', 0, ''
+                this.dispatchEvent(e)
+            
     # restores from localStorage
     if localStorage['maps-other-status']?
         otherStatus = JSON.parse localStorage['maps-other-status']
