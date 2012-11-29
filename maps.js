@@ -1124,7 +1124,7 @@
   };
 
   initializeDOM = function() {
-    var $bookmarkPage, $edit, $mapType, $naviHeader, $option, $panoramio, $route, $routeSearchFrame, $search, $traffic, $travelMode, $versatile, backToMap, e, openRouteForm, otherStatus, _i, _len, _ref5, _ref6, _ref7;
+    var $bookmarkPage, $edit, $mapType, $naviHeader, $option, $panoramio, $route, $routeSearchFrame, $search, $traffic, $travelMode, $versatile, backToMap, e, openRouteForm, otherStatus, _i, _j, _len, _len1, _ref5, _ref6, _ref7, _ref8;
     $map = $('#map');
     $gps = $('#gps');
     $addressField = $('#address input[name="address"]');
@@ -1133,7 +1133,11 @@
     $message = $('#message');
     $pinList = $('#pin-list');
     pinRowHeight = $('#pin-list tr').height();
-    new NoClickDelay($('#container')[0]);
+    _ref5 = $('button');
+    for (_i = 0, _len = _ref5.length; _i < _len; _i++) {
+      e = _ref5[_i];
+      new NoClickDelay(e);
+    }
     document.addEventListener('touchmove', function(event) {
       return event.preventDefault();
     });
@@ -1141,11 +1145,11 @@
       return event.stopPropagation();
     });
     $('input.places-auto').on('textInput', function() {
-      var e, event, _i, _len, _ref5, _results;
-      _ref5 = ['keydown', 'keyup'];
+      var event, _j, _len1, _ref6, _results;
+      _ref6 = ['keydown', 'keyup'];
       _results = [];
-      for (_i = 0, _len = _ref5.length; _i < _len; _i++) {
-        event = _ref5[_i];
+      for (_j = 0, _len1 = _ref6.length; _j < _len1; _j++) {
+        event = _ref6[_j];
         e = document.createEvent('KeyboardEvent');
         e.initKeyboardEvent(event, true, true, window, 'Enter', 0, '');
         _results.push(this.dispatchEvent(e));
@@ -1163,9 +1167,9 @@
       if ((otherStatus.destination != null) && otherStatus.destination !== '') {
         updateField($destinationField, otherStatus.destination);
       }
-      _ref6 = (_ref5 = otherStatus.bookmarks) != null ? _ref5 : [];
-      for (_i = 0, _len = _ref6.length; _i < _len; _i++) {
-        e = _ref6[_i];
+      _ref7 = (_ref6 = otherStatus.bookmarks) != null ? _ref6 : [];
+      for (_j = 0, _len1 = _ref7.length; _j < _len1; _j++) {
+        e = _ref7[_j];
         bookmarks.push(new Place(new google.maps.Marker({
           map: map,
           position: new google.maps.LatLng(e.lat, e.lng),
@@ -1173,7 +1177,7 @@
           visible: false
         }), e.address));
       }
-      history = (_ref7 = otherStatus.history) != null ? _ref7 : [];
+      history = (_ref8 = otherStatus.history) != null ? _ref8 : [];
     }
     localize();
     $(document.body).css('display', 'block');

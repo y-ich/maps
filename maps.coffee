@@ -796,7 +796,8 @@ initializeDOM = ->
     $pinList = $('#pin-list')
     pinRowHeight = $('#pin-list tr').height()
 
-    new NoClickDelay $('#container')[0]
+    for e in $('button')
+        new NoClickDelay e
     
     # prevents default page scroll, but scroll bookmark/history list.
     document.addEventListener 'touchmove', (event) ->
