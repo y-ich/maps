@@ -1190,11 +1190,11 @@
       history = (_ref8 = otherStatus.history) != null ? _ref8 : [];
     }
     localize();
-    $('#container').css('display', '');
     window.scrollTo(0, 0);
     if (/iPhone/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent)) {
       $('html, body').height(innerHeight);
     }
+    $('#container').css('display', '');
     window.addEventListener('orientationchange', function() {
       return document.body.scrollLeft = scrollLeft ? innerWidth : 0;
     });
@@ -1554,17 +1554,12 @@
       $('#container').css('right', '');
       return openRouteForm();
     });
-    $('#from-here').on('click', function() {
+    return $('#from-here').on('click', function() {
       updateField($originField, placeContext.address);
       $route.trigger('click');
       $('#container').css('right', '');
       return openRouteForm();
     });
-    return setTimeout((function() {
-      return $('.startup').on('webkitTransitionEnd', function() {
-        return $('.startup').css('display', 'none');
-      }).css('opacity', '0');
-    }), 3000);
   };
 
   window.app = {

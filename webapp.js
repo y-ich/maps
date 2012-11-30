@@ -55,9 +55,15 @@
 
   app.initializeGoogleMaps();
 
+  $version.html(VERSION);
+
   app.initializeDOM();
 
-  $version.html(VERSION);
+  setTimeout((function() {
+    return $('.startup').on('webkitTransitionEnd', function() {
+      return $('.startup').css('display', 'none');
+    }).css('opacity', '0');
+  }), 3000);
 
   window.onpagehide = function() {
     app.tracer.stop();

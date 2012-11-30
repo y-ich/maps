@@ -36,8 +36,12 @@ for type in types
     window.applicationCache.addEventListener type, (event) -> console.log event.type
 
 app.initializeGoogleMaps()
-app.initializeDOM()
 $version.html VERSION
+app.initializeDOM()
+setTimeout (->
+    $('.startup').on('webkitTransitionEnd', -> $('.startup').css 'display', 'none')
+                 .css 'opacity', '0'
+), 3000
 
 window.onpagehide = ->
     app.tracer.stop()
