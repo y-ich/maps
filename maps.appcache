@@ -1,6 +1,6 @@
 CACHE MANIFEST
 
-#version 1.2.12 11-29-2012
+#version 1.2.13 11-30-2012
 
 CACHE:
 
@@ -20,6 +20,9 @@ http://maps.gstatic.com/mapfiles/undo_poly.png
 
 #internal HTML documents
 maps.html
+
+# fonts
+http://themes.googleusercontent.com/static/fonts/mrdehaviland/v2/fD8y4L6PJ4vqDk7z8Y8e22chIAIIjf4XOO79k2CCdSI.woff
 
 #style sheets
 css/bootstrap.min.css

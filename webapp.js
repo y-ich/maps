@@ -2,7 +2,7 @@
 (function() {
   var $option, $version, BLINK_INTERVAL, VERSION, timerId, type, types, _i, _len;
 
-  VERSION = '(C) 2012 ICHIKAWA, Yuji (New 3 Rs)<br>Maps ver. 1.2.12';
+  VERSION = '(C) 2012 ICHIKAWA, Yuji (New 3 Rs)<br>Maps ver. 1.2.13';
 
   BLINK_INTERVAL = 500;
 
@@ -11,6 +11,8 @@
   $option = $('#option');
 
   $version = $('#version');
+
+  document.write('<div class="startup">\n    <div id="logo">RRR</div>\n</div>');
 
   window.applicationCache.addEventListener('downloading', function() {
     timerId = setInterval((function() {

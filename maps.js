@@ -1190,7 +1190,7 @@
       history = (_ref8 = otherStatus.history) != null ? _ref8 : [];
     }
     localize();
-    $(document.body).css('display', 'block');
+    $('#container').css('display', '');
     window.scrollTo(0, 0);
     if (/iPhone/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent)) {
       $('html, body').height(innerHeight);
@@ -1554,12 +1554,17 @@
       $('#container').css('right', '');
       return openRouteForm();
     });
-    return $('#from-here').on('click', function() {
+    $('#from-here').on('click', function() {
       updateField($originField, placeContext.address);
       $route.trigger('click');
       $('#container').css('right', '');
       return openRouteForm();
     });
+    return setTimeout((function() {
+      return $('.startup').on('webkitTransitionEnd', function() {
+        return $('.startup').css('display', 'none');
+      }).css('opacity', '0');
+    }), 2000);
   };
 
   window.app = {

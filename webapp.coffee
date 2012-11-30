@@ -1,12 +1,17 @@
 # Google Maps Web App
 # Copyright (C) 2012 ICHIKAWA, Yuji (New 3 Rs) 
 
-VERSION = '(C) 2012 ICHIKAWA, Yuji (New 3 Rs)<br>Maps ver. 1.2.12'
+VERSION = '(C) 2012 ICHIKAWA, Yuji (New 3 Rs)<br>Maps ver. 1.2.13'
 BLINK_INTERVAL = 500 # ms
 timerId = null
 $option = $('#option')
 $version = $('#version')
 
+document.write '''
+    <div class="startup">
+        <div id="logo">RRR</div>
+    </div>
+    '''
 window.applicationCache.addEventListener 'downloading', ->
     timerId = setInterval (-> $option.toggleClass 'btn-light'), BLINK_INTERVAL
     $version.html VERSION + ' (downloading new version...)'

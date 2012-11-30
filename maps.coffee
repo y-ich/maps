@@ -842,8 +842,7 @@ initializeDOM = ->
     #localization
     localize()
     
-
-    $(document.body).css 'display', 'block'
+    $('#container').css 'display', ''
     window.scrollTo 0, 0
     $('html, body').height innerHeight if /iPhone/.test(navigator.userAgent) and /Safari/.test(navigator.userAgent)
         
@@ -1169,6 +1168,12 @@ initializeDOM = ->
         $route.trigger 'click'
         $('#container').css 'right', ''
         openRouteForm()
+
+    setTimeout (->
+        $('.startup').on('webkitTransitionEnd', -> $('.startup').css 'display', 'none')
+                     .css 'opacity', '0'
+    ), 2000
+
 
 # export
 
