@@ -320,13 +320,14 @@ mapSum = (array, fn) ->
 
 # returns ordinal number as String
 ordinal = (n) ->
-    switch n % 10
+    tens = n.toString().slice(0, -1)
+    switch n % 20
         when 1
-            '1st'
+            tens + '1st'
         when 2
-            '2nd'
+            tens + '2nd'
         when 3
-            '3rd'
+            tens + '3rd'
         else
             n + 'th'
 

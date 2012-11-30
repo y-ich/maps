@@ -563,13 +563,15 @@
   };
 
   ordinal = function(n) {
-    switch (n % 10) {
+    var tens;
+    tens = n.toString().slice(0, -1);
+    switch (n % 20) {
       case 1:
-        return '1st';
+        return tens + '1st';
       case 2:
-        return '2nd';
+        return tens + '2nd';
       case 3:
-        return '3rd';
+        return tens + '3rd';
       default:
         return n + 'th';
     }
