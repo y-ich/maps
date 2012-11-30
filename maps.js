@@ -1564,7 +1564,7 @@
       return $('.startup').on('webkitTransitionEnd', function() {
         return $('.startup').css('display', 'none');
       }).css('opacity', '0');
-    }), 2000);
+    }), 3000);
   };
 
   window.app = {

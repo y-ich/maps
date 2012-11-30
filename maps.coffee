@@ -1172,7 +1172,7 @@ initializeDOM = ->
     setTimeout (->
         $('.startup').on('webkitTransitionEnd', -> $('.startup').css 'display', 'none')
                      .css 'opacity', '0'
-    ), 2000
+    ), 3000
 
 
 # export
