@@ -3,6 +3,7 @@
 
 VERSION = '(C) 2012 ICHIKAWA, Yuji (New 3 Rs)<br>Maps ver. 1.2.13'
 BLINK_INTERVAL = 500 # ms
+STARTUP_TIME = 3000 # ms
 timerId = null
 $option = $('#option')
 $version = $('#version')
@@ -38,14 +39,17 @@ for type in types
 app.initializeGoogleMaps()
 $version.html VERSION
 app.initializeDOM()
-setTimeout (->
-    $('.startup').on('webkitTransitionEnd', -> $('.startup').css 'display', 'none')
-                 .css 'opacity', '0'
-), 3000
 
+# post process
 window.onpagehide = ->
     app.tracer.stop()
     app.saveMapStatus()
     app.saveOtherStatus()
+
+# finish startup screen
+setTimeout (->
+    $('.startup').on('webkitTransitionEnd', -> $('.startup').css 'display', 'none')
+                 .css 'opacity', '0'
+), STARTUP_TIME
 
 app.tracer.start()
