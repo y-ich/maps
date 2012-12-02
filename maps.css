@@ -276,10 +276,20 @@ img.icon {
   bottom: 46px;
   -webkit-transition: top 0.3s, bottom 0.3s;
 }
-#map.streetview {
+#sv-close-button {
+  display: none;
+  position: absolute;
+  right: 0px;
+  top: 0px;
+  z-index: 1000001;
+}
+#map-page.streetview #map {
   top: 0px;
   bottom: 0px;
   z-index: 1;
+}
+#map-page.streetview #sv-close-button {
+  display: block;
 }
 #map img {
   max-width: none;

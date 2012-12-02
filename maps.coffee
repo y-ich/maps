@@ -235,21 +235,22 @@ for name, method of MapState.prototype when typeof method is 'function'
 # place
 class Place
     @streetViewService: new google.maps.StreetViewService()
-    @streetViewButtonWrapper: $('<div class="button-wrapper wrapper-left"></div>').on('click', ->
+    @streetViewButtonWrapper: $('<div class="button-wrapper wrapper-left"></div>').on('click', -> # ,(comma) out of parenthesis causes parser error.
         if placeContext.svLatLng?
-            $map.addClass 'streetview'
+            $('#map-page').addClass 'streetview'
             sv = map.getStreetView()
             sv.setPosition placeContext.svLatLng
             sv.setPov
                 heading: map.getHeading() ? 0
                 pitch: 0
                 zoom: 1
-            sv.setVisible true)
+            sv.setVisible true
+    )
     @infoButtonWrapper: $('<div class="button-wrapper wrapper-right"></div>').on('click', ->
-            setInfoPage(placeContext, placeContext is droppedPlace)
-            $('body').animate {scrollLeft: innerWidth}, 300
-            scrollLeft = true
-        )
+        setInfoPage(placeContext, placeContext is droppedPlace)
+        $('body').animate {scrollLeft: innerWidth}, 300
+        scrollLeft = true
+    )
 
     constructor: (@marker, @address) ->
         google.maps.event.addListener @marker, 'click', (event) =>
@@ -672,7 +673,7 @@ initializeGoogleMaps = ->
         mapOptions.center = new google.maps.LatLng 35.660389, 139.729225
         mapOptions.zoom = 14
 
-    map = new google.maps.Map document.getElementById("map"), mapOptions
+    map = new google.maps.Map document.getElementById('map'), mapOptions
     map.setTilt 45
     mapFSM = new MapFSM(MapState.NORMAL)
     infoWindow = new MobileInfoWindow
@@ -790,8 +791,9 @@ initializeGoogleMaps = ->
     google.maps.event.addListener map, 'center_changed', saveMapStatus
     google.maps.event.addListener map, 'zoom_changed', saveMapStatus
 
-    google.maps.event.addListener map.getStreetView(), 'visible_changed', -> $map.removeClass 'streetview' unless @getVisible()
+    google.maps.event.addListener map.getStreetView(), 'visible_changed', -> $('#map-page').removeClass 'streetview' unless @getVisible()
             
+
     trafficLayer = new google.maps.TrafficLayer()
 
     transitLayer = new google.maps.TransitLayer()
@@ -1149,6 +1151,9 @@ initializeDOM = ->
         $route.trigger 'click'
         $('#container').css 'right', ''
         openRouteForm()
+        
+    $('#sv-close-button').on 'click', ->
+        map.getStreetView().setVisible false
 
 # auxiliary functions for initializDOM
 restoreStatus = ->

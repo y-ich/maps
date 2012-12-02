@@ -476,7 +476,7 @@
     Place.streetViewButtonWrapper = $('<div class="button-wrapper wrapper-left"></div>').on('click', function() {
       var sv, _ref2;
       if (placeContext.svLatLng != null) {
-        $map.addClass('streetview');
+        $('#map-page').addClass('streetview');
         sv = map.getStreetView();
         sv.setPosition(placeContext.svLatLng);
         sv.setPov({
@@ -1007,7 +1007,7 @@
       mapOptions.center = new google.maps.LatLng(35.660389, 139.729225);
       mapOptions.zoom = 14;
     }
-    map = new google.maps.Map(document.getElementById("map"), mapOptions);
+    map = new google.maps.Map(document.getElementById('map'), mapOptions);
     map.setTilt(45);
     mapFSM = new MapFSM(MapState.NORMAL);
     infoWindow = new MobileInfoWindow({
@@ -1134,7 +1134,7 @@
     google.maps.event.addListener(map, 'zoom_changed', saveMapStatus);
     google.maps.event.addListener(map.getStreetView(), 'visible_changed', function() {
       if (!this.getVisible()) {
-        return $map.removeClass('streetview');
+        return $('#map-page').removeClass('streetview');
       }
     });
     trafficLayer = new google.maps.TrafficLayer();
@@ -1523,11 +1523,14 @@
       $('#container').css('right', '');
       return openRouteForm();
     });
-    return $('#from-here').on('click', function() {
+    $('#from-here').on('click', function() {
       updateField($originField, placeContext.address);
       $route.trigger('click');
       $('#container').css('right', '');
       return openRouteForm();
+    });
+    return $('#sv-close-button').on('click', function() {
+      return map.getStreetView().setVisible(false);
     });
   };
 
