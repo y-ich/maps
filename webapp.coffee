@@ -8,6 +8,21 @@ timerId = null
 $option = $('#option')
 $version = $('#version')
 
+# function definitions
+
+# full screen for iPhone
+# IMPORTANT: This function should be invoked after initializeDOM for the order of event listener.
+fullScreen = ->
+    window.scrollTo 0, 0 # hide address bar
+    $([document, document.body]).height innerHeight # 100% is not full screen height, is a size below address bar.
+    window.addEventListener 'orientationchange', (->
+        # scrollTo/scrollLeft will be set beforehand by the other event listener.
+        $([document, document.body]).height innerHeight
+    ), false
+    $('input').on 'blur', ->
+        window.scrollTo document.body.scrollLeft, 0 # I wanted to animate but, animation was flickery on iphone as left always reset to 0 during animation. 
+
+
 document.write '''
     <div class="startup">
         <div id="logo">RRR</div>
@@ -39,6 +54,7 @@ for type in types
 app.initializeGoogleMaps()
 $version.html VERSION
 app.initializeDOM()
+fullScreen() if /iPhone/.test(navigator.userAgent) and /Safari/.test(navigator.userAgent)
 
 # post process
 window.onpagehide = ->

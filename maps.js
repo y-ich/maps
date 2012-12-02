@@ -1190,14 +1190,10 @@
       history = (_ref8 = otherStatus.history) != null ? _ref8 : [];
     }
     localize();
-    window.scrollTo(0, 0);
-    if (/iPhone/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent)) {
-      $('html, body').height(innerHeight);
-    }
     $('#container').css('display', '');
-    window.addEventListener('orientationchange', function() {
+    window.addEventListener('orientationchange', (function() {
       return document.body.scrollLeft = scrollLeft ? innerWidth : 0;
-    });
+    }), false);
     $map.on('touchstart', function() {
       isHold = false;
       return setTimeout((function() {
@@ -1224,11 +1220,6 @@
     });
     $gps.on('click', function() {
       return mapFSM.gpsClicked();
-    });
-    $('input').on('blur', function() {
-      var left;
-      left = document.body.scrollLeft;
-      return window.scrollTo(left, 0);
     });
     $addressField.on('focus', function() {
       return $('#search-header').css('top', '0');

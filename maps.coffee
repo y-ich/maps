@@ -841,9 +841,6 @@ initializeDOM = ->
 
     #localization
     localize()
-    
-    window.scrollTo 0, 0
-    $('html, body').height innerHeight if /iPhone/.test(navigator.userAgent) and /Safari/.test(navigator.userAgent)
     $('#container').css 'display', ''
         
 
@@ -851,8 +848,10 @@ initializeDOM = ->
     # event handlers
     #
 
-    window.addEventListener 'orientationchange', ->
+    window.addEventListener 'orientationchange', (->
+        # work around against unexpected page slide when rotating to portrait
         document.body.scrollLeft = if scrollLeft then innerWidth else 0
+    ), false
  
     # hold detection
     $map.on 'touchstart', ->
@@ -877,10 +876,6 @@ initializeDOM = ->
     
     $gps.on 'click', -> mapFSM.gpsClicked()
             
-    $('input').on 'blur', ->
-        left = document.body.scrollLeft
-        window.scrollTo left, 0 # I wanted to animate but, animation was flickery on iphone as left always reset to 0 during animation. 
-        
     # search header
 
     $addressField.on 'focus', -> $('#search-header').css 'top', '0' # down form
