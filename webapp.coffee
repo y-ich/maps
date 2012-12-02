@@ -35,6 +35,7 @@ window.applicationCache.addEventListener 'downloading', ->
 window.applicationCache.addEventListener 'cached', ->
     clearInterval timerId
     $option.removeClass 'btn-light' if $option.hasClass 'btn-light'
+    $version.html VERSION
 
 window.applicationCache.addEventListener 'updateready', ->
     clearInterval timerId

@@ -37,8 +37,9 @@
   window.applicationCache.addEventListener('cached', function() {
     clearInterval(timerId);
     if ($option.hasClass('btn-light')) {
-      return $option.removeClass('btn-light');
+      $option.removeClass('btn-light');
     }
+    return $version.html(VERSION);
   });
 
   window.applicationCache.addEventListener('updateready', function() {
