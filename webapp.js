@@ -20,7 +20,7 @@
     window.addEventListener('orientationchange', (function() {
       return $([document, document.body]).height(innerHeight);
     }), false);
-    return $('input').on('blur', function() {
+    return $('input[type="text"], input[type="search"]').on('blur', function() {
       return window.scrollTo(document.body.scrollLeft, 0);
     });
   };

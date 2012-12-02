@@ -692,6 +692,27 @@ initializeGoogleMaps = ->
     autoDestinationField = new google.maps.places.Autocomplete $('#destination input[name="destination"]')[0]
     autoDestinationField.bindTo 'bounds', map 
     
+    # Here is a work around for google.maps.places.Autocomplete on iOS.
+    # Type Enter after Japanese IME transformation causes input value to restore the one before transformation unexpectedly.
+    # The difference between desktop and iOS is keydown and keyup events after textInput(IME transformation) event.
+    # There are neither keydown nor keyup on iOS.
+    # So emulate this events after textInput without keydown.
+    # note: textInput always happens when English. So you need check with or without keydown.
+    $('input.places-auto').on 'keydown', -> $(this).data 'keydown', true
+    $('input.places-auto').on 'keyup', -> $(this).data 'keydown', false        
+    $('input.places-auto').on 'textInput', ->
+        unless $(this).data 'keydown' # if textInput without keydown
+            for event in ['keydown', 'keyup']
+                e = document.createEvent 'KeyboardEvent'
+                e.initKeyboardEvent event, true, true, window, 'Enter', 0, ''
+                this.dispatchEvent(e)
+            
+    # relace place lists after transition.
+    # place lists of auto complete are placed 'absolute'ly. They doesn't take care of transition effect.
+    $('#search-header, #route-search-frame').on 'webkitTransitionEnd', ->
+        $this = $(this)
+        $('.pac-container:visible').css 'top', $this.offset().top + $this.outerHeight(true) + 'px'
+        
     directionsRenderer = new google.maps.DirectionsRenderer
         hideRouteList: false
         infoWindow: infoWindow
@@ -806,41 +827,11 @@ initializeDOM = ->
     $('#pin-list-frame, #info, #directions-panel').on 'touchmove', (event) ->
         event.stopPropagation()
 
-    # Here is a work around for google.maps.places.Autocomplete on iOS.
-    # Type Enter after Japanese IME transformation causes input value to restore the one before transformation unexpectedly.
-    # The difference between desktop and iOS is keydown and keyup events after textInput(IME transformation) event.
-    # There are neither keydown nor keyup on iOS.
-    # So emulate this events after textInput without keydown.
-    # note: textInput always happens when English. So you need check with or without keydown.
-    $('input.places-auto').on 'keydown', -> $(this).data 'keydown', true
-    $('input.places-auto').on 'keyup', -> $(this).data 'keydown', false        
-    $('input.places-auto').on 'textInput', ->
-        unless $(this).data 'keydown' # if textInput without keydown
-            for event in ['keydown', 'keyup']
-                e = document.createEvent 'KeyboardEvent'
-                e.initKeyboardEvent event, true, true, window, 'Enter', 0, ''
-                this.dispatchEvent(e)
-            
-    # restores from localStorage
-    if localStorage['maps-other-status']?
-        otherStatus = JSON.parse localStorage['maps-other-status']
-        if otherStatus.address? and otherStatus.address isnt ''
-            updateField $addressField, otherStatus.address
-        if otherStatus.origin? and otherStatus.origin isnt ''
-            updateField $originField, otherStatus.origin
-        if otherStatus.destination? and otherStatus.destination isnt ''
-            updateField $destinationField, otherStatus.destination
-        for e in otherStatus.bookmarks ? []
-            bookmarks.push new Place new google.maps.Marker(
-                    map: map
-                    position: new google.maps.LatLng e.lat, e.lng
-                    title: e.title
-                    visible: false
-                ), e.address
-        history = otherStatus.history ? []
+    restoreStatus()
 
     #localization
     localize()
+    # renders DOMs after localize
     $('#container').css 'display', ''
         
 
@@ -881,10 +872,6 @@ initializeDOM = ->
     $addressField.on 'focus', -> $('#search-header').css 'top', '0' # down form
     $addressField.on 'blur', -> $('#search-header').css 'top', '' # up form
 
-    $('#search-header, #route-search-frame').on 'webkitTransitionEnd', ->
-        $this = $(this)
-        $('.pac-container:visible').css 'top', $this.offset().top + $this.outerHeight(true) + 'px'
-        
     $('#address').on 'submit', ->
         searchAddress(false)
         $addressField.blur()
@@ -896,7 +883,6 @@ initializeDOM = ->
         setLocalExpressionInto 'done', 'Done'
         searchPlace.marker.setVisible false
         infoWindow.close() if placeContext is searchPlace
-        
 
     $naviHeader = $('#navi-header1')
     $search = $('#search')
@@ -1163,6 +1149,25 @@ initializeDOM = ->
         $route.trigger 'click'
         $('#container').css 'right', ''
         openRouteForm()
+
+# auxiliary functions for initializDOM
+restoreStatus = ->
+    if localStorage['maps-other-status']?
+        otherStatus = JSON.parse localStorage['maps-other-status']
+        if otherStatus.address? and otherStatus.address isnt ''
+            updateField $addressField, otherStatus.address
+        if otherStatus.origin? and otherStatus.origin isnt ''
+            updateField $originField, otherStatus.origin
+        if otherStatus.destination? and otherStatus.destination isnt ''
+            updateField $destinationField, otherStatus.destination
+        for e in otherStatus.bookmarks ? []
+            bookmarks.push new Place new google.maps.Marker(
+                    map: map
+                    position: new google.maps.LatLng e.lat, e.lng
+                    title: e.title
+                    visible: false
+                ), e.address
+        history = otherStatus.history ? []
 
 
 # export

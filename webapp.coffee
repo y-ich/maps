@@ -19,7 +19,7 @@ fullScreen = ->
         # scrollTo/scrollLeft will be set beforehand by the other event listener.
         $([document, document.body]).height innerHeight
     ), false
-    $('input').on 'blur', ->
+    $('input[type="text"], input[type="search"]').on 'blur', ->
         window.scrollTo document.body.scrollLeft, 0 # I wanted to animate but, animation was flickery on iphone as left always reset to 0 during animation. 
 
 
