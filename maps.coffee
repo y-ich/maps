@@ -855,10 +855,17 @@ initializeDOM = ->
     #
 
     window.addEventListener 'orientationchange', (->
+        console.log 'orientationchange'
         # work around against unexpected page slide when rotating to portrait
         document.body.scrollLeft = if scrollLeft then innerWidth else 0
     ), false
  
+    window.addEventListener 'resize', (->
+        console.log 'resize'
+        google.maps.event.trigger map, 'resize'
+        google.maps.event.trigger map.getStreetView(), 'resize'        
+    ), false
+
     # hold detection
     $map.on 'touchstart', ->
         isHold = false

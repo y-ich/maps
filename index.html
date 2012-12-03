@@ -3,9 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <title>Maps: An Web app looking just like iOS5 Maps for iOS6 or other devices</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css" />
     <style type="text/css">
-        table p {
-            margin: 10px;
+        body {
+            padding-top: 60px;
+            padding-bottom: 40px;
+        }
+        .center {
+            text-align: center;
         }
     </style>
     <script type="text/javascript"><!--
@@ -23,50 +28,114 @@
     --></script>
 </head>
 <body>
-<h1>Maps: An Web app looking just like iOS5 Maps for iOS6 or other devices</h1>
-<p>To try, click <a href="maps.html">here</a>!</p>
-<p>If you are iOS device user, we recommend "Add to Home Screen" to enjoy full screen display.</p>
-<h2>Screenshots</h2>
-<table style="text-align: center"><tr>
-    <td>
-        <img src="img/screenshot1.png">
-        <p>Same looking, same UI as the original iOS5 Maps.</p>
-    </td>
-    <td>
-        <img src="img/screenshot2.png">
-        <p>Japanese localization is also available. It is automatically detected.</p>
-    </td>
-</tr></table>
-<h2>Features</h2>
-<p>Almost all features of iOS5 Maps are implemented.</p>
-<ul>
-    <li>Basic map functions (with display options such like satellite, traffic, and etc.)</li>
-    <li>Current location trace</li>
-    <li>Dropped pin</li>
-    <li>Place search</li>
-    <li>Route search (The availability of transit search is depending on your country/region)</li>
-    <li>Search history</li>
-    <li>Route navigation</li>
-    <li>Bookmark</li>
-    <li>Street View near dropped pin or bookmark</li>
-</ul>
-<p>What we are missing now are,</p>
-<ul>
-    <li>Trace accuracy by pulsating</li>
-    <li>Heading trace</li>
-    <li>Display and choise from plural route candidates</li>
-    <li>Detail list of route</li>
-</ul>
-<h2>Libraries and platforms we use</h2>
-<ul>
-    <li>Google Maps JavaScript API V3</li>
-    <li>jQuery</li>
-    <li>Twitter Bootstrap</li>
-    <li>GLYPHICONS FREE</li>
-    <li><a href="http://plebeosaur.us/here-we-are-again/">Here We Are Again</a> - plebeosaur.us</li>
-</ul>
-<p>Enjoy! And please give us(@new3Rs) your feedback on Twitter!</p>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="#">Maps</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              <li class="active"><a href="#">Home</a></li>
+              <li><a href="#about">About</a></li>
+              <li><a href="#contact">Contact</a></li>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                  <li><a href="#">Action</a></li>
+                  <li><a href="#">Another action</a></li>
+                  <li><a href="#">Something else here</a></li>
+                  <li class="divider"></li>
+                  <li class="nav-header">Nav header</li>
+                  <li><a href="#">Separated link</a></li>
+                  <li><a href="#">One more separated link</a></li>
+                </ul>
+              </li>
+            </ul>
+            <div class="nav pull-right">
+                <li><a href="index.ja.html">日本語</a></li>                
+            </div>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
 
-<footer>Copyright (C) 2012 ICHIKAWA, Yuji (New 3 Rs)  All Rights Reserved.</footer>
+    <div class="container">
+
+      <!-- Main hero unit for a primary marketing message or call to action -->
+      <div class="hero-unit">
+          <div class="center">
+              <h1>Maps</h1>
+              <p>Web app just like iOS5 Maps, for iOS6 or other devices</p>
+              <a href="maps.html" class="btn btn-primary btn-large">Try Now!</a>
+          </div>
+      </div>
+
+      <!-- Example row of columns -->
+      <div class="row">
+        <div class="span4">
+          <h2>Map and Search</h2>
+          <p>Move a map by drag, zoom it by pinch. Natural. Place Search accepts not only addresses but also names of establishments.</p>
+        </div>
+        <div class="span4">
+          <h2>Directions</h2>
+          <p> </p>
+       </div>
+        <div class="span4">
+          <h2>Pins and Street View</h2>
+          <p>Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
+        </div>
+      </div>
+      <div class="row">
+          <div class="span4">
+              <img src="img/screenshot1.png">
+          </div>
+          <div class="span4">
+              <img src="img/screenshot2.png">
+          </div>
+          <div class="span4">
+              <img src="img/screenshot3.png">
+          </div>
+      </div>
+      <hr>
+
+    </div> <!-- /container -->
+    
+    <div class="container">
+        <h2>All Features</h2>
+        <ul>
+            <li>Basic map operations (with display options such like satellite picture, traffic information, and Paranomio.)</li>
+            <li>Current location trace</li>
+            <li>Dropped pin for getting place information</li>
+            <li>Street View</li>
+            <li>Place search</li>
+            <li>Route search for drive, transit(*), bicycle, walking</li>
+            <li>Route navigation</li>
+            <li>Search history</li>
+            <li>Bookmark</li>
+            <li>Full screen display</li>
+            <li>Fast startup by application cache</li>
+        </ul>
+        <p>(*)The availability of transit search is depending on your country/region</p>
+        <p>What we are missing now are,</p>
+        <ul>
+            <li>Heading trace</li>
+            <li>Display plural route candidates</li>
+        </ul>
+        <h2>Libraries and platforms we use</h2>
+        <ul>
+            <li>Google Maps JavaScript API V3</li>
+            <li>jQuery</li>
+            <li>Twitter Bootstrap</li>
+            <li>GLYPHICONS FREE</li>
+        </ul>
+        <p>Enjoy! And please give us(@new3Rs) your feedback on Twitter!</p>
+    </div>
+    <footer>
+      <p>&copy; 2012 New 3 Rs</p>
+    </footer>
 </body>
 </html>

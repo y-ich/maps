@@ -1192,7 +1192,13 @@
     localize();
     $('#container').css('display', '');
     window.addEventListener('orientationchange', (function() {
+      console.log('orientationchange');
       return document.body.scrollLeft = scrollLeft ? innerWidth : 0;
+    }), false);
+    window.addEventListener('resize', (function() {
+      console.log('resize');
+      google.maps.event.trigger(map, 'resize');
+      return google.maps.event.trigger(map.getStreetView(), 'resize');
     }), false);
     $map.on('touchstart', function() {
       isHold = false;
