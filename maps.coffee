@@ -236,9 +236,11 @@ for name, method of MapState.prototype when typeof method is 'function'
 # place
 class Place
     @streetViewService: new google.maps.StreetViewService()
-    @streetViewButtonWrapper: $('<div class="button-wrapper wrapper-left"></div>').on('click', -> # ,(comma) out of parenthesis causes parser error.
+    @streetViewButtonWrapper: $('<div class="button-wrapper wrapper-left"></div>').on('click', (event) -> # ,(comma) out of parenthesis causes parser error.
+        event.stopPropagation()
         if placeContext.svLatLng?
             centerBeforeSV = map.getCenter()
+            infoWindow.close()
             $('#map-page').addClass 'streetview'
             google.maps.event.trigger map, 'resize'
             map.setOptions streetViewControl: true
@@ -668,7 +670,11 @@ initializeGoogleMaps = ->
     mapOptions =
         mapTypeId: getMapType()
         disableDefaultUI: true
-        streetView: new google.maps.StreetViewPanorama document.getElementById('streetview')
+        streetView: new google.maps.StreetViewPanorama(document.getElementById('streetview'),
+            panControl: false,
+            zoomControl: false,
+            visible: false
+        )
 
     google.maps.event.addListener mapOptions.streetView, 'position_changed', ->
         map.setCenter this.getPosition()
@@ -770,24 +776,24 @@ initializeGoogleMaps = ->
         visible: false
 
     google.maps.event.addListener map, 'click', (event) ->
-        unless isHold
-            infoWindow.close()
-            return
-
-        # The following code is a work around for iOS Safari. iOS Safari can not stop propagation of mouse event on the map.
-        $infoWindow = $('.info-window')
-        if $infoWindow.length > 0
-            xy = infoWindow.getProjection().fromLatLngToDivPixel event.latLng
-            position = $infoWindow.position()
-            return if (position.left <= xy.x <= position.left + $infoWindow.outerWidth(true)) and (position.top <= xy.y <= position.top + $infoWindow.outerHeight(true))
+        if isHold
+            # The following code is a work around for iOS Safari. iOS Safari can not stop propagation of mouse event on the map.
+            $infoWindow = $('.info-window')
+            if $infoWindow.length > 0
+                xy = infoWindow.getProjection().fromLatLngToDivPixel event.latLng
+                position = $infoWindow.position()
+                return if (position.left <= xy.x <= position.left + $infoWindow.outerWidth(true)) and (position.top <= xy.y <= position.top + $infoWindow.outerHeight(true))
                 
-        infoWindow.close()
-        droppedPlace.address = ''
-        droppedPlace.svLatLng = null
-        droppedPlace.marker.setPosition event.latLng
-        droppedPlace.marker.setVisible true
-        droppedPlace.marker.setAnimation google.maps.Animation.DROP
-        placeContext = droppedPlace
+            infoWindow.close()
+            droppedPlace.address = ''
+            droppedPlace.svLatLng = null
+            droppedPlace.marker.setPosition event.latLng
+            droppedPlace.marker.setVisible true
+            droppedPlace.marker.setAnimation google.maps.Animation.DROP
+            placeContext = droppedPlace
+        else
+            infoWindow.close()
+
 
     google.maps.event.addListener droppedPlace.marker, 'animation_changed', ->
         droppedPlace.showInfoWindow() if not this.getAnimation()? # animation property becomes undefined after animation ends
@@ -1158,14 +1164,17 @@ initializeDOM = ->
         $route.trigger 'click'
         $('#container').css 'right', ''
         openRouteForm()
-        
-    $('#sv-close-button').on 'click', ->
-        map.getStreetView().setVisible false
-        map.setOptions streetViewControl: false
-        $('#map-page').removeClass 'streetview'
-        google.maps.event.trigger map, 'resize'
-        map.setCenter centerBeforeSV 
 
+    $map.on 'click', (event) ->
+        event.stopPropagation()
+        if map.getStreetView().getVisible()
+            map.getStreetView().setVisible false
+            map.setOptions streetViewControl: false
+            $('#map-page').removeClass 'streetview'
+            google.maps.event.trigger map, 'resize'
+            placeContext.showInfoWindow()
+            map.setCenter centerBeforeSV
+        
 # auxiliary functions for initializDOM
 restoreStatus = ->
     if localStorage['maps-other-status']?

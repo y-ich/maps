@@ -276,12 +276,13 @@ img.icon {
   bottom: 46px;
   -webkit-transition: top 0.3s, bottom 0.3s;
 }
-#map img {
+#map img,
+#streetview img {
   max-width: none;
   /* work around against a coherence between Google Maps and Bootstrap */
 
 }
-#map-page.streetview #sv-frame {
+#map-page.streetview #streetview {
   display: block;
 }
 #map-page.streetview #map {
@@ -293,21 +294,12 @@ img.icon {
   bottom: 0px;
   z-index: 1;
 }
-#sv-frame {
-  display: none;
-  z-index: 1;
-}
-#sv-frame,
 #streetview {
+  display: none;
   position: absolute;
   width: 100%;
   top: 0px;
   bottom: 0px;
-}
-#sv-close-button {
-  position: absolute;
-  right: 0px;
-  top: 0px;
   z-index: 1;
 }
 #directions-window {

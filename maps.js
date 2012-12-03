@@ -475,10 +475,12 @@
 
     Place.streetViewService = new google.maps.StreetViewService();
 
-    Place.streetViewButtonWrapper = $('<div class="button-wrapper wrapper-left"></div>').on('click', function() {
+    Place.streetViewButtonWrapper = $('<div class="button-wrapper wrapper-left"></div>').on('click', function(event) {
       var sv, _ref2;
+      event.stopPropagation();
       if (placeContext.svLatLng != null) {
         centerBeforeSV = map.getCenter();
+        infoWindow.close();
         $('#map-page').addClass('streetview');
         google.maps.event.trigger(map, 'resize');
         map.setOptions({
@@ -1006,7 +1008,11 @@
     mapOptions = {
       mapTypeId: getMapType(),
       disableDefaultUI: true,
-      streetView: new google.maps.StreetViewPanorama(document.getElementById('streetview'))
+      streetView: new google.maps.StreetViewPanorama(document.getElementById('streetview'), {
+        panControl: false,
+        zoomControl: false,
+        visible: false
+      })
     };
     google.maps.event.addListener(mapOptions.streetView, 'position_changed', function() {
       return map.setCenter(this.getPosition());
@@ -1109,25 +1115,25 @@
     });
     google.maps.event.addListener(map, 'click', function(event) {
       var $infoWindow, position, xy, _ref5, _ref6;
-      if (!isHold) {
-        infoWindow.close();
-        return;
-      }
-      $infoWindow = $('.info-window');
-      if ($infoWindow.length > 0) {
-        xy = infoWindow.getProjection().fromLatLngToDivPixel(event.latLng);
-        position = $infoWindow.position();
-        if (((position.left <= (_ref5 = xy.x) && _ref5 <= position.left + $infoWindow.outerWidth(true))) && ((position.top <= (_ref6 = xy.y) && _ref6 <= position.top + $infoWindow.outerHeight(true)))) {
-          return;
+      if (isHold) {
+        $infoWindow = $('.info-window');
+        if ($infoWindow.length > 0) {
+          xy = infoWindow.getProjection().fromLatLngToDivPixel(event.latLng);
+          position = $infoWindow.position();
+          if (((position.left <= (_ref5 = xy.x) && _ref5 <= position.left + $infoWindow.outerWidth(true))) && ((position.top <= (_ref6 = xy.y) && _ref6 <= position.top + $infoWindow.outerHeight(true)))) {
+            return;
+          }
         }
+        infoWindow.close();
+        droppedPlace.address = '';
+        droppedPlace.svLatLng = null;
+        droppedPlace.marker.setPosition(event.latLng);
+        droppedPlace.marker.setVisible(true);
+        droppedPlace.marker.setAnimation(google.maps.Animation.DROP);
+        return placeContext = droppedPlace;
+      } else {
+        return infoWindow.close();
       }
-      infoWindow.close();
-      droppedPlace.address = '';
-      droppedPlace.svLatLng = null;
-      droppedPlace.marker.setPosition(event.latLng);
-      droppedPlace.marker.setVisible(true);
-      droppedPlace.marker.setAnimation(google.maps.Animation.DROP);
-      return placeContext = droppedPlace;
     });
     google.maps.event.addListener(droppedPlace.marker, 'animation_changed', function() {
       if (!(this.getAnimation() != null)) {
@@ -1540,14 +1546,18 @@
       $('#container').css('right', '');
       return openRouteForm();
     });
-    return $('#sv-close-button').on('click', function() {
-      map.getStreetView().setVisible(false);
-      map.setOptions({
-        streetViewControl: false
-      });
-      $('#map-page').removeClass('streetview');
-      google.maps.event.trigger(map, 'resize');
-      return map.setCenter(centerBeforeSV);
+    return $map.on('click', function(event) {
+      event.stopPropagation();
+      if (map.getStreetView().getVisible()) {
+        map.getStreetView().setVisible(false);
+        map.setOptions({
+          streetViewControl: false
+        });
+        $('#map-page').removeClass('streetview');
+        google.maps.event.trigger(map, 'resize');
+        placeContext.showInfoWindow();
+        return map.setCenter(centerBeforeSV);
+      }
     });
   };
 
