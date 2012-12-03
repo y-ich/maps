@@ -31,6 +31,7 @@ infoWindow = null # general purpose singlton of InfoWindow
 droppedPlace = null # combination of dropped marker and address information
 searchPlace = null # search result
 placeContext = null # context place
+centerBeforeSV = null
 
 norikaeServices = [
     ['MapFan+', 'mapfanplus:', '', '']
@@ -237,7 +238,11 @@ class Place
     @streetViewService: new google.maps.StreetViewService()
     @streetViewButtonWrapper: $('<div class="button-wrapper wrapper-left"></div>').on('click', -> # ,(comma) out of parenthesis causes parser error.
         if placeContext.svLatLng?
+            centerBeforeSV = map.getCenter()
             $('#map-page').addClass 'streetview'
+            google.maps.event.trigger map, 'resize'
+            map.setOptions streetViewControl: true
+            map.setCenter placeContext.svLatLng
             sv = map.getStreetView()
             sv.setPosition placeContext.svLatLng
             sv.setPov
@@ -262,7 +267,7 @@ class Place
         $container.html """
                         <table id="info-window"><tr>
                             <td>
-                                <button id="street-view" class="btn btn-mini#{if @svLatLng? then ' btn-primary' else ''}">
+                                <button id="sv-button" class="btn btn-mini#{if @svLatLng? then ' btn-primary' else ''}">
                                     <i class="icon-user icon-white"></i>
                                 </button>
                             </td>
@@ -284,7 +289,7 @@ class Place
             Place.streetViewService.getPanoramaByLocation placeContext.marker.getPosition(), 49, (data, status) =>
                 if status is google.maps.StreetViewStatus.OK
                     @svLatLng = data.location.latLng
-                    $('#street-view').addClass 'btn-primary'
+                    $('#sv-button').addClass 'btn-primary'
         
         unless @address? and @address isnt ''
             geocoder.geocode {latLng : @marker.getPosition() }, (result, status) =>
@@ -663,6 +668,10 @@ initializeGoogleMaps = ->
     mapOptions =
         mapTypeId: getMapType()
         disableDefaultUI: true
+        streetView: new google.maps.StreetViewPanorama document.getElementById('streetview')
+
+    google.maps.event.addListener mapOptions.streetView, 'position_changed', ->
+        map.setCenter this.getPosition()
 
     # restore map status
     if localStorage['maps-map-status']?
@@ -788,11 +797,9 @@ initializeGoogleMaps = ->
 
     google.maps.event.addListener map, 'dragstart', -> mapFSM.setState MapState.NORMAL
     # The followings are a workaround for web app on home screen. As there is no onpagehide event, saves statuses when updated.
-    google.maps.event.addListener map, 'center_changed', saveMapStatus
+    google.maps.event.addListener map, 'center_changed', ->
+        saveMapStatus unless map.getStreetView().getVisible()
     google.maps.event.addListener map, 'zoom_changed', saveMapStatus
-
-    google.maps.event.addListener map.getStreetView(), 'visible_changed', -> $('#map-page').removeClass 'streetview' unless @getVisible()
-            
 
     trafficLayer = new google.maps.TrafficLayer()
 
@@ -1154,6 +1161,10 @@ initializeDOM = ->
         
     $('#sv-close-button').on 'click', ->
         map.getStreetView().setVisible false
+        map.setOptions streetViewControl: false
+        $('#map-page').removeClass 'streetview'
+        google.maps.event.trigger map, 'resize'
+        map.setCenter centerBeforeSV 
 
 # auxiliary functions for initializDOM
 restoreStatus = ->

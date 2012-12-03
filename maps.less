@@ -266,12 +266,12 @@ img.icon {
     right: 0;
 }
 
-#street-view {
+#sv-button {
     background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(249,205,158)), to(rgb(210,49,0)));
     opacity: 0.5;
 }
 
-#street-view.btn-primary {
+#sv-button.btn-primary {
     opacity: 1;
 }
 
@@ -290,26 +290,41 @@ img.icon {
     -webkit-transition: top @transition-time, bottom @transition-time;
 }
 
-#sv-close-button {
-    display: none;
-    position: absolute;
-    right: 0px;
-    top: 0px;
-    z-index: 1000001;
+#map img {
+    max-width: none; /* work around against a coherence between Google Maps and Bootstrap */
 }
 
-#map-page.streetview #map {
-    top: 0px;
-    bottom: 0px;
-    z-index: 1;
-}
-
-#map-page.streetview #sv-close-button {
+#map-page.streetview #sv-frame {
     display: block;
 }
 
-#map img {
-    max-width: none; /* work around against a coherence between Google Maps and Bootstrap */
+#map-page.streetview #map {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    top: auto;
+    right: 0px;
+    bottom: 0px;
+    z-index: 1;
+}
+    
+#sv-frame {
+    display: none;
+    z-index: 1;
+}
+
+#sv-frame, #streetview {
+    position: absolute;
+    width: 100%;
+    top: 0px;
+    bottom: 0px;
+}
+
+#sv-close-button {
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    z-index: 1;
 }
 
 #directions-window {
