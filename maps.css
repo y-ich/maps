@@ -289,9 +289,9 @@ img.icon {
   position: absolute;
   width: 100px;
   height: 100px;
-  top: auto;
+  top: 0px;
   right: 0px;
-  bottom: 0px;
+  bottom: auto;
   z-index: 1;
 }
 #streetview {
