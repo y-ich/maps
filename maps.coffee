@@ -391,7 +391,7 @@ localize = ->
         'address-label' : 'address'
         'to-here' : 'Directions To Here'
         'from-here' : 'Directions From Here'
-        'delete-pin' : 'Remove Pin'
+        'remove-pin' : 'Remove Pin'
         'add-into-contact' : 'Add to Contacts'
         'send-place' : 'Share Location'
         'add-bookmark' : 'Add to Bookmarks'
@@ -641,7 +641,7 @@ setInfoPage = (place, dropped) ->
     $('#info-name').text title
     $('#bookmark-name input[name="bookmark-name"]').val if dropped then place.address else title
     $('#info-address').text place.address
-    # $('#delete-pin').css 'display', if dropped then 'block' else 'none'
+    # $('#remove-pin').css 'display', if dropped then 'block' else 'none'
     # The above was commented out because editing bookmark is not implemented yet.
     $('#send-place').attr 'href', "mailto:?subject=#{title}&body=<a href=\"https://maps.google.co.jp/maps?q=#{position.lat()},#{position.lng()}\">#{title}</a>"
 
@@ -1042,9 +1042,11 @@ initializeDOM = ->
         setTimeout window.print, 0
         backToMap()
         
-    $('#button-map').on 'click', ->
+    infoPage2Map = ->
         $('body').animate {scrollLeft: 0}, 300
         scrollLeft = false
+
+    $('#button-map').on 'click', infoPage2Map
         
     $bookmarkPage = $('#bookmark-page')    
     $('.btn-bookmark').on 'click', ->
@@ -1107,7 +1109,7 @@ initializeDOM = ->
 
     $('#cancel-add-bookmark').on 'click', -> $('#add-bookmark-page').css 'top', ''
 
-    $('#delete-pin').on 'click', ->
+    $('#remove-pin').on 'click', ->
         if placeContext is droppedPlace
             droppedPlace.marker.setVisible false
         else
@@ -1116,7 +1118,7 @@ initializeDOM = ->
             saveOtherStatus()
             placeContext.marker.setMap null
         infoWindow.close()
-        $('#container').css 'right', ''
+        infoPage2Map()
         
     $('#bookmark-name').on 'submit', ->
         $('#bookmark-name input[name="bookmark-name"]').blur()
@@ -1133,7 +1135,7 @@ initializeDOM = ->
         saveOtherStatus()
         place.showInfoWindow()
         $('#add-bookmark-page').css 'top', ''
-        $('#container').css 'right', ''
+        infoPage2Map()
 
 
     $('#nav-bookmark button').on 'click', ->
@@ -1162,13 +1164,13 @@ initializeDOM = ->
     $('#to-here').on 'click', ->
         updateField $destinationField, placeContext.address
         $route.trigger 'click'
-        $('#container').css 'right', ''
+        infoPage2Map()
         openRouteForm()
         
     $('#from-here').on 'click', ->
         updateField $originField, placeContext.address
         $route.trigger 'click'
-        $('#container').css 'right', ''
+        infoPage2Map()
         openRouteForm()
 
     $map.on 'click', (event) ->

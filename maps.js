@@ -652,7 +652,7 @@
       'address-label': 'address',
       'to-here': 'Directions To Here',
       'from-here': 'Directions From Here',
-      'delete-pin': 'Remove Pin',
+      'remove-pin': 'Remove Pin',
       'add-into-contact': 'Add to Contacts',
       'send-place': 'Share Location',
       'add-bookmark': 'Add to Bookmarks',
@@ -1169,7 +1169,7 @@
   };
 
   initializeDOM = function() {
-    var $bookmarkPage, $edit, $mapType, $naviHeader, $option, $panoramio, $route, $routeSearchFrame, $search, $traffic, $travelMode, $versatile, backToMap, e, openRouteForm, _i, _len, _ref5;
+    var $bookmarkPage, $edit, $mapType, $naviHeader, $option, $panoramio, $route, $routeSearchFrame, $search, $traffic, $travelMode, $versatile, backToMap, e, infoPage2Map, openRouteForm, _i, _len, _ref5;
     $map = $('#map');
     $gps = $('#gps');
     $addressField = $('#address input[name="address"]');
@@ -1407,12 +1407,13 @@
       setTimeout(window.print, 0);
       return backToMap();
     });
-    $('#button-map').on('click', function() {
+    infoPage2Map = function() {
       $('body').animate({
         scrollLeft: 0
       }, 300);
       return scrollLeft = false;
-    });
+    };
+    $('#button-map').on('click', infoPage2Map);
     $bookmarkPage = $('#bookmark-page');
     $('.btn-bookmark').on('click', function() {
       var ancestor;
@@ -1481,7 +1482,7 @@
     $('#cancel-add-bookmark').on('click', function() {
       return $('#add-bookmark-page').css('top', '');
     });
-    $('#delete-pin').on('click', function() {
+    $('#remove-pin').on('click', function() {
       var index;
       if (placeContext === droppedPlace) {
         droppedPlace.marker.setVisible(false);
@@ -1492,7 +1493,7 @@
         placeContext.marker.setMap(null);
       }
       infoWindow.close();
-      return $('#container').css('right', '');
+      return infoPage2Map();
     });
     $('#bookmark-name').on('submit', function() {
       $('#bookmark-name input[name="bookmark-name"]').blur();
@@ -1510,7 +1511,7 @@
       saveOtherStatus();
       place.showInfoWindow();
       $('#add-bookmark-page').css('top', '');
-      return $('#container').css('right', '');
+      return infoPage2Map();
     });
     $('#nav-bookmark button').on('click', function() {
       var $this;
@@ -1542,13 +1543,13 @@
     $('#to-here').on('click', function() {
       updateField($destinationField, placeContext.address);
       $route.trigger('click');
-      $('#container').css('right', '');
+      infoPage2Map();
       return openRouteForm();
     });
     $('#from-here').on('click', function() {
       updateField($originField, placeContext.address);
       $route.trigger('click');
-      $('#container').css('right', '');
+      infoPage2Map();
       return openRouteForm();
     });
     return $map.on('click', function(event) {
