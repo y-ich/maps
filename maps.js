@@ -284,6 +284,7 @@
       return tracer.setState(tracer.NORMAL);
     },
     error: function(error) {
+      console.log(error);
       switch (error.code) {
         case error.PERMISSION_DENIED:
           tracer.stop();
@@ -1177,7 +1178,7 @@
     $message = $('#message');
     $pinList = $('#pin-list');
     pinRowHeight = $('#pin-list tr').height();
-    _ref5 = $('button');
+    _ref5 = $('button').not('#clear, .btn-reset');
     for (_i = 0, _len = _ref5.length; _i < _len; _i++) {
       e = _ref5[_i];
       new NoClickDelay(e);
@@ -1192,11 +1193,9 @@
     localize();
     $('#container').css('display', '');
     window.addEventListener('orientationchange', (function() {
-      console.log('orientationchange');
       return document.body.scrollLeft = scrollLeft ? innerWidth : 0;
     }), false);
     window.addEventListener('resize', (function() {
-      console.log('resize');
       google.maps.event.trigger(map, 'resize');
       return google.maps.event.trigger(map.getStreetView(), 'resize');
     }), false);

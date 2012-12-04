@@ -105,6 +105,7 @@ tracer =
         tracer.setState tracer.NORMAL
 
     error: (error) ->
+        console.log error
         switch error.code
             when error.PERMISSION_DENIED
                 tracer.stop()                
@@ -833,8 +834,8 @@ initializeDOM = ->
     $pinList = $('#pin-list')
     pinRowHeight = $('#pin-list tr').height()
 
-    for e in $('button')
-        new NoClickDelay e
+    for e in $('button').not('#clear, .btn-reset') # except '#clear, .btn-reset' because NoClickDelay prevents 'mousedown' event and causes to blur text input.
+        new NoClickDelay e    
     
     # prevents default page scroll, but scroll bookmark/history list.
     document.addEventListener 'touchmove', (event) ->
@@ -855,13 +856,11 @@ initializeDOM = ->
     #
 
     window.addEventListener 'orientationchange', (->
-        console.log 'orientationchange'
         # work around against unexpected page slide when rotating to portrait
         document.body.scrollLeft = if scrollLeft then innerWidth else 0
     ), false
  
     window.addEventListener 'resize', (->
-        console.log 'resize'
         google.maps.event.trigger map, 'resize'
         google.maps.event.trigger map.getStreetView(), 'resize'        
     ), false
@@ -880,7 +879,7 @@ initializeDOM = ->
             $this.siblings('.btn-bookmark').css('display', 'none')
 
     $('#clear, .btn-reset').on 'mousedown', (event) -> event.preventDefault() # prevent blur of input
-        
+
     # input with bookmark icon
     $('.btn-reset').on 'click', -> $(this).siblings('.btn-bookmark').css('display', 'block')
     $('#clear').on 'click', -> $('#address .btn-bookmark').css('display', 'block')
