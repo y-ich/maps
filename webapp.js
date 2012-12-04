@@ -2,7 +2,7 @@
 (function() {
   var $option, $version, BLINK_INTERVAL, STARTUP_TIME, VERSION, fullScreen, timerId, type, types, _i, _len;
 
-  VERSION = '(C) 2012 ICHIKAWA, Yuji (New 3 Rs)<br>Maps ver. 1.2.15';
+  VERSION = '(C) 2012 ICHIKAWA, Yuji (New 3 Rs)<br>Maps ver. 1.2.16';
 
   BLINK_INTERVAL = 500;
 
