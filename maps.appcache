@@ -34,7 +34,7 @@ img/glyphicons-halflings.png
 
 #javascript files
 http://www.google-analytics.com/ga.js
-js/jquery-1.8.2.min.js
+http://code.jquery.com/jquery-1.8.3.min.js
 js/noClickDelay.js
 http://maps.gstatic.com/cat_js/intl/ja_ALL/mapfiles/api-3/10/17/%7Bcommon,map,util,geocoder,controls,places_impl,geometry,directions,marker,poly,layers,onion%7D.js
 http://maps.gstatic.com/cat_js/intl/ja_ALL/mapfiles/api-3/10/17/%7Boverlay,stats%7D.js
