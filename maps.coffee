@@ -283,7 +283,6 @@ class Place
                         </tr></table>
                         """
         infoWindow.setContent $container.append(Place.streetViewButtonWrapper, Place.infoButtonWrapper)[0]
-        
 
     showInfoWindow: ->
         @setInfoWindow()
@@ -1075,7 +1074,6 @@ initializeDOM = ->
                     updateField $destinationField, item.destination
                     $route.trigger 'click'
                     searchDirections true
-                
         else # bookmark list
             place = eval(name)
             switch bookmarkContext
@@ -1092,13 +1090,13 @@ initializeDOM = ->
                         place.showInfoWindow()
                 when 'origin'
                     updateField $originField, if place is currentPlace
-                            latLng = place.getPosition()
+                            latLng = place.marker.getPosition()
                             "#{latLng.lat()}, #{latLng.lng()}"
                         else
                             place.address            
                 when 'destination'
                     updateField $destinationField, if place is currentPlace
-                            latLng = place.getPosition()
+                            latLng = place.marker.getPosition()
                             "#{latLng.lat()}, #{latLng.lng()}"
                         else
                             place.address            

@@ -1468,10 +1468,10 @@
             }
             break;
           case 'origin':
-            updateField($originField, place === currentPlace ? (latLng = place.getPosition(), "" + (latLng.lat()) + ", " + (latLng.lng())) : place.address);
+            updateField($originField, place === currentPlace ? (latLng = place.marker.getPosition(), "" + (latLng.lat()) + ", " + (latLng.lng())) : place.address);
             break;
           case 'destination':
-            updateField($destinationField, place === currentPlace ? (latLng = place.getPosition(), "" + (latLng.lat()) + ", " + (latLng.lng())) : place.address);
+            updateField($destinationField, place === currentPlace ? (latLng = place.marker.getPosition(), "" + (latLng.lat()) + ", " + (latLng.lng())) : place.address);
         }
       }
       return $bookmarkPage.css('bottom', '-100%');
