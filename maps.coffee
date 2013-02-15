@@ -274,7 +274,7 @@ class Place
             Place._streetViewService.getPanoramaByLocation placeContext.marker.getPosition(), 49, (data, status) =>
                 if status is google.maps.StreetViewStatus.OK
                     @svLatLng = data.location.latLng
-                    $('#sv-button').addClass 'btn-primary'
+                    $('#sv-button').addClass 'btn-primary' if placeContext is @
         
         unless @address? and @address isnt ''
             geocoder.geocode {latLng : @marker.getPosition() }, (result, status) =>
