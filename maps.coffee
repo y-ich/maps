@@ -260,8 +260,21 @@ class Place
         scrollLeft = true
     )
 
-    # constructs an instance from marker and address, sets placeContext, and shows its InfoWindow.
+    # constructs an instance from marker and address, gets address if missed, gets Street View info and sets event listener.
     constructor: (@marker, @address) ->
+        if not @address? or @address is ''
+            geocoder.geocode {latLng : @marker.getPosition() }, (result, status) =>
+                @address = if status is google.maps.GeocoderStatus.OK
+                        result[0].formatted_address.replace(/日本, /, '')
+                    else
+                        getLocalizedString 'No information'
+                @_setInfoWindow() if placeContext is @
+
+        Place._streetViewService.getPanoramaByLocation @marker.getPosition(), 49, (data, status) =>
+            if status is google.maps.StreetViewStatus.OK
+                @svLatLng = data.location.latLng
+                $('#sv-button').addClass 'btn-primary' if placeContext is @
+
         google.maps.event.addListener @marker, 'click', (event) =>
             placeContext = @
             @showInfoWindow()
@@ -270,20 +283,8 @@ class Place
     showInfoWindow: ->
         @_setInfoWindow()
         infoWindow.open map, @marker
-        unless @svLatLng?
-            Place._streetViewService.getPanoramaByLocation placeContext.marker.getPosition(), 49, (data, status) =>
-                if status is google.maps.StreetViewStatus.OK
-                    @svLatLng = data.location.latLng
-                    $('#sv-button').addClass 'btn-primary' if placeContext is @
         
-        unless @address? and @address isnt ''
-            geocoder.geocode {latLng : @marker.getPosition() }, (result, status) =>
-                @address = if status is google.maps.GeocoderStatus.OK
-                        result[0].formatted_address.replace(/日本, /, '')
-                    else
-                        getLocalizedString 'No information'
-                @_setInfoWindow()
-        
+    # plain object to JSONize.
     toObject: () ->
         pos = @marker.getPosition()
         {
