@@ -234,10 +234,10 @@ for name, method of MapState.prototype when typeof method is 'function'
 
 
 
-# place
+# is a class with a marker and an address and responsible for InfoWindow.
 class Place
-    @streetViewService: new google.maps.StreetViewService()
-    @streetViewButtonWrapper: $('<div class="button-wrapper wrapper-left"></div>').on('click', (event) -> # ,(comma) out of parenthesis causes parser error.
+    @_streetViewService: new google.maps.StreetViewService()
+    @_streetViewButtonWrapper: $('<div class="button-wrapper wrapper-left"></div>').on('click', (event) -> # ,(comma) out of parenthesis causes parser error.
         event.stopPropagation()
         if placeContext.svLatLng?
             centerBeforeSV = map.getCenter()
@@ -254,18 +254,46 @@ class Place
                 zoom: 1
             sv.setVisible true
     )
-    @infoButtonWrapper: $('<div class="button-wrapper wrapper-right"></div>').on('click', ->
+    @_infoButtonWrapper: $('<div class="button-wrapper wrapper-right"></div>').on('click', ->
         setInfoPage(placeContext, placeContext is droppedPlace)
         $('body').animate {scrollLeft: innerWidth}, 300
         scrollLeft = true
     )
 
+    # constructs an instance from marker and address, sets placeContext, and shows its InfoWindow.
     constructor: (@marker, @address) ->
         google.maps.event.addListener @marker, 'click', (event) =>
             placeContext = @
             @showInfoWindow()
 
-    setInfoWindow: ->
+    # shows its InfoWindow.
+    showInfoWindow: ->
+        @_setInfoWindow()
+        infoWindow.open map, @marker
+        unless @svLatLng?
+            Place._streetViewService.getPanoramaByLocation placeContext.marker.getPosition(), 49, (data, status) =>
+                if status is google.maps.StreetViewStatus.OK
+                    @svLatLng = data.location.latLng
+                    $('#sv-button').addClass 'btn-primary'
+        
+        unless @address? and @address isnt ''
+            geocoder.geocode {latLng : @marker.getPosition() }, (result, status) =>
+                @address = if status is google.maps.GeocoderStatus.OK
+                        result[0].formatted_address.replace(/日本, /, '')
+                    else
+                        getLocalizedString 'No information'
+                @_setInfoWindow()
+        
+    toObject: () ->
+        pos = @marker.getPosition()
+        {
+            lat: pos.lat()
+            lng: pos.lng()
+            title: @marker.getTitle()
+            address: @address
+        }
+
+    _setInfoWindow: ->
         $container = $('<div>')
         $container.html """
                         <table id="info-window"><tr>
@@ -282,33 +310,7 @@ class Place
                             </td>
                         </tr></table>
                         """
-        infoWindow.setContent $container.append(Place.streetViewButtonWrapper, Place.infoButtonWrapper)[0]
-
-    showInfoWindow: ->
-        @setInfoWindow()
-        infoWindow.open map, @marker
-        unless @svLatLng?
-            Place.streetViewService.getPanoramaByLocation placeContext.marker.getPosition(), 49, (data, status) =>
-                if status is google.maps.StreetViewStatus.OK
-                    @svLatLng = data.location.latLng
-                    $('#sv-button').addClass 'btn-primary'
-        
-        unless @address? and @address isnt ''
-            geocoder.geocode {latLng : @marker.getPosition() }, (result, status) =>
-                @address = if status is google.maps.GeocoderStatus.OK
-                        result[0].formatted_address.replace(/日本, /, '')
-                    else
-                        getLocalizedString 'No information'
-                @setInfoWindow()
-        
-    toObject: () ->
-        pos = @marker.getPosition()
-        {
-            lat: pos.lat()
-            lng: pos.lng()
-            title: @marker.getTitle()
-            address: @address
-        }
+        infoWindow.setContent $container.append(Place._streetViewButtonWrapper, Place._infoButtonWrapper)[0]
 
 
 #
