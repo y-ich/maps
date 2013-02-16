@@ -1,7 +1,7 @@
 # Google Maps Web App
-# Copyright (C) 2012 ICHIKAWA, Yuji (New 3 Rs) 
+# Copyright (C) 2012-2013 ICHIKAWA, Yuji (New 3 Rs) 
 
-VERSION = '(C) 2012 ICHIKAWA, Yuji (New 3 Rs)<br>Maps ver. 1.2.17'
+VERSION = '(C) 2012 ICHIKAWA, Yuji (New 3 Rs)<br>Maps ver. 1.2.18'
 BLINK_INTERVAL = 500 # ms
 STARTUP_TIME = 3000 # ms
 timerId = null

@@ -277,7 +277,8 @@
       currentPlace.marker.setVisible(true);
       currentPlace.marker.setPosition(latLng);
       currentPlace.marker.setRadius(position.coords.accuracy);
-      currentPlace.address = '';
+      currentPlace.address = null;
+      currentPlace.update();
       if (!mapFSM.is(MapState.NORMAL)) {
         map.setCenter(latLng);
       }
@@ -474,9 +475,9 @@
 
   Place = (function() {
 
-    Place.streetViewService = new google.maps.StreetViewService();
+    Place._streetViewService = new google.maps.StreetViewService();
 
-    Place.streetViewButtonWrapper = $('<div class="button-wrapper wrapper-left"></div>').on('click', function(event) {
+    Place._streetViewButtonWrapper = $('<div class="button-wrapper wrapper-left"></div>').on('click', function(event) {
       var sv, _ref2;
       event.stopPropagation();
       if (placeContext.svLatLng != null) {
@@ -499,7 +500,7 @@
       }
     });
 
-    Place.infoButtonWrapper = $('<div class="button-wrapper wrapper-right"></div>').on('click', function() {
+    Place._infoButtonWrapper = $('<div class="button-wrapper wrapper-right"></div>').on('click', function() {
       setInfoPage(placeContext, placeContext === droppedPlace);
       $('body').animate({
         scrollLeft: innerWidth
@@ -511,39 +512,40 @@
       var _this = this;
       this.marker = marker;
       this.address = address;
+      this.update();
       google.maps.event.addListener(this.marker, 'click', function(event) {
         placeContext = _this;
         return _this.showInfoWindow();
       });
     }
 
-    Place.prototype.setInfoWindow = function() {
-      var $container;
-      $container = $('<div>');
-      $container.html("<table id=\"info-window\"><tr>\n    <td>\n        <button id=\"sv-button\" class=\"btn btn-mini" + (this.svLatLng != null ? ' btn-primary' : '') + "\">\n            <i class=\"icon-user icon-white\"></i>\n        </button>\n    </td>\n    <td style=\"white-space: nowrap;\"><div style=\"max-width:160px;overflow:hidden;\">" + (this.marker.getTitle()) + "<br><span id=\"dropped-message\" style=\"font-size:10px\">" + this.address + "</span></div></td>\n    <td>\n        <button id=\"button-info\" class=\"btn btn-mini btn-light\">\n            <i class=\"icon-chevron-right icon-white\"></i>\n        </button>\n    </td>\n</tr></table>");
-      return infoWindow.setContent($container.append(Place.streetViewButtonWrapper, Place.infoButtonWrapper)[0]);
-    };
-
-    Place.prototype.showInfoWindow = function() {
+    Place.prototype.update = function() {
       var _this = this;
-      this.setInfoWindow();
-      infoWindow.open(map, this.marker);
-      if (this.svLatLng == null) {
-        Place.streetViewService.getPanoramaByLocation(placeContext.marker.getPosition(), 49, function(data, status) {
-          if (status === google.maps.StreetViewStatus.OK) {
-            _this.svLatLng = data.location.latLng;
-            return $('#sv-button').addClass('btn-primary');
+      if (!(this.address != null)) {
+        geocoder.geocode({
+          latLng: this.marker.getPosition()
+        }, function(result, status) {
+          var $droppedMessage;
+          _this.address = status === google.maps.GeocoderStatus.OK ? result[0].formatted_address.replace(/日本, /, '') : getLocalizedString('No information');
+          $droppedMessage = $('#dropped-message');
+          if (placeContext === _this && $('#info-window').length === 1 && $droppedMessage.text() !== _this.address) {
+            return $droppedMessage.text(_this.address);
           }
         });
       }
-      if (!((this.address != null) && this.address !== '')) {
-        return geocoder.geocode({
-          latLng: this.marker.getPosition()
-        }, function(result, status) {
-          _this.address = status === google.maps.GeocoderStatus.OK ? result[0].formatted_address.replace(/日本, /, '') : getLocalizedString('No information');
-          return _this.setInfoWindow();
-        });
-      }
+      return Place._streetViewService.getPanoramaByLocation(this.marker.getPosition(), 49, function(data, status) {
+        if (status === google.maps.StreetViewStatus.OK) {
+          _this.svLatLng = data.location.latLng;
+          if (placeContext === _this && $('#info-window').length === 1) {
+            return $('#sv-button').addClass('btn-primary');
+          }
+        }
+      });
+    };
+
+    Place.prototype.showInfoWindow = function() {
+      this._setInfoWindow();
+      return infoWindow.open(map, this.marker);
     };
 
     Place.prototype.toObject = function() {
@@ -555,6 +557,13 @@
         title: this.marker.getTitle(),
         address: this.address
       };
+    };
+
+    Place.prototype._setInfoWindow = function() {
+      var $container;
+      $container = $('<div>');
+      $container.html("<table id=\"info-window\"><tr>\n    <td>\n        <button id=\"sv-button\" class=\"btn btn-mini" + (this.svLatLng != null ? ' btn-primary' : '') + "\">\n            <i class=\"icon-user icon-white\"></i>\n        </button>\n    </td>\n    <td style=\"white-space: nowrap;\"><div style=\"max-width:160px;overflow:hidden;\">" + (this.marker.getTitle()) + "<br><span id=\"dropped-message\" style=\"font-size:10px\">" + this.address + "</span></div></td>\n    <td>\n        <button id=\"button-info\" class=\"btn btn-mini btn-light\">\n            <i class=\"icon-chevron-right icon-white\"></i>\n        </button>\n    </td>\n</tr></table>");
+      return infoWindow.setContent($container.append(Place._streetViewButtonWrapper, Place._infoButtonWrapper)[0]);
     };
 
     return Place;
@@ -1126,11 +1135,12 @@
           }
         }
         infoWindow.close();
-        droppedPlace.address = '';
+        droppedPlace.address = null;
         droppedPlace.svLatLng = null;
         droppedPlace.marker.setPosition(event.latLng);
         droppedPlace.marker.setVisible(true);
         droppedPlace.marker.setAnimation(google.maps.Animation.DROP);
+        droppedPlace.update();
         return placeContext = droppedPlace;
       } else {
         return infoWindow.close();

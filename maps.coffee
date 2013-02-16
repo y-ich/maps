@@ -1,5 +1,5 @@
 # Google Maps Web App
-# Copyright (C) ICHIKAWA, Yuji (New 3 Rs) 2012
+# Copyright (C) 2012-2103 ICHIKAWA, Yuji (New 3 Rs) 
 
 #
 # global variables
@@ -100,7 +100,8 @@ tracer =
         currentPlace.marker.setVisible true
         currentPlace.marker.setPosition latLng
         currentPlace.marker.setRadius position.coords.accuracy
-        currentPlace.address = '' # because current address may become old.
+        currentPlace.address = null # because current address may become old.
+        currentPlace.update()
         map.setCenter latLng unless mapFSM.is MapState.NORMAL
         tracer.setState tracer.NORMAL
 
@@ -262,22 +263,27 @@ class Place
 
     # constructs an instance from marker and address, gets address if missed, gets Street View info and sets event listener.
     constructor: (@marker, @address) ->
-        if not @address? or @address is ''
+        @update()
+        google.maps.event.addListener @marker, 'click', (event) =>
+            placeContext = @
+            @showInfoWindow()
+    
+    update: ->
+        if not @address?
             geocoder.geocode {latLng : @marker.getPosition() }, (result, status) =>
                 @address = if status is google.maps.GeocoderStatus.OK
                         result[0].formatted_address.replace(/日本, /, '')
                     else
                         getLocalizedString 'No information'
-                @_setInfoWindow() if placeContext is @
+                $droppedMessage = $('#dropped-message')
+                if placeContext is @ and $('#info-window').length == 1 and $droppedMessage.text() isnt @address
+                    $droppedMessage.text @address 
 
         Place._streetViewService.getPanoramaByLocation @marker.getPosition(), 49, (data, status) =>
             if status is google.maps.StreetViewStatus.OK
                 @svLatLng = data.location.latLng
-                $('#sv-button').addClass 'btn-primary' if placeContext is @
-
-        google.maps.event.addListener @marker, 'click', (event) =>
-            placeContext = @
-            @showInfoWindow()
+                $('#sv-button').addClass 'btn-primary' if placeContext is @ and $('#info-window').length == 1
+      
 
     # shows its InfoWindow.
     showInfoWindow: ->
@@ -788,11 +794,12 @@ initializeGoogleMaps = ->
                 return if (position.left <= xy.x <= position.left + $infoWindow.outerWidth(true)) and (position.top <= xy.y <= position.top + $infoWindow.outerHeight(true))
                 
             infoWindow.close()
-            droppedPlace.address = ''
+            droppedPlace.address = null
             droppedPlace.svLatLng = null
             droppedPlace.marker.setPosition event.latLng
             droppedPlace.marker.setVisible true
             droppedPlace.marker.setAnimation google.maps.Animation.DROP
+            droppedPlace.update()
             placeContext = droppedPlace
         else
             infoWindow.close()
