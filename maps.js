@@ -1014,7 +1014,7 @@
   };
 
   initializeGoogleMaps = function() {
-    var mapOptions, mapStatus;
+    var holdInfo, mapOptions, mapStatus;
     mapOptions = {
       mapTypeId: getMapType(),
       disableDefaultUI: true,
@@ -1123,18 +1123,26 @@
       optimized: false,
       visible: false
     });
-    google.maps.event.addListener(map, 'click', function(event) {
+    holdInfo = {
+      x: null,
+      y: null,
+      id: null
+    };
+    google.maps.event.addListener(map, 'mousedown', function(event) {
       var $infoWindow, position, xy, _ref5, _ref6;
-      if (isHold) {
-        $infoWindow = $('.info-window');
-        if ($infoWindow.length > 0) {
-          xy = infoWindow.getProjection().fromLatLngToDivPixel(event.latLng);
-          position = $infoWindow.position();
-          if (((position.left <= (_ref5 = xy.x) && _ref5 <= position.left + $infoWindow.outerWidth(true))) && ((position.top <= (_ref6 = xy.y) && _ref6 <= position.top + $infoWindow.outerHeight(true)))) {
-            return;
-          }
+      $infoWindow = $('.info-window');
+      if ($infoWindow.length > 0) {
+        xy = infoWindow.getProjection().fromLatLngToDivPixel(event.latLng);
+        position = $infoWindow.position();
+        if (((position.left <= (_ref5 = xy.x) && _ref5 <= position.left + $infoWindow.outerWidth(true))) && ((position.top <= (_ref6 = xy.y) && _ref6 <= position.top + $infoWindow.outerHeight(true)))) {
+          return;
         }
-        infoWindow.close();
+      }
+      infoWindow.close();
+      holdInfo.x = event.pixel.x;
+      holdInfo.y = event.pixel.y;
+      return holdInfo.id = setTimeout((function() {
+        console.log('drop');
         droppedPlace.address = null;
         droppedPlace.svLatLng = null;
         droppedPlace.marker.setPosition(event.latLng);
@@ -1142,9 +1150,19 @@
         droppedPlace.marker.setAnimation(google.maps.Animation.DROP);
         droppedPlace.update();
         return placeContext = droppedPlace;
-      } else {
-        return infoWindow.close();
+      }), 1000);
+    });
+    google.maps.event.addListener(map, 'mousemove', function(event) {
+      if ((holdInfo.id != null) && !((Math.abs(event.pixel.x - holdInfo.x) < 10) && (Math.abs(event.pixel.y - holdInfo.y) < 10))) {
+        clearTimeout(holdInfo.id);
+        return holdInfo.id = null;
       }
+    });
+    google.maps.event.addListener(map, 'mouseup', function() {
+      if (holdInfo.id != null) {
+        clearTimeout(holdInfo.id);
+      }
+      return holdInfo.id = null;
     });
     google.maps.event.addListener(droppedPlace.marker, 'animation_changed', function() {
       if (!(this.getAnimation() != null)) {

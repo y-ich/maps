@@ -784,16 +784,24 @@ initializeGoogleMaps = ->
         optimized: false
         visible: false
 
-    google.maps.event.addListener map, 'click', (event) ->
-        if isHold
-            # The following code is a work around for iOS Safari. iOS Safari can not stop propagation of mouse event on the map.
-            $infoWindow = $('.info-window')
-            if $infoWindow.length > 0
-                xy = infoWindow.getProjection().fromLatLngToDivPixel event.latLng
-                position = $infoWindow.position()
-                return if (position.left <= xy.x <= position.left + $infoWindow.outerWidth(true)) and (position.top <= xy.y <= position.top + $infoWindow.outerHeight(true))
+    holdInfo =
+        x: null
+        y: null
+        id: null
+    google.maps.event.addListener map, 'mousedown', (event) ->
+        # The following code is a work around for iOS Safari. iOS Safari can not stop propagation of mouse event on the map.
+        $infoWindow = $('.info-window')
+        if $infoWindow.length > 0
+            xy = infoWindow.getProjection().fromLatLngToDivPixel event.latLng
+            position = $infoWindow.position()
+            return if (position.left <= xy.x <= position.left + $infoWindow.outerWidth(true)) and (position.top <= xy.y <= position.top + $infoWindow.outerHeight(true))
                 
-            infoWindow.close()
+        infoWindow.close()
+
+        holdInfo.x = event.pixel.x
+        holdInfo.y = event.pixel.y
+        holdInfo.id = setTimeout (->
+            console.log 'drop'
             droppedPlace.address = null
             droppedPlace.svLatLng = null
             droppedPlace.marker.setPosition event.latLng
@@ -801,9 +809,16 @@ initializeGoogleMaps = ->
             droppedPlace.marker.setAnimation google.maps.Animation.DROP
             droppedPlace.update()
             placeContext = droppedPlace
-        else
-            infoWindow.close()
+        ), 1000
 
+    google.maps.event.addListener map, 'mousemove', (event) ->
+        if holdInfo.id? and not ((Math.abs(event.pixel.x - holdInfo.x) < 10) and (Math.abs(event.pixel.y - holdInfo.y) < 10)) # if not a little move
+            clearTimeout holdInfo.id
+            holdInfo.id = null
+        
+    google.maps.event.addListener map, 'mouseup', ->
+        clearTimeout holdInfo.id if holdInfo.id?
+        holdInfo.id = null
 
     google.maps.event.addListener droppedPlace.marker, 'animation_changed', ->
         droppedPlace.showInfoWindow() if not this.getAnimation()? # animation property becomes undefined after animation ends
