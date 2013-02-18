@@ -1139,18 +1139,22 @@
         }
       }
       infoWindow.close();
-      holdInfo.x = event.pixel.x;
-      holdInfo.y = event.pixel.y;
-      return holdInfo.id = setTimeout((function() {
-        console.log('drop');
-        droppedPlace.address = null;
-        droppedPlace.svLatLng = null;
-        droppedPlace.marker.setPosition(event.latLng);
-        droppedPlace.marker.setVisible(true);
-        droppedPlace.marker.setAnimation(google.maps.Animation.DROP);
-        droppedPlace.update();
-        return placeContext = droppedPlace;
-      }), 1000);
+      if (holdInfo.id != null) {
+        clearTimeout(holdInfo.id);
+        return holdInfo.id = null;
+      } else {
+        holdInfo.x = event.pixel.x;
+        holdInfo.y = event.pixel.y;
+        return holdInfo.id = setTimeout((function() {
+          droppedPlace.address = null;
+          droppedPlace.svLatLng = null;
+          droppedPlace.marker.setPosition(event.latLng);
+          droppedPlace.marker.setVisible(true);
+          droppedPlace.marker.setAnimation(google.maps.Animation.DROP);
+          droppedPlace.update();
+          return placeContext = droppedPlace;
+        }), 500);
+      }
     });
     google.maps.event.addListener(map, 'mousemove', function(event) {
       if ((holdInfo.id != null) && !((Math.abs(event.pixel.x - holdInfo.x) < 10) && (Math.abs(event.pixel.y - holdInfo.y) < 10))) {
