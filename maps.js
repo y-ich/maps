@@ -278,7 +278,6 @@
       currentPlace.marker.setPosition(latLng);
       currentPlace.marker.setRadius(position.coords.accuracy);
       currentPlace.address = null;
-      currentPlace.update();
       if (!mapFSM.is(MapState.NORMAL)) {
         map.setCenter(latLng);
       }
@@ -515,7 +514,10 @@
       this.update();
       google.maps.event.addListener(this.marker, 'click', function(event) {
         placeContext = _this;
-        return _this.showInfoWindow();
+        _this.showInfoWindow();
+        if (_this.address == null) {
+          return _this.update();
+        }
       });
     }
 

@@ -101,7 +101,6 @@ tracer =
         currentPlace.marker.setPosition latLng
         currentPlace.marker.setRadius position.coords.accuracy
         currentPlace.address = null # because current address may become old.
-        currentPlace.update()
         map.setCenter latLng unless mapFSM.is MapState.NORMAL
         tracer.setState tracer.NORMAL
 
@@ -267,6 +266,7 @@ class Place
         google.maps.event.addListener @marker, 'click', (event) =>
             placeContext = @
             @showInfoWindow()
+            @update() unless @address?
     
     update: ->
         if not @address?
