@@ -20,6 +20,7 @@ trafficLayer = null
 bicycleLayer = null
 panoramioLayer = null
 kmlLayer = null
+fusionLayer = null
 autoAddressField = null
 autoOriginField = null
 autoDestinationField = null
@@ -94,7 +95,7 @@ tracer =
         if @state isnt state
             @state = state
             mapFSM.tracerChanged()
-        
+
     success: (position) ->
         latLng = new google.maps.LatLng position.coords.latitude,position.coords.longitude
         currentPlace.marker.setVisible true
@@ -108,7 +109,7 @@ tracer =
         console.log error
         switch error.code
             when error.PERMISSION_DENIED
-                tracer.stop()                
+                tracer.stop()
                 tracer.setState tracer.DISABLED
             when error.POSITION_UNAVAILABLE
                 tracer.setState tracer.UNAVAILABLE
@@ -118,7 +119,7 @@ tracer =
 # abstract class for map's trace state
 # Concrete instances are class constant.
 class MapState
-    constructor: (@name)-> 
+    constructor: (@name)->
 
     # concrete instances
     @DISABLED: new MapState('disabled')
@@ -135,7 +136,7 @@ class MapState
     tracerChanged: ->
         switch tracer.state
             when tracer.DISABLED
-                MapState.DISABLED        
+                MapState.DISABLED
             else
                 @
 
@@ -147,7 +148,7 @@ tracer2State = ->
         when tracer.NORMAL
             MapState.TRACE_POSITION
         when tracer.DISABLED
-            MapState.DISABLED        
+            MapState.DISABLED
         when tracer.UNAVAILABLE
             MapState.UNAVAILABLE
         when tracer.TIMEOUT
@@ -160,7 +161,7 @@ MapState.DISABLED.update = ->
     $gps.removeClass('btn-light')
         .addClass('disabled')
     @
-    
+
 MapState.NORMAL.update = ->
     $gps.removeClass('btn-light')
     @
@@ -267,7 +268,7 @@ class Place
             placeContext = @
             @showInfoWindow()
             @update() unless @address?
-    
+
     update: ->
         if not @address?
             geocoder.geocode {latLng : @marker.getPosition() }, (result, status) =>
@@ -283,13 +284,13 @@ class Place
             if status is google.maps.StreetViewStatus.OK
                 @svLatLng = data.location.latLng
                 $('#sv-button').addClass 'btn-primary' if placeContext is @ and $('#info-window').length == 1
-      
+
 
     # shows its InfoWindow.
     showInfoWindow: ->
         @_setInfoWindow()
         infoWindow.open map, @marker
-        
+
     # plain object to JSONize.
     toObject: () ->
         pos = @marker.getPosition()
@@ -330,7 +331,7 @@ class Place
 # sums in an array
 sum = (array) ->
     array.reduce (a, b) -> a + b
-    
+
 # sums after some transformation
 mapSum = (array, fn) ->
     array.map(fn).reduce (a, b) -> a + b
@@ -360,15 +361,15 @@ window.getDepartAtMessage ?= (time) ->
 
 window.getArriveAtMessage ?= (time) ->
     'Arrives at ' + time
-    
+
 getLocalizedString = (key) ->
     if localizedStrings? then localizedStrings[key] ? key else key
 
 setLocalExpressionInto = (id, english) ->
     document.getElementById(id).lastChild.data = getLocalizedString english
 
-localize = ->        
-    idWordPairs = 
+localize = ->
+    idWordPairs =
         'replace-pin' : 'Replace Pin'
         'print' : 'Print'
         'traffic' : 'Show Traffic'
@@ -413,7 +414,7 @@ localize = ->
     document.title = getLocalizedString 'Maps'
     document.getElementById('search-input').placeholder = getLocalizedString 'Search or Address'
     setLocalExpressionInto key, value for key, value of idWordPairs
-        
+
 
 # saves current state into localStorage
 # saves frequently changing state
@@ -507,7 +508,19 @@ searchAddress = (fromHistory) ->
             type: 'search'
             address: address
         saveOtherStatus()
-    if /^[a-z]+:\/\//.test address
+    if match = address.match /^fusion:(\S*)/
+        equations = match[1].split '&'
+        parameters = {}
+        for e in equations
+            pair = e.split '='
+            parameters[pair[0]] = pair[1]
+        return unless `'id' in parameters`
+        fusionLayer = new google.maps.FusionTablesLayer
+            map: map
+            query:
+                from: parameters['id']
+                select: parameters['column'] ? 'Location'
+    else if /^([a-z]+):\/\//.test address
         kmlLayer = new google.maps.KmlLayer address, { map: map }
         google.maps.event.addListener kmlLayer, 'status_changed', ->
             return if kmlLayer.getStatus() is google.maps.KmlLayerStatus.OK
@@ -612,7 +625,7 @@ navigate = (str) ->
             if navigate.step < route.legs[navigate.leg].steps.length - 1
                 navigate.step += 1
             else if navigate.leg < route.legs.length - 1
-                navigate.leg += 1            
+                navigate.leg += 1
                 navigate.step = 0
         when 'previous'
             if navigate.step > 0
@@ -620,7 +633,7 @@ navigate = (str) ->
             else if navigate.leg > 0
                 navigate.leg -= 1
                 navigate.step = route.legs[navigate.leg].steps.legth - 1
-        
+
     map.setZoom 15
     step = route.legs[navigate.leg].steps[navigate.step]
     naviMarker.setPosition step.start_location
@@ -659,7 +672,7 @@ generateBookmarkList = ->
     list += "<tr><td data-object-name=\"bookmarks[#{i}]\">#{e.marker.getTitle()}</td></tr>" for e, i in bookmarks
     list += Array(Math.max(1, Math.floor(innerHeight / pinRowHeight) - bookmarks.length)).join '<tr><td></td></tr>'
     $pinList.html list
-    
+
 generateHistoryList = ->
     print = (e) ->
         switch e.type
@@ -710,13 +723,13 @@ initializeGoogleMaps = ->
     google.maps.event.addListener autoAddressField, 'place_changed', ->
         place = autoAddressField.getPlace()
         setSearchResult place if 'geometry' of place 
-    
+
     autoOriginField = new google.maps.places.Autocomplete $('#origin input[name="origin"]')[0]
     autoOriginField.bindTo 'bounds', map 
-    
+
     autoDestinationField = new google.maps.places.Autocomplete $('#destination input[name="destination"]')[0]
     autoDestinationField.bindTo 'bounds', map 
-    
+
     # Here is a work around for google.maps.places.Autocomplete on iOS.
     # Type Enter after Japanese IME transformation causes input value to restore the one before transformation unexpectedly.
     # The difference between desktop and iOS is keydown and keyup events after textInput(IME transformation) event.
@@ -724,26 +737,26 @@ initializeGoogleMaps = ->
     # So emulate this events after textInput without keydown.
     # note: textInput always happens when English. So you need check with or without keydown.
     $('input.places-auto').on 'keydown', -> $(this).data 'keydown', true
-    $('input.places-auto').on 'keyup', -> $(this).data 'keydown', false        
+    $('input.places-auto').on 'keyup', -> $(this).data 'keydown', false
     $('input.places-auto').on 'textInput', ->
         unless $(this).data 'keydown' # if textInput without keydown
             for event in ['keydown', 'keyup']
                 e = document.createEvent 'KeyboardEvent'
                 e.initKeyboardEvent event, true, true, window, 'Enter', 0, ''
                 this.dispatchEvent(e)
-            
+
     # relace place lists after transition.
     # place lists of auto complete are placed 'absolute'ly. They doesn't take care of transition effect.
     $('#search-header, #route-search-frame').on 'webkitTransitionEnd', ->
         $this = $(this)
         $('.pac-container:visible').css 'top', $this.offset().top + $this.outerHeight(true) + 'px'
-        
+
     directionsRenderer = new google.maps.DirectionsRenderer
         hideRouteList: false
         infoWindow: infoWindow
         map: map
         panel: $('#directions-panel')[0]
-        
+
     google.maps.event.addListener directionsRenderer, 'directions_changed', ->
         navigate.leg = null
         navigate.step = null
@@ -764,7 +777,7 @@ initializeGoogleMaps = ->
             animation: google.maps.Animation.DROP
             map: map
             icon: new google.maps.MarkerImage(PURPLE_DOT_IMAGE)
-            shadow: new google.maps.MarkerImage(MSMARKER_SHADOW, null, null, new google.maps.Point(DEFAULT_ICON_SIZE/2, DEFAULT_ICON_SIZE))
+            shadow: new google.maps.MarkerImage(MSMARKER_SHADOW, null, null, new google.maps.Point(DEFAULT_ICON_SIZE / 2, DEFAULT_ICON_SIZE))
             position: mapOptions.center
             title: getLocalizedString 'Dropped Pin'
             visible: false
@@ -776,7 +789,7 @@ initializeGoogleMaps = ->
             position: mapOptions.center
             visible: false
         ), ''
-    
+
     naviMarker = new google.maps.Marker
         flat: true
         icon: new google.maps.MarkerImage('img/bluedot.png', null, null, new google.maps.Point(8, 8), new google.maps.Size(17, 17))
@@ -794,7 +807,7 @@ initializeGoogleMaps = ->
             xy = infoWindow.getProjection().fromLatLngToDivPixel event.latLng
             position = $infoWindow.position()
             return if (position.left <= xy.x <= position.left + $infoWindow.outerWidth(true)) and (position.top <= xy.y <= position.top + $infoWindow.outerHeight(true))
-                
+
         infoWindow.close()
 
         if holdInfo.id? # multi touch cause plural mousedowns before mouseup. In that case, just cancels hold behavior.
@@ -817,7 +830,7 @@ initializeGoogleMaps = ->
         if holdInfo.id? and not ((Math.abs(event.pixel.x - holdInfo.x) < 10) and (Math.abs(event.pixel.y - holdInfo.y) < 10)) # if not a little move
             clearTimeout holdInfo.id
             holdInfo.id = null
-        
+
     google.maps.event.addListener map, 'mouseup', ->
         clearTimeout holdInfo.id if holdInfo.id?
         holdInfo.id = null
@@ -861,8 +874,8 @@ initializeDOM = ->
     pinRowHeight = $('#pin-list tr').height()
 
     for e in $('button').not('#clear, .btn-reset') # except '#clear, .btn-reset' because NoClickDelay prevents 'mousedown' event and causes to blur text input.
-        new NoClickDelay e    
-    
+        new NoClickDelay e
+
     # prevents default page scroll, but scroll bookmark/history list.
     document.addEventListener 'touchmove', (event) ->
         event.preventDefault()
@@ -875,7 +888,7 @@ initializeDOM = ->
     localize()
     # renders DOMs after localize
     $('#container').css 'display', ''
-        
+
 
     #
     # event handlers
@@ -885,17 +898,17 @@ initializeDOM = ->
         # work around against unexpected page slide when rotating to portrait
         document.body.scrollLeft = if scrollLeft then innerWidth else 0
     ), false
- 
+
     window.addEventListener 'resize', (->
         google.maps.event.trigger map, 'resize'
-        google.maps.event.trigger map.getStreetView(), 'resize'        
+        google.maps.event.trigger map.getStreetView(), 'resize'
     ), false
 
     # hold detection
     $map.on 'touchstart', ->
         isHold = false
         setTimeout (-> isHold = true), 500
-        
+
     # input with reset button
     $('.search-query').on 'keyup', -> # textInput, keypress is before inputting a character.
         $this = $(this)
@@ -911,9 +924,9 @@ initializeDOM = ->
     $('#clear').on 'click', -> $('#address .btn-bookmark').css('display', 'block')
 
     # footer
-    
+
     $gps.on 'click', -> mapFSM.gpsClicked()
-            
+
     # search header
 
     $addressField.on 'focus', -> $('#search-header').css 'top', '0' # down form
@@ -925,7 +938,7 @@ initializeDOM = ->
         false # to prevent submit action
 
     $addressField.on 'keyup', -> setLocalExpressionInto 'done', if $(this).val() is '' then 'Done' else 'Cancel'
-    
+
     $('#clear, #address .btn-reset').on 'click', ->
         setLocalExpressionInto 'done', 'Done'
         searchPlace.marker.setVisible false
@@ -989,7 +1002,7 @@ initializeDOM = ->
         $travelMode.children().removeClass 'btn-primary'
         $this.addClass 'btn-primary'
         setRouteMap()
-        
+
     $versatile.on 'click', ->
         switch $versatile.text().replace(/^\s*|\s*$/, '')
             when getLocalizedString 'Route'
@@ -1001,7 +1014,7 @@ initializeDOM = ->
                 navigate 'start'
 
     $('#cursor-left').on 'click', -> navigate 'previous'
-    $('#cursor-right').on 'click', -> navigate 'next'       
+    $('#cursor-right').on 'click', -> navigate 'next'
 
     backToMap = ->
         $map.css 'top', ''
@@ -1009,7 +1022,7 @@ initializeDOM = ->
         $('#directions-panel').css 'top', ''
         $('#directions-panel').css 'bottom', ''
         $option.removeClass 'btn-primary'
-        
+
     $option = $('#option')
     $option.on 'click', ->
         $('#option-page').css 'display', 'block'
@@ -1067,14 +1080,14 @@ initializeDOM = ->
     $('#print').on 'click', ->
         setTimeout window.print, 0
         backToMap()
-        
+
     infoPage2Map = ->
         $('body').animate {scrollLeft: 0}, 300
         scrollLeft = false
 
     $('#button-map').on 'click', infoPage2Map
-        
-    $bookmarkPage = $('#bookmark-page')    
+
+    $bookmarkPage = $('#bookmark-page')
     $('.btn-bookmark').on 'click', ->
         mapFSM.bookmarkClicked()
         ancestor = $(this).parent()
@@ -1082,10 +1095,10 @@ initializeDOM = ->
         bookmarkContext = ancestor.attr 'id'
         generateBookmarkList()
         $bookmarkPage.css 'bottom', '0'
-    
+
     $('#bookmark-done').on 'click', ->
         $bookmarkPage.css 'bottom', '-100%'
-    
+
     $('#pin-list').on 'click', 'td', ->
         name = $(this).data('object-name')
         return unless name? and name isnt ''
@@ -1120,13 +1133,13 @@ initializeDOM = ->
                             latLng = place.marker.getPosition()
                             "#{latLng.lat()}, #{latLng.lng()}"
                         else
-                            place.address            
+                            place.address
                 when 'destination'
                     updateField $destinationField, if place is currentPlace
                             latLng = place.marker.getPosition()
                             "#{latLng.lat()}, #{latLng.lng()}"
                         else
-                            place.address            
+                            place.address
 
         $bookmarkPage.css 'bottom', '-100%'
 
@@ -1144,7 +1157,7 @@ initializeDOM = ->
             placeContext.marker.setMap null
         infoWindow.close()
         infoPage2Map()
-        
+
     $('#bookmark-name').on 'submit', ->
         $('#bookmark-name input[name="bookmark-name"]').blur()
         $('#save-bookmark').trigger 'click'
@@ -1191,7 +1204,7 @@ initializeDOM = ->
         $route.trigger 'click'
         infoPage2Map()
         openRouteForm()
-        
+
     $('#from-here').on 'click', ->
         updateField $originField, placeContext.address
         $route.trigger 'click'
@@ -1207,7 +1220,7 @@ initializeDOM = ->
             google.maps.event.trigger map, 'resize'
             placeContext.showInfoWindow()
             map.setCenter centerBeforeSV
-        
+
 # auxiliary functions for initializDOM
 restoreStatus = ->
     if localStorage['maps-other-status']?
