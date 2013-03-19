@@ -695,6 +695,8 @@ generateHistoryList = ->
 # initializations
 
 initializeGoogleMaps = ->
+    parameters = parseQuery decodeURIComponent location.search
+
     mapOptions =
         mapTypeId: getMapType()
         disableDefaultUI: true
@@ -722,14 +724,17 @@ initializeGoogleMaps = ->
     infoWindow = new MobileInfoWindow
         maxWidth: Math.floor innerWidth*0.9
 
-    if location.search isnt ''
-        parameters = parseQuery location.search
-        if `'fusionid' in parameters`
-            fusionLayer = new google.maps.FusionTablesLayer
-                map: map
-                query:
-                    from: parameters['fusionid']
-                    select: parameters['column'] ? 'Location'
+    if `'fusionid' in parameters`
+        console.log 'pass'
+        fusionLayer = new google.maps.FusionTablesLayer
+            map: map
+            query:
+                from: parameters['fusionid']
+                select: parameters['column'] ? 'Location'
+            styles: [
+                    markerOptions:
+                        iconName: 'red_stars'
+                ]
 
     geocoder = new google.maps.Geocoder()
 
