@@ -355,7 +355,7 @@ parseQuery = (str) ->
     result= {}
     for e in equations
         pair = e.split '='
-        result[pair[0]] = pair[1]
+        result[pair[0]] = decodeURIComponent pair[1]
     result
 
 # localize functions
@@ -506,6 +506,31 @@ setRouteMap = ->
         else
             map.setMapTypeId google.maps.MapTypeId.ROADMAP
 
+prepareKmlLayer = (address) ->
+    kmlLayer.setMap null if kmlLayer?
+    kmlLayer = new google.maps.KmlLayer address, map: map
+    google.maps.event.addListener kmlLayer, 'status_changed', ->
+        return if kmlLayer.getStatus() is google.maps.KmlLayerStatus.OK
+        switch kmlLayer.getStatus()
+            when google.maps.KmlLayerStatus.DOCUMENT_NOT_FOUND
+                alert 'DOCUMENT_NOT_FOUND'
+            when google.maps.KmlLayerStatus.DOCUMENT_TOO_LARGE
+                alert 'DOCUMENT_TOO_LARGE'
+            when google.maps.KmlLayerStatus.FETCH_ERROR
+                alert 'FETCH_ERROR'
+            when google.maps.KmlLayerStatus.INVALID_DOCUMENT
+                alert 'INVALID_DOCUMENT'
+            when google.maps.KmlLayerStatus.INVALID_REQUEST
+                alert 'INVALID_REQUEST'
+            when google.maps.KmlLayerStatus.LIMITS_EXCEEDED
+                alert 'LIMITS_EXCEEDED'
+            when google.maps.KmlLayerStatus.TIMED_OUT
+                alert 'TIMED_OUT'
+            when google.maps.KmlLayerStatus.UNKNOWN
+                alert 'UNKNOWN'
+        kmlLayer.setMap null
+        kmlLayer = null
+
 # search and display a place
 searchAddress = (fromHistory) ->
     address = $addressField.val()
@@ -527,28 +552,7 @@ searchAddress = (fromHistory) ->
                 from: parameters['id']
                 select: parameters['column'] ? 'Location'
     else if /^([a-z]+):\/\//.test address
-        kmlLayer = new google.maps.KmlLayer address, { map: map }
-        google.maps.event.addListener kmlLayer, 'status_changed', ->
-            return if kmlLayer.getStatus() is google.maps.KmlLayerStatus.OK
-            switch kmlLayer.getStatus()
-                when google.maps.KmlLayerStatus.DOCUMENT_NOT_FOUND
-                    alert 'DOCUMENT_NOT_FOUND'
-                when google.maps.KmlLayerStatus.DOCUMENT_TOO_LARGE
-                    alert 'DOCUMENT_TOO_LARGE'
-                when google.maps.KmlLayerStatus.FETCH_ERROR
-                    alert 'FETCH_ERROR'
-                when google.maps.KmlLayerStatus.INVALID_DOCUMENT
-                    alert 'INVALID_DOCUMENT'
-                when google.maps.KmlLayerStatus.INVALID_REQUEST
-                    alert 'INVALID_REQUEST'
-                when google.maps.KmlLayerStatus.LIMITS_EXCEEDED
-                    alert 'LIMITS_EXCEEDED'
-                when google.maps.KmlLayerStatus.TIMED_OUT
-                    alert 'TIMED_OUT'
-                when google.maps.KmlLayerStatus.UNKNOWN
-                    alert 'UNKNOWN'
-            kmlLayer.setMap null
-            kmlLayer = null
+        prepareKmlLayer address
     else
         geocoder.geocode { address : address }, (result, status) ->
             switch status
@@ -695,7 +699,7 @@ generateHistoryList = ->
 # initializations
 
 initializeGoogleMaps = ->
-    parameters = parseQuery decodeURIComponent location.search
+    parameters = parseQuery location.search
 
     mapOptions =
         mapTypeId: getMapType()
@@ -725,7 +729,6 @@ initializeGoogleMaps = ->
         maxWidth: Math.floor innerWidth*0.9
 
     if `'fusionid' in parameters`
-        console.log 'pass'
         fusionLayer = new google.maps.FusionTablesLayer
             map: map
             query:
@@ -735,6 +738,9 @@ initializeGoogleMaps = ->
                     markerOptions:
                         iconName: 'red_stars'
                 ]
+
+    if `'kml' in parameters`
+        prepareKmlLayer parameters['kml']
 
     geocoder = new google.maps.Geocoder()
 
