@@ -603,7 +603,7 @@
 
   parseQuery = function(str) {
     var e, equations, pair, result, _i, _len;
-    equations = str.replace(/\s+$/, '').split('&');
+    equations = str.replace(/^\?|\s+$/, '').split('&');
     result = {};
     for (_i = 0, _len = equations.length; _i < _len; _i++) {
       e = equations[_i];
@@ -814,14 +814,13 @@
       if (fusionLayer != null) {
         fusionLayer.setMap(null);
       }
-      fusionLayer = new google.maps.FusionTablesLayer({
+      return fusionLayer = new google.maps.FusionTablesLayer({
         map: map,
         query: {
           from: parameters['id'],
           select: (_ref5 = parameters['column']) != null ? _ref5 : 'Location'
         }
       });
-      return console.log(parameters);
     } else if (/^([a-z]+):\/\//.test(address)) {
       kmlLayer = new google.maps.KmlLayer(address, {
         map: map
@@ -1046,7 +1045,7 @@
   };
 
   initializeGoogleMaps = function() {
-    var holdInfo, mapOptions, mapStatus;
+    var holdInfo, mapOptions, mapStatus, parameters, _ref5;
     mapOptions = {
       mapTypeId: getMapType(),
       disableDefaultUI: true,
@@ -1073,6 +1072,18 @@
     infoWindow = new MobileInfoWindow({
       maxWidth: Math.floor(innerWidth * 0.9)
     });
+    if (location.search !== '') {
+      parameters = parseQuery(location.search);
+      if ('fusionid' in parameters) {
+        fusionLayer = new google.maps.FusionTablesLayer({
+          map: map,
+          query: {
+            from: parameters['fusionid'],
+            select: (_ref5 = parameters['column']) != null ? _ref5 : 'Location'
+          }
+        });
+      }
+    }
     geocoder = new google.maps.Geocoder();
     autoAddressField = new google.maps.places.Autocomplete($('#address input[name="address"]')[0]);
     autoAddressField.bindTo('bounds', map);
@@ -1094,12 +1105,12 @@
       return $(this).data('keydown', false);
     });
     $('input.places-auto').on('textInput', function() {
-      var e, event, _i, _len, _ref5, _results;
+      var e, event, _i, _len, _ref6, _results;
       if (!$(this).data('keydown')) {
-        _ref5 = ['keydown', 'keyup'];
+        _ref6 = ['keydown', 'keyup'];
         _results = [];
-        for (_i = 0, _len = _ref5.length; _i < _len; _i++) {
-          event = _ref5[_i];
+        for (_i = 0, _len = _ref6.length; _i < _len; _i++) {
+          event = _ref6[_i];
           e = document.createEvent('KeyboardEvent');
           e.initKeyboardEvent(event, true, true, window, 'Enter', 0, '');
           _results.push(this.dispatchEvent(e));
@@ -1161,12 +1172,12 @@
       id: null
     };
     google.maps.event.addListener(map, 'mousedown', function(event) {
-      var $infoWindow, position, xy, _ref5, _ref6;
+      var $infoWindow, position, xy, _ref6, _ref7;
       $infoWindow = $('.info-window');
       if ($infoWindow.length > 0) {
         xy = infoWindow.getProjection().fromLatLngToDivPixel(event.latLng);
         position = $infoWindow.position();
-        if (((position.left <= (_ref5 = xy.x) && _ref5 <= position.left + $infoWindow.outerWidth(true))) && ((position.top <= (_ref6 = xy.y) && _ref6 <= position.top + $infoWindow.outerHeight(true)))) {
+        if (((position.left <= (_ref6 = xy.x) && _ref6 <= position.left + $infoWindow.outerWidth(true))) && ((position.top <= (_ref7 = xy.y) && _ref7 <= position.top + $infoWindow.outerHeight(true)))) {
           return;
         }
       }

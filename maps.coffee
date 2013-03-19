@@ -351,7 +351,7 @@ ordinal = (n) ->
 
 
 parseQuery = (str) ->
-    equations = str.replace(/\s+$/,'').split '&'
+    equations = str.replace(/^\?|\s+$/,'').split '&'
     result= {}
     for e in equations
         pair = e.split '='
@@ -526,7 +526,6 @@ searchAddress = (fromHistory) ->
             query:
                 from: parameters['id']
                 select: parameters['column'] ? 'Location'
-        console.log parameters
     else if /^([a-z]+):\/\//.test address
         kmlLayer = new google.maps.KmlLayer address, { map: map }
         google.maps.event.addListener kmlLayer, 'status_changed', ->
@@ -722,6 +721,15 @@ initializeGoogleMaps = ->
     mapFSM = new MapFSM(MapState.NORMAL)
     infoWindow = new MobileInfoWindow
         maxWidth: Math.floor innerWidth*0.9
+
+    if location.search isnt ''
+        parameters = parseQuery location.search
+        if `'fusionid' in parameters`
+            fusionLayer = new google.maps.FusionTablesLayer
+                map: map
+                query:
+                    from: parameters['fusionid']
+                    select: parameters['column'] ? 'Location'
 
     geocoder = new google.maps.Geocoder()
 
