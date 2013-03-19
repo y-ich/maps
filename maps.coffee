@@ -349,6 +349,15 @@ ordinal = (n) ->
         else
             n + 'th'
 
+
+parseQuery = (str) ->
+    equations = str.replace(/\s+$/,'').split '&'
+    result= {}
+    for e in equations
+        pair = e.split '='
+        result[pair[0]] = pair[1]
+    result
+
 # localize functions
 
 # getRouteindexMessage, getDepartAtMessage, getArriveAtMessage should be defined in js for localization.
@@ -508,18 +517,16 @@ searchAddress = (fromHistory) ->
             type: 'search'
             address: address
         saveOtherStatus()
-    if match = address.match /^fusion:(\S*)/
-        equations = match[1].split '&'
-        parameters = {}
-        for e in equations
-            pair = e.split '='
-            parameters[pair[0]] = pair[1]
+    if match = address.match /^fusion:(.*)/
+        parameters = parseQuery match[1]
         return unless `'id' in parameters`
+        fusionLayer.setMap null if fusionLayer?
         fusionLayer = new google.maps.FusionTablesLayer
             map: map
             query:
                 from: parameters['id']
                 select: parameters['column'] ? 'Location'
+        console.log parameters
     else if /^([a-z]+):\/\//.test address
         kmlLayer = new google.maps.KmlLayer address, { map: map }
         google.maps.event.addListener kmlLayer, 'status_changed', ->
