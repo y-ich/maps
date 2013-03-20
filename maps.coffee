@@ -733,10 +733,10 @@ initializeGoogleMaps = ->
             map: map
             query:
                 from: parameters['fusionid']
-                select: parameters['column'] ? 'Location'
+                select: parameters['fusioncolumn'] ? 'Location'
             styles: [
                     markerOptions:
-                        iconName: 'red_stars'
+                        iconName: parameters['fusionicon'] ? 'red_stars'
                 ]
 
     if `'kml' in parameters`

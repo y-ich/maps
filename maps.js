@@ -1052,7 +1052,7 @@
   };
 
   initializeGoogleMaps = function() {
-    var holdInfo, mapOptions, mapStatus, parameters, _ref5;
+    var holdInfo, mapOptions, mapStatus, parameters, _ref5, _ref6;
     parameters = parseQuery(location.search);
     mapOptions = {
       mapTypeId: getMapType(),
@@ -1085,12 +1085,12 @@
         map: map,
         query: {
           from: parameters['fusionid'],
-          select: (_ref5 = parameters['column']) != null ? _ref5 : 'Location'
+          select: (_ref5 = parameters['fusioncolumn']) != null ? _ref5 : 'Location'
         },
         styles: [
           {
             markerOptions: {
-              iconName: 'red_stars'
+              iconName: (_ref6 = parameters['fusionicon']) != null ? _ref6 : 'red_stars'
             }
           }
         ]
@@ -1120,12 +1120,12 @@
       return $(this).data('keydown', false);
     });
     $('input.places-auto').on('textInput', function() {
-      var e, event, _i, _len, _ref6, _results;
+      var e, event, _i, _len, _ref7, _results;
       if (!$(this).data('keydown')) {
-        _ref6 = ['keydown', 'keyup'];
+        _ref7 = ['keydown', 'keyup'];
         _results = [];
-        for (_i = 0, _len = _ref6.length; _i < _len; _i++) {
-          event = _ref6[_i];
+        for (_i = 0, _len = _ref7.length; _i < _len; _i++) {
+          event = _ref7[_i];
           e = document.createEvent('KeyboardEvent');
           e.initKeyboardEvent(event, true, true, window, 'Enter', 0, '');
           _results.push(this.dispatchEvent(e));
@@ -1187,12 +1187,12 @@
       id: null
     };
     google.maps.event.addListener(map, 'mousedown', function(event) {
-      var $infoWindow, position, xy, _ref6, _ref7;
+      var $infoWindow, position, xy, _ref7, _ref8;
       $infoWindow = $('.info-window');
       if ($infoWindow.length > 0) {
         xy = infoWindow.getProjection().fromLatLngToDivPixel(event.latLng);
         position = $infoWindow.position();
-        if (((position.left <= (_ref6 = xy.x) && _ref6 <= position.left + $infoWindow.outerWidth(true))) && ((position.top <= (_ref7 = xy.y) && _ref7 <= position.top + $infoWindow.outerHeight(true)))) {
+        if (((position.left <= (_ref7 = xy.x) && _ref7 <= position.left + $infoWindow.outerWidth(true))) && ((position.top <= (_ref8 = xy.y) && _ref8 <= position.top + $infoWindow.outerHeight(true)))) {
           return;
         }
       }
