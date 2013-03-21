@@ -64,6 +64,13 @@ localize = ->
 initializeDOM = ->
     localize()
     $('#container').css 'display', ''
+    $gbutton = $('#button-gdrive')
+    $gbutton.on 'click', (event) ->
+        gapi.auth.authorize
+                'client_id': CLIENT_ID
+                'scope': SCOPES
+                'immediate': false
+            , handleAuthResult
 
 initializeGoogleMaps = ->
     mapOptions =

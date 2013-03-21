@@ -1,7 +1,7 @@
 # Google Maps Web App
 # Copyright (C) 2012-2013 ICHIKAWA, Yuji (New 3 Rs) 
 
-VERSION = '(C) 2012 ICHIKAWA, Yuji (New 3 Rs)<br>Maps ver. 1.2.20'
+VERSION = '(C) 2013 ICHIKAWA, Yuji (New 3 Rs)<br>Maps ver. 2.0.0'
 BLINK_INTERVAL = 500 # ms
 STARTUP_TIME = 3000 # ms
 timerId = null
@@ -25,7 +25,7 @@ fullScreen = ->
     setTimeout (->
         window.scrollTo 0, 0 # hide address bar
         $([document, document.body]).height innerHeight # 100% is not full screen height, is a size below address bar.
-        $body.remove $dummy
+        $dummy.height 40 # dummy would be used to pull address bar. 20px is not enough due to notification center.
     ), 0
 
 document.write """

@@ -2,7 +2,7 @@
 (function() {
   var $option, $version, BLINK_INTERVAL, STARTUP_TIME, VERSION, fullScreen, timerId, type, types, _i, _len;
 
-  VERSION = '(C) 2012 ICHIKAWA, Yuji (New 3 Rs)<br>Maps ver. 1.2.20';
+  VERSION = '(C) 2013 ICHIKAWA, Yuji (New 3 Rs)<br>Maps ver. 2.0.0';
 
   BLINK_INTERVAL = 500;
 
@@ -28,7 +28,7 @@
     return setTimeout((function() {
       window.scrollTo(0, 0);
       $([document, document.body]).height(innerHeight);
-      return $body.remove($dummy);
+      return $dummy.height(40);
     }), 0);
   };
 

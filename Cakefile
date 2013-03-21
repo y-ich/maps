@@ -1,7 +1,7 @@
 {spawn, exec} = require 'child_process'
 
 maps = ['googleMapsExtensions.coffee', 'maps.coffee']
-maps2 = ['googleMapsExtensions.coffee', 'maps2.coffee']
+maps2 = ['googleDrive.coffee', 'googleMapsExtensions.coffee', 'maps2.coffee']
 start = 'webapp.coffee'
 start2 = 'webapp2.coffee'
 
