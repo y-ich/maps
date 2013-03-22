@@ -338,7 +338,6 @@
       _results = [];
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         e = _ref1[_j];
-        console.log(e);
         req = gapi.client.fusiontables.column.list({
           tableId: e.value
         });
@@ -347,25 +346,28 @@
           if (result.error != null) {
             return console.error(result.error);
           } else {
-            option = {
-              map: map,
-              query: {
-                from: e.value
-              },
-              styles: [
-                {
-                  markerOptions: {
-                    iconName: 'red_stars'
-                  }
-                }
-              ]
-            };
             locations = result.items.filter(function(e) {
               return e.type === 'LOCATION';
             });
-            console.log(locations);
-            option.query.select = locations[0].name;
-            return fusionTablesLayers.push(new google.maps.FusionTablesLayer(option));
+            if (locations.length > 0) {
+              option = {
+                map: map,
+                query: {
+                  from: e.value,
+                  select: locations[0].name
+                },
+                styles: [
+                  {
+                    markerOptions: {
+                      iconName: 'red_stars'
+                    }
+                  }
+                ]
+              };
+              return fusionTablesLayers.push(new google.maps.FusionTablesLayer(option));
+            } else {
+              return console.error('no locations');
+            }
           }
         }));
       }
