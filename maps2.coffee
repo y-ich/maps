@@ -2,6 +2,8 @@
 # Copyright (C) 2012-2103 ICHIKAWA, Yuji (New 3 Rs) 
 
 tracer = null
+map = null
+fusionTablesLayers = []
 
 saveMapStatus = ->
 
@@ -15,47 +17,7 @@ setLocalExpressionInto = (id, english) ->
     el.lastChild.data = getLocalizedString english if el?
 
 localize = ->
-    idWordPairs =
-        'replace-pin' : 'Replace Pin'
-        'print' : 'Print'
-        'traffic' : 'Show Traffic'
-        'panoramio' : 'Show Panoramio'
-        'roadmap' : 'Standard'
-        'satellite' : 'Satellite'
-        'panel' : 'List'
-        'hybrid' : 'Hybrid'
-        'clear' : 'Clear'
-        'map-title' : 'Search'
-        'done' : 'Done'
-        'edit' : 'Edit'
-        'versatile' : 'Start'
-        'origin-label' : 'Start: '
-        'destination-label' : 'End: '
-        'edit2' : 'Edit'
-        'search' : 'Search'
-        'route' : 'Directions'
-        'bookmark-message' : 'Choose a bookmark to view on the map'
-        'bookmark-edit' : 'Edit'
-        'bookmark-done' : 'Done'
-        'bookmark-title' : 'Bookmarks'
-        'bookmark' : 'Bookmarks'
-        'history' : 'Recents'
-        'contact' : 'Contacts'
-        'button-map' : 'Map'
-        'info-title' : 'Info'
-        'address-label' : 'address'
-        'to-here' : 'Directions To Here'
-        'from-here' : 'Directions From Here'
-        'remove-pin' : 'Remove Pin'
-        'add-into-contact' : 'Add to Contacts'
-        'send-place' : 'Share Location'
-        'add-bookmark' : 'Add to Bookmarks'
-        'add-bookmark-message' : 'Type a name for the bookmark'
-        'cancel-add-bookmark' : 'Cancel'
-        'add-bookmark-title' : 'Add Bookmark'
-        'save-bookmark' : 'Save'
-        'edit3' : 'Edit'
-        'directions-title' : 'Directions'
+    idWordPairs = []
 
     document.title = getLocalizedString 'Maps'
     # document.getElementById('search-input').placeholder = getLocalizedString 'Search or Address'
@@ -64,13 +26,35 @@ localize = ->
 initializeDOM = ->
     localize()
     $('#container').css 'display', ''
-    $gbutton = $('#button-gdrive')
+    $gbutton = $('#button-google-drive')
     $gbutton.on 'click', (event) ->
         gapi.auth.authorize
                 'client_id': CLIENT_ID
                 'scope': SCOPES
                 'immediate': false
             , handleAuthResult
+
+    $('#modal-fusion-tables').on 'show', (event) ->
+        $('#fusion-tables').empty()
+        searchFiles 'mimeType = "application/vnd.google-apps.fusiontable"', (result) ->
+            $('#fusion-tables').html ("<label><input type=\"checkbox\" value=\"#{e.id}\" />#{e.title}</label>" for e in result).join('')
+
+    $('#button-clear').on 'click', (event) ->
+        e.setMap null for e in fusionTablesLayers
+        fusionTablesLayers = []
+
+    $('#button-show').on 'click', (event) ->
+        e.setMap null for e in fusionTablesLayers
+        fusionTablesLayers = []
+        for e in $('#fusion-tables input:checked:lt(5)')
+            fusionTablesLayers.push new google.maps.FusionTablesLayer
+                map: map
+                query:
+                    from: e.value
+                styles: [
+                        markerOptions:
+                            iconName: 'red_stars'
+                    ]
 
 initializeGoogleMaps = ->
     mapOptions =

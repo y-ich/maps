@@ -31,7 +31,7 @@ document.write '''
 window.applicationCache.addEventListener 'downloading', ->
     timerId = setInterval (-> $option.toggleClass 'btn-light'), BLINK_INTERVAL
     $version.html VERSION + ' (downloading new version...)'
-    
+
 window.applicationCache.addEventListener 'cached', ->
     clearInterval timerId
     $option.removeClass 'btn-light' if $option.hasClass 'btn-light'
@@ -46,7 +46,7 @@ window.applicationCache.addEventListener 'error', ->
     clearInterval timerId
     $option.addClass 'btn-light' unless $option.hasClass 'btn-light'
     $version.html VERSION + ' (cache error)'
-    
+
 # application cache debug information            
 types = ['checking', 'noupdate', 'downloading', 'progress','cached', 'updateready', 'obsolete', 'error']
 for type in types

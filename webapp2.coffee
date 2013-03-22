@@ -3,7 +3,7 @@
 
 VERSION = '(C) 2013 ICHIKAWA, Yuji (New 3 Rs)<br>Maps ver. 2.0.0'
 BLINK_INTERVAL = 500 # ms
-STARTUP_TIME = 3000 # ms
+STARTUP_TIME = 2000 # ms
 timerId = null
 $option = $('#option')
 $version = $('#version')
@@ -25,7 +25,7 @@ fullScreen = ->
     setTimeout (->
         window.scrollTo 0, 0 # hide address bar
         $([document, document.body]).height innerHeight # 100% is not full screen height, is a size below address bar.
-        $dummy.height 40 # dummy would be used to pull address bar. 20px is not enough due to notification center.
+        $dummy.remove()
     ), 0
 
 document.write """
@@ -56,13 +56,12 @@ window.applicationCache.addEventListener 'error', ->
 # application cache debug information            
 types = ['checking', 'noupdate', 'downloading', 'progress','cached', 'updateready', 'obsolete', 'error']
 for type in types
-    window.applicationCache.addEventListener type, (event) -> console.log event.type
+    window.applicationCache.addEventListener type, (event) -> console.log 'cache', event.type
 
 app.initializeGoogleMaps()
 $version.html VERSION
 app.initializeDOM()
 fullScreen() if /iPhone/.test(navigator.userAgent) and /Safari/.test(navigator.userAgent)
-
 
 # post process
 window.onpagehide = ->

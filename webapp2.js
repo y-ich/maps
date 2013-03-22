@@ -6,7 +6,7 @@
 
   BLINK_INTERVAL = 500;
 
-  STARTUP_TIME = 3000;
+  STARTUP_TIME = 2000;
 
   timerId = null;
 
@@ -28,7 +28,7 @@
     return setTimeout((function() {
       window.scrollTo(0, 0);
       $([document, document.body]).height(innerHeight);
-      return $dummy.height(40);
+      return $dummy.remove();
     }), 0);
   };
 
@@ -70,7 +70,7 @@
   for (_i = 0, _len = types.length; _i < _len; _i++) {
     type = types[_i];
     window.applicationCache.addEventListener(type, function(event) {
-      return console.log(event.type);
+      return console.log('cache', event.type);
     });
   }
 

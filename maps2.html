@@ -7,7 +7,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Maps</title>
-    <meta name="viewport" content="initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no" />
     <link rel="apple-touch-icon-precomposed" href="img/icon.png" />
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="img/icon@2x.png" />
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="img/icon-72.png" />
@@ -25,6 +25,7 @@
     <link rel="apple-touch-startup-image" media="(device-width: 768px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)" href="img/startup-ipad-landscape@2x.png" />
 -->
     <link href='http://fonts.googleapis.com/css?family=Mr+De+Haviland' rel='stylesheet' type='text/css'>
+	<!--<link href="css/bootstrap-2.3.1.min.css" rel="stylesheet">-->
 	<link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
     <link href="maps2.css" rel="stylesheet">
 </head>
@@ -32,8 +33,28 @@
     <div id="container" style="display: none;"> <!-- should be displayed after localization -->
         <div id="streetview"></div>
         <div id="map"></div>
+        <div id="map-ui"></div>
+		<div id="header" class="navbar navbar-fixed-top">
+			<div class="navbar-inner">
+				<button type="button" id="button-google-drive" class="btn" disabled>Authorizing...</button>
+				<a id="button-fusion-tables" href="#modal-fusion-tables" role="button" class="btn" style="display: none;" data-toggle="modal">Fusion Tables</a>
+			</div>
+		</div>
+		<div id="modal-fusion-tables" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+				<h5 id="myModalLabel">Fusion Tables</h5>
+			</div>
+			<div class="modal-body">
+				Check up to 5 tables to view.
+				<form id="fusion-tables"></form>
+			</div>
+			<div class="modal-footer">
+				<button id="button-clear" class="btn" data-dismiss="modal" aria-hidden="true">Clear</button>
+				<button id="button-show" class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Show</button>
+			</div>
+		</div>
 	</div>
-	<button id="button-gdrive">Google Drive</button>
 	<script type='application/javascript' src='js/fastclick.js'></script>
     <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
 	<script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
