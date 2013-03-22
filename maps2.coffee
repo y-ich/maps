@@ -47,14 +47,24 @@ initializeDOM = ->
         e.setMap null for e in fusionTablesLayers
         fusionTablesLayers = []
         for e in $('#fusion-tables input:checked:lt(5)')
-            fusionTablesLayers.push new google.maps.FusionTablesLayer
-                map: map
-                query:
-                    from: e.value
-                styles: [
-                        markerOptions:
-                            iconName: 'red_stars'
-                    ]
+            console.log e
+            req = gapi.client.fusiontables.column.list tableId: e.value
+            req.execute (result) ->
+                if result.error?
+                    console.error result.error
+                else
+                    option =
+                        map: map
+                        query:
+                            from: e.value
+                        styles: [
+                                markerOptions:
+                                    iconName: 'red_stars'
+                            ]
+                    locations = result.items.filter (e) -> e.type is 'LOCATION'
+                    console.log locations
+                    option.query.select = '場所' #locations[0].name
+                    fusionTablesLayers.push new google.maps.FusionTablesLayer option
 
 initializeGoogleMaps = ->
     mapOptions =

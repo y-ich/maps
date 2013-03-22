@@ -6,7 +6,7 @@
 
   CLIENT_ID = '458982307818.apps.googleusercontent.com';
 
-  SCOPES = 'https://www.googleapis.com/auth/drive';
+  SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/fusiontables.readonly'];
 
   handleClientLoad = function() {
     return window.setTimeout(checkAuth, 1);
@@ -23,10 +23,11 @@
   handleAuthResult = function(authResult) {
     if (authResult && !authResult.error) {
       console.log('ok');
-      return gapi.client.load('drive', 'v2', function() {
+      gapi.client.load('drive', 'v2', function() {
         $('#button-google-drive').css('display', 'none');
         return $('#button-fusion-tables').css('display', '');
       });
+      return gapi.client.load('fusiontables', 'v1');
     } else {
       console.log('ng');
       return $('#button-google-drive').text('Google Drive').attr('disabled', null);
@@ -327,7 +328,7 @@
       return fusionTablesLayers = [];
     });
     return $('#button-show').on('click', function(event) {
-      var e, _i, _j, _len, _len1, _ref1, _results;
+      var e, req, _i, _j, _len, _len1, _ref1, _results;
       for (_i = 0, _len = fusionTablesLayers.length; _i < _len; _i++) {
         e = fusionTablesLayers[_i];
         e.setMap(null);
@@ -337,19 +338,36 @@
       _results = [];
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         e = _ref1[_j];
-        _results.push(fusionTablesLayers.push(new google.maps.FusionTablesLayer({
-          map: map,
-          query: {
-            from: e.value
-          },
-          styles: [
-            {
-              markerOptions: {
-                iconName: 'red_stars'
-              }
-            }
-          ]
-        })));
+        console.log(e);
+        req = gapi.client.fusiontables.column.list({
+          tableId: e.value
+        });
+        _results.push(req.execute(function(result) {
+          var locations, option;
+          if (result.error != null) {
+            return console.error(result.error);
+          } else {
+            option = {
+              map: map,
+              query: {
+                from: e.value
+              },
+              styles: [
+                {
+                  markerOptions: {
+                    iconName: 'red_stars'
+                  }
+                }
+              ]
+            };
+            locations = result.items.filter(function(e) {
+              return e.type === 'LOCATION';
+            });
+            console.log(locations);
+            option.query.select = '場所';
+            return fusionTablesLayers.push(new google.maps.FusionTablesLayer(option));
+          }
+        }));
       }
       return _results;
     });
