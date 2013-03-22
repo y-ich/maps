@@ -34,10 +34,15 @@ initializeDOM = ->
                 'immediate': false
             , handleAuthResult
 
+    $fusionTables = $('#fusion-tables')
+    checked = (column) ->
+        if $fusionTables.find("input[value=#{column.id}]:checked").length > 0
+            'checked'
+        else
+            ''
     $('#modal-fusion-tables').on 'show', (event) ->
-        $('#fusion-tables').empty()
         searchFiles 'mimeType = "application/vnd.google-apps.fusiontable"', (result) ->
-            $('#fusion-tables').html ("<label><input type=\"checkbox\" value=\"#{e.id}\" />#{e.title}</label>" for e in result).join('')
+                $fusionTables.html ("<label><input type=\"checkbox\" value=\"#{e.id}\" #{checked(e)}/>#{e.title}</label>" for e in result).join('')
 
     $('#button-clear').on 'click', (event) ->
         e.setMap null for e in fusionTablesLayers

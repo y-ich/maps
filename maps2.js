@@ -293,7 +293,7 @@
   };
 
   initializeDOM = function() {
-    var $gbutton;
+    var $fusionTables, $gbutton, checked;
     localize();
     $('#container').css('display', '');
     $gbutton = $('#button-google-drive');
@@ -304,16 +304,23 @@
         'immediate': false
       }, handleAuthResult);
     });
+    $fusionTables = $('#fusion-tables');
+    checked = function(column) {
+      if ($fusionTables.find("input[value=" + column.id + "]:checked").length > 0) {
+        return 'checked';
+      } else {
+        return '';
+      }
+    };
     $('#modal-fusion-tables').on('show', function(event) {
-      $('#fusion-tables').empty();
       return searchFiles('mimeType = "application/vnd.google-apps.fusiontable"', function(result) {
         var e;
-        return $('#fusion-tables').html(((function() {
+        return $fusionTables.html(((function() {
           var _i, _len, _results;
           _results = [];
           for (_i = 0, _len = result.length; _i < _len; _i++) {
             e = result[_i];
-            _results.push("<label><input type=\"checkbox\" value=\"" + e.id + "\" />" + e.title + "</label>");
+            _results.push("<label><input type=\"checkbox\" value=\"" + e.id + "\" " + (checked(e)) + "/>" + e.title + "</label>");
           }
           return _results;
         })()).join(''));
