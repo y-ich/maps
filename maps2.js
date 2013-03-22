@@ -364,7 +364,7 @@
               return e.type === 'LOCATION';
             });
             console.log(locations);
-            option.query.select = '場所';
+            option.query.select = locations[0].name;
             return fusionTablesLayers.push(new google.maps.FusionTablesLayer(option));
           }
         }));

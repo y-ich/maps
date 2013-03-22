@@ -18,6 +18,12 @@ body {
   margin: 0px;
 }
 /* end of cancel */
+#map img,
+#streetview img {
+  max-width: none;
+  /* work around against a coherence between Google Maps and Bootstrap */
+
+}
 /* intrinsic */
 #container {
   position: relative;

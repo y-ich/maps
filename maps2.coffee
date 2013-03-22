@@ -63,7 +63,7 @@ initializeDOM = ->
                             ]
                     locations = result.items.filter (e) -> e.type is 'LOCATION'
                     console.log locations
-                    option.query.select = '場所' #locations[0].name
+                    option.query.select = locations[0].name
                     fusionTablesLayers.push new google.maps.FusionTablesLayer option
 
 initializeGoogleMaps = ->
