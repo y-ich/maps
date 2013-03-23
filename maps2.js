@@ -6,7 +6,7 @@
 
   CLIENT_ID = '458982307818.apps.googleusercontent.com';
 
-  SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/fusiontables.readonly'];
+  SCOPES = ['https://www.googleapis.com/auth/drive.readonly.metadata', 'https://www.googleapis.com/auth/fusiontables.readonly'];
 
   handleClientLoad = function() {
     return window.setTimeout(checkAuth(true), 1);
@@ -344,35 +344,37 @@
         req = gapi.client.fusiontables.column.list({
           tableId: e.value
         });
-        _results.push(req.execute(function(result) {
-          var locations, option;
-          if (result.error != null) {
-            return console.error(result.error);
-          } else {
-            locations = result.items.filter(function(e) {
-              return e.type === 'LOCATION';
-            });
-            if (locations.length > 0) {
-              option = {
-                map: map,
-                query: {
-                  from: e.value,
-                  select: locations[0].name
-                },
-                styles: [
-                  {
-                    markerOptions: {
-                      iconName: 'red_stars'
-                    }
-                  }
-                ]
-              };
-              return fusionTablesLayers.push(new google.maps.FusionTablesLayer(option));
+        _results.push(req.execute((function(tableId) {
+          return function(result) {
+            var locations, option;
+            if (result.error != null) {
+              return console.error(result.error);
             } else {
-              return console.error('no locations');
+              locations = result.items.filter(function(e) {
+                return e.type === 'LOCATION';
+              });
+              if (locations.length > 0) {
+                option = {
+                  map: map,
+                  query: {
+                    from: tableId,
+                    select: locations[0].name
+                  },
+                  styles: [
+                    {
+                      markerOptions: {
+                        iconName: (fusionTablesLayers.length + 1) + '_blue'
+                      }
+                    }
+                  ]
+                };
+                return fusionTablesLayers.push(new google.maps.FusionTablesLayer(option));
+              } else {
+                return console.error('no locations');
+              }
             }
-          }
-        }));
+          };
+        })(e.value)));
       }
       return _results;
     });

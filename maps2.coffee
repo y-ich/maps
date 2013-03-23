@@ -45,24 +45,26 @@ initializeDOM = ->
         fusionTablesLayers = []
         for e in $('#fusion-tables input:checked:lt(5)')
             req = gapi.client.fusiontables.column.list tableId: e.value
-            req.execute (result) ->
-                if result.error?
-                    console.error result.error
-                else
-                    locations = result.items.filter (e) -> e.type is 'LOCATION'
-                    if locations.length > 0
-                        option =
-                            map: map
-                            query:
-                                from: e.value
-                                select: locations[0].name
-                            styles: [
-                                    markerOptions:
-                                        iconName: 'red_stars'
-                                ]
-                        fusionTablesLayers.push new google.maps.FusionTablesLayer option
+            req.execute ((tableId) ->
+                (result) ->
+                    if result.error?
+                        console.error result.error
                     else
-                        console.error 'no locations'
+                        locations = result.items.filter (e) -> e.type is 'LOCATION'
+                        if locations.length > 0
+                            option =
+                                map: map
+                                query:
+                                    from: tableId
+                                    select: locations[0].name
+                                styles: [
+                                        markerOptions:
+                                            iconName: (fusionTablesLayers.length + 1) + '_blue'
+                                    ]
+                            fusionTablesLayers.push new google.maps.FusionTablesLayer option
+                        else
+                            console.error 'no locations'
+            )(e.value)
 
 initializeGoogleMaps = ->
     mapOptions =

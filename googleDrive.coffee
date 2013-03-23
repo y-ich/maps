@@ -1,6 +1,6 @@
 CLIENT_ID = '458982307818.apps.googleusercontent.com'
 SCOPES = [
-    'https://www.googleapis.com/auth/drive'
+    'https://www.googleapis.com/auth/drive.readonly.metadata'
     'https://www.googleapis.com/auth/fusiontables.readonly'
 ]
 
