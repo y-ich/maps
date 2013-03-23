@@ -32,13 +32,12 @@ saveMapStatus = () ->
 initializeDOM = ->
     localize()
     $('#container').css 'display', ''
-    $gbutton = $('#button-google-drive')
-    $gbutton.on 'click', checkAuth false
+    $('#button-google-drive').on 'click', checkAuth false
 
     $fusionTables = $('#fusion-tables')
-    checked = (column) -> if $fusionTables.find("input[value=#{column.id}]:checked").length > 0 then 'checked' else ''
     $('#modal-fusion-tables').on 'show', (event) ->
         searchFiles 'mimeType = "application/vnd.google-apps.fusiontable" and trashed = false', (result) ->
+            checked = (column) -> if $fusionTables.find("input[value=#{column.id}]:checked").length > 0 then 'checked' else ''
             $fusionTables.html ("<label><input type=\"checkbox\" value=\"#{e.id}\" #{checked(e)}/>#{e.title}</label>" for e in result.filter (e) -> e.shared).join('')
 
     $('#button-show').on 'click', (event) ->

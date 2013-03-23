@@ -62,7 +62,7 @@
 var match, lang;
 lang = navigator.language.replace(/-.*$/, '');
 if (match = window.location.search.match(/lang=([\w-]+)/)) lang = match[1];
-document.write('<script src="http://maps.google.com/maps/api/js?v=3.11&sensor=true&libraries=places,panoramio&language=' + lang + '"></script>');
+document.write('<script src="http://maps.google.com/maps/api/js?' + ((location.host !== 'localhost') ? 'key=AIzaSyAmdOV8Xct8u8cplnEulkyvTg8YXyBb1C4&' : '') + 'v=3.11&sensor=false&libraries=places,panoramio&language=' + lang + '"></script>');
 switch (lang) {
     case 'ja':
         document.write('<script src="localize/' + lang + '.js"></script>');
