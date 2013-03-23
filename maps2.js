@@ -319,13 +319,16 @@
       }
     };
     $('#modal-fusion-tables').on('show', function(event) {
-      return searchFiles('mimeType = "application/vnd.google-apps.fusiontable"', function(result) {
+      return searchFiles('mimeType = "application/vnd.google-apps.fusiontable" and trashed = false', function(result) {
         var e;
         return $fusionTables.html(((function() {
-          var _i, _len, _results;
+          var _i, _len, _ref1, _results;
+          _ref1 = result.filter(function(e) {
+            return e.shared;
+          });
           _results = [];
-          for (_i = 0, _len = result.length; _i < _len; _i++) {
-            e = result[_i];
+          for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+            e = _ref1[_i];
             _results.push("<label><input type=\"checkbox\" value=\"" + e.id + "\" " + (checked(e)) + "/>" + e.title + "</label>");
           }
           return _results;

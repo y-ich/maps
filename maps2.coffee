@@ -47,8 +47,8 @@ initializeDOM = ->
         else
             ''
     $('#modal-fusion-tables').on 'show', (event) ->
-        searchFiles 'mimeType = "application/vnd.google-apps.fusiontable"', (result) ->
-                $fusionTables.html ("<label><input type=\"checkbox\" value=\"#{e.id}\" #{checked(e)}/>#{e.title}</label>" for e in result).join('')
+        searchFiles 'mimeType = "application/vnd.google-apps.fusiontable" and trashed = false', (result) ->
+            $fusionTables.html ("<label><input type=\"checkbox\" value=\"#{e.id}\" #{checked(e)}/>#{e.title}</label>" for e in result.filter (e) -> e.shared).join('')
 
     $('#button-show').on 'click', (event) ->
         e.setMap null for e in fusionTablesLayers
