@@ -2,16 +2,12 @@
 # Copyright (C) 2012-2013 ICHIKAWA, Yuji (New 3 Rs) 
 
 VERSION = '(C) 2013 ICHIKAWA, Yuji (New 3 Rs)<br>Maps ver. 2.0.0'
-BLINK_INTERVAL = 500 # ms
 STARTUP_TIME = 2000 # ms
-timerId = null
-$option = $('#option')
-$version = $('#version')
 
 # function definitions
 
 # full screen for iPhone
-# IMPORTANT: This function should be invoked after initializeDOM for the order of event listener.
+# IMPORTANT: This function should be invoked after app.initialize for the order of event listener.
 fullScreen = ->
     $body = $(document.body)
     $dummy = $("<div id=\"dummy\" style=\"position: absolute; width: 100%; height: #{screen.availHeight}px; top: 0px\"></div>")
@@ -28,45 +24,22 @@ fullScreen = ->
         $dummy.remove()
     ), 0
 
+# startup screen for on-browser
 document.write """
     <div class="startup">
         <div id="logo">RRR</div>
     </div>
     """
 
-window.applicationCache.addEventListener 'downloading', ->
-    timerId = setInterval (-> $option.toggleClass 'btn-light'), BLINK_INTERVAL
-    $version.html VERSION + ' (downloading new version...)'
-
-window.applicationCache.addEventListener 'cached', ->
-    clearInterval timerId
-    $option.removeClass 'btn-light' if $option.hasClass 'btn-light'
-    $version.html VERSION
-
-window.applicationCache.addEventListener 'updateready', ->
-    clearInterval timerId
-    $option.addClass 'btn-light' unless $option.hasClass 'btn-light'
-    $version.html VERSION + ' (new version available)'
-
-window.applicationCache.addEventListener 'error', ->
-    clearInterval timerId
-    $option.addClass 'btn-light' unless $option.hasClass 'btn-light'
-    $version.html VERSION + ' (cache error)'
-
 # application cache debug information            
 types = ['checking', 'noupdate', 'downloading', 'progress','cached', 'updateready', 'obsolete', 'error']
 for type in types
-    window.applicationCache.addEventListener type, (event) -> console.log 'cache', event.type
+    applicationCache.addEventListener type, (event) -> console.log 'cache', event.type
 
-app.initializeGoogleMaps()
-$version.html VERSION
-app.initializeDOM()
+app.initialize()
 fullScreen() if /iPhone/.test(navigator.userAgent) and /Safari/.test(navigator.userAgent)
 
-# post process
-window.onpagehide = ->
-    app.saveMapStatus()
-    app.saveOtherStatus()
+window.onpagehide = app.saveMapStatus
 
 # finish startup screen
 setTimeout (->

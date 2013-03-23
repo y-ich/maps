@@ -1,13 +1,10 @@
 # Google Maps Web App
 # Copyright (C) 2012-2103 ICHIKAWA, Yuji (New 3 Rs) 
 
-tracer = null
+MAP_STATUS = 'maps2-map-status'
+
 map = null
 fusionTablesLayers = []
-
-saveMapStatus = ->
-
-saveOtherStatus = ->
 
 getLocalizedString = (key) ->
     if localizedStrings? then localizedStrings[key] ? key else key
@@ -22,6 +19,15 @@ localize = ->
     document.title = getLocalizedString 'Maps'
     # document.getElementById('search-input').placeholder = getLocalizedString 'Search or Address'
     setLocalExpressionInto key, value for key, value of idWordPairs
+
+# saves current state into localStorage
+# saves frequently changing state
+saveMapStatus = () ->
+    pos = map.getCenter()
+    localStorage[MAP_STATUS] = JSON.stringify
+        lat: pos.lat()
+        lng: pos.lng()
+        zoom: map.getZoom()
 
 initializeDOM = ->
     localize()
@@ -43,10 +49,6 @@ initializeDOM = ->
     $('#modal-fusion-tables').on 'show', (event) ->
         searchFiles 'mimeType = "application/vnd.google-apps.fusiontable"', (result) ->
                 $fusionTables.html ("<label><input type=\"checkbox\" value=\"#{e.id}\" #{checked(e)}/>#{e.title}</label>" for e in result).join('')
-
-    $('#button-clear').on 'click', (event) ->
-        e.setMap null for e in fusionTablesLayers
-        fusionTablesLayers = []
 
     $('#button-show').on 'click', (event) ->
         e.setMap null for e in fusionTablesLayers
@@ -86,8 +88,8 @@ initializeGoogleMaps = ->
         map.setCenter this.getPosition()
 
     # restore map status
-    if localStorage['maps-map-status']?
-        mapStatus = JSON.parse localStorage['maps-map-status']
+    if localStorage[MAP_STATUS]?
+        mapStatus = JSON.parse localStorage[MAP_STATUS]
         mapOptions.center = new google.maps.LatLng mapStatus.lat, mapStatus.lng
         mapOptions.zoom = mapStatus.zoom
     else
@@ -100,8 +102,7 @@ initializeGoogleMaps = ->
 # export
 
 window.app =
-    tracer: tracer
-    initializeDOM: initializeDOM
-    initializeGoogleMaps: initializeGoogleMaps
+    initialize: ->
+        initializeGoogleMaps()
+        initializeDOM()
     saveMapStatus: saveMapStatus
-    saveOtherStatus: saveOtherStatus
