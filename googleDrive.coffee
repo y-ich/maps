@@ -5,14 +5,15 @@ SCOPES = [
 ]
 
 handleClientLoad = ->
-    window.setTimeout checkAuth, 1
+    window.setTimeout checkAuth(true), 1
 
-checkAuth = ->
-    gapi.auth.authorize
-            'client_id': CLIENT_ID
-            'scope': SCOPES
-            'immediate': true
-        , handleAuthResult
+checkAuth = (immediate) ->
+    ->
+        gapi.auth.authorize
+                'client_id': CLIENT_ID
+                'scope': SCOPES
+                'immediate': immediate
+            , handleAuthResult
 
 handleAuthResult = (authResult) ->
     if authResult and not authResult.error

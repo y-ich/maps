@@ -33,19 +33,10 @@ initializeDOM = ->
     localize()
     $('#container').css 'display', ''
     $gbutton = $('#button-google-drive')
-    $gbutton.on 'click', (event) ->
-        gapi.auth.authorize
-                'client_id': CLIENT_ID
-                'scope': SCOPES
-                'immediate': false
-            , handleAuthResult
+    $gbutton.on 'click', checkAuth false
 
     $fusionTables = $('#fusion-tables')
-    checked = (column) ->
-        if $fusionTables.find("input[value=#{column.id}]:checked").length > 0
-            'checked'
-        else
-            ''
+    checked = (column) -> if $fusionTables.find("input[value=#{column.id}]:checked").length > 0 then 'checked' else ''
     $('#modal-fusion-tables').on 'show', (event) ->
         searchFiles 'mimeType = "application/vnd.google-apps.fusiontable" and trashed = false', (result) ->
             $fusionTables.html ("<label><input type=\"checkbox\" value=\"#{e.id}\" #{checked(e)}/>#{e.title}</label>" for e in result.filter (e) -> e.shared).join('')
