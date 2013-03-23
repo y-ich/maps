@@ -9,15 +9,17 @@
   SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/fusiontables.readonly'];
 
   handleClientLoad = function() {
-    return window.setTimeout(checkAuth, 1);
+    return window.setTimeout(checkAuth(true), 1);
   };
 
-  checkAuth = function() {
-    return gapi.auth.authorize({
-      'client_id': CLIENT_ID,
-      'scope': SCOPES,
-      'immediate': true
-    }, handleAuthResult);
+  checkAuth = function(immediate) {
+    return function() {
+      return gapi.auth.authorize({
+        'client_id': CLIENT_ID,
+        'scope': SCOPES,
+        'immediate': immediate
+      }, handleAuthResult);
+    };
   };
 
   handleAuthResult = function(authResult) {
@@ -299,28 +301,21 @@
   };
 
   initializeDOM = function() {
-    var $fusionTables, $gbutton, checked;
+    var $fusionTables;
     localize();
     $('#container').css('display', '');
-    $gbutton = $('#button-google-drive');
-    $gbutton.on('click', function(event) {
-      return gapi.auth.authorize({
-        'client_id': CLIENT_ID,
-        'scope': SCOPES,
-        'immediate': false
-      }, handleAuthResult);
-    });
+    $('#button-google-drive').on('click', checkAuth(false));
     $fusionTables = $('#fusion-tables');
-    checked = function(column) {
-      if ($fusionTables.find("input[value=" + column.id + "]:checked").length > 0) {
-        return 'checked';
-      } else {
-        return '';
-      }
-    };
     $('#modal-fusion-tables').on('show', function(event) {
       return searchFiles('mimeType = "application/vnd.google-apps.fusiontable" and trashed = false', function(result) {
-        var e;
+        var checked, e;
+        checked = function(column) {
+          if ($fusionTables.find("input[value=" + column.id + "]:checked").length > 0) {
+            return 'checked';
+          } else {
+            return '';
+          }
+        };
         return $fusionTables.html(((function() {
           var _i, _len, _ref1, _results;
           _ref1 = result.filter(function(e) {
