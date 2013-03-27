@@ -6,9 +6,11 @@ SCOPES = [
     'https://www.googleapis.com/auth/calendar'
 ]
 MAP_STATUS = 'spacetime-map-status'
+DEFAULT_ICON_SIZE = 32
 
 map = null
-markers = []
+infoWindow = null
+events = []
 geocoder = null
 
 handleClientLoad = ->
@@ -60,6 +62,63 @@ saveMapStatus = () ->
         lng: pos.lng()
         zoom: map.getZoom()
 
+class Event
+    constructor: (@calendarId, @resource) ->
+        console.log @resource
+
+    latLng: ->
+        if match = @resource.location?.match /\((\d*\.\d*)\s*,\s*(\d*\.\d*)\)/
+            new google.maps.LatLng parseFloat(match[1]), parseFloat(match[2])
+        else
+            null
+
+    geocode: (callback) ->
+        return if @latLng()
+        geocoder.geocode { address: @resource.location }, (results, status) =>
+            if status is google.maps.GeocoderStatus.OK
+                if results.length is 1
+                    @resource.location += results[0].geometry.location.toString()
+                    req = gapi.client.calendar.events.update
+                        calendarId: @calendarId
+                        eventId: @resource.id
+                        resource: @resource
+                    req.execute (resp) ->
+                        if resp.error?
+                            console.log resp.error
+                        else
+                            console.log 'update succeed'
+                    callback()
+                else
+                    console.log 'several candicates'
+                    console.log results
+            else
+                console.error status
+
+    setMarker: ->
+        latLng = @latLng()
+        if latLng?
+            @marker = new google.maps.Marker
+                map: map
+                position: latLng
+            google.maps.event.addListener @marker, 'click', @showInfoWindow
+            return true
+        else
+            @geocode =>
+                latLng = @latLng()
+                if latLng?
+                    @marker = new google.maps.Marker
+                        map: map
+                        position: latLng
+                    google.maps.event.addListener @marker, 'click', @showInfoWindow
+            return null
+
+    showInfoWindow: =>
+        console.log 'pass'
+        infoWindow.setOptions
+            content: @resource.toString()
+
+        infoWindow.open map, @marker
+
 initializeDOM = ->
     localize()
     $('#container').css 'display', ''
@@ -82,43 +141,13 @@ initializeDOM = ->
         options.timeMax = $('#form-calendar [name="end-date"]')[0].value + 'T00:00:00Z' unless $('#form-calendar [name="end-date"]')[0].value is ''
         req = gapi.client.calendar.events.list options
         req.execute (resp) ->
-            count = 0
             if resp.error?
                 console.log resp.error
             else
                 for e in resp.items
-                    if e.location?
-                        if match = e.location.match /\((\d*\.\d*)\s*,\s*(\d*\.\d*)\)/
-                            markers.push new google.maps.Marker
-                                map: map
-                                position: new google.maps.LatLng(parseFloat(match[1]), parseFloat(match[2]))
-                        else if count <= 10
-                            geocoder.geocode { address: e.location }, ((event) ->
-                                (results, status) ->
-                                    if status is google.maps.GeocoderStatus.OK
-                                        if results.length is 1
-                                            event.location += results[0].geometry.location.toString()
-                                            markers.push new google.maps.Marker
-                                                map: map
-                                                position: results[0].geometry.location
-                                            req = gapi.client.calendar.events.update
-                                                calendarId: id
-                                                eventId: event.id
-                                                resource: event
-                                            req.execute (resp) ->
-                                                if resp.error?
-                                                    console.log resp.error
-                                                else
-                                                    console.log 'update succeed'
-                                        else
-                                            console.log 'several candicates'
-                                            console.log results
-                                    else
-                                        console.error status
-                                )(e)
-                            count += 1
-                        else
-                            console.log 'too many for geocode.'
+                    event= new Event id, e
+                    event.setMarker()
+                    events.push event
 
 initializeGoogleMaps = ->
     mapOptions =
@@ -144,6 +173,9 @@ initializeGoogleMaps = ->
 
     map = new google.maps.Map document.getElementById('map'), mapOptions
     map.setTilt 45
+
+    infoWindow = new MobileInfoWindow
+        maxWidth: Math.floor innerWidth * 0.9
 
     geocoder = new google.maps.Geocoder()
 
