@@ -1,7 +1,8 @@
 {spawn, exec} = require 'child_process'
 
 maps = ['googleMapsExtensions.coffee', 'maps.coffee']
-maps2 = ['googleDrive.coffee', 'googleMapsExtensions.coffee', 'maps2.coffee']
+maps2 = ['googleDrive.coffee', 'maps2.coffee']
+spacetime = ['googleMapsExtensions.coffee', 'spacetime.coffee']
 start = 'webapp.coffee'
 start2 = 'webapp2.coffee'
 
@@ -26,6 +27,19 @@ task 'watch2', 'continually build with --watch', ->
     src2.stdout.on 'data', (data) -> console.log data.toString().trim()
 
     test = spawn 'coffee', ['-wcbj', 'test/maps2.js'].concat maps2
+    test.stdout.on 'data', (data) -> console.log data.toString().trim()
+
+    spec = spawn 'coffee', ['-wc','spec']
+    spec.stdout.on 'data', (data) -> console.log data.toString().trim()
+
+task 'watch3', 'continually build with --watch', ->
+    src = spawn 'coffee', ['-wcj', 'spacetime.js'].concat spacetime
+    src.stdout.on 'data', (data) -> console.log data.toString().trim()
+
+    src2 = spawn 'coffee', ['-wc', start2]
+    src2.stdout.on 'data', (data) -> console.log data.toString().trim()
+
+    test = spawn 'coffee', ['-wcbj', 'test/spacetime.js'].concat spacetime
     test.stdout.on 'data', (data) -> console.log data.toString().trim()
 
     spec = spawn 'coffee', ['-wc','spec']
