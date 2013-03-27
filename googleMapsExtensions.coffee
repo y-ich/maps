@@ -107,3 +107,40 @@ for name, method of google.maps.Marker.prototype when typeof method is 'function
     unless MarkerWithCircle.prototype[name]
         MarkerWithCircle.prototype[name] = ((name) ->
             -> @marker[name]())(name) # substantiation of name
+
+console.log 'pass'
+style = document.createElement 'style'
+style.setAttribute 'type', 'text/css'
+style.innerHTML = '''
+.info-window {
+    position: absolute;
+    color: white;
+    background-color: rgba(0,0,0,0.5);
+    border-radius: 5px;
+    padding: 4px;
+}
+
+.info-window button {
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border-radius: 10px;
+    border: 1px solid white;
+}
+
+.info-window .button-wrapper {
+    position: absolute;
+    width: 25px;
+    height: 100%;
+    top: -1px;
+}
+
+.info-window .button-wrapper.wrapper-left {
+    left: 0;
+}
+
+.info-window .button-wrapper.wrapper-right {
+    right: 0;
+}
+'''
+document.head.appendChild style

@@ -30,13 +30,6 @@ body {
   /* work around against a coherence between Google Maps and Bootstrap. You still need for Bootstrap 2.3.1. */
 
 }
-.info-window {
-  position: absolute;
-  color: white;
-  background-color: rgba(0, 0, 0, 0.5);
-  border-radius: 5px;
-  padding: 4px;
-}
 /* intrinsic */
 #container {
   position: relative;

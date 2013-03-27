@@ -234,47 +234,6 @@ img.icon {
     height: 14px;
 }
 
-/* info window which is dynamically drawed by JavaScript */
-.info-window {
-    position: absolute;
-    color: white;
-    background-color: rgba(0,0,0,0.5);
-    border-radius: 5px;
-    padding: 4px;
-}
-
-.info-window button {
-    width: 20px;
-    height: 20px;
-    padding: 0;
-    border-radius: 10px;
-    border: 1px solid white;
-}
-
-.info-window .button-wrapper {
-    position: absolute;
-    width: 25px;
-    height: 100%;
-    top: -1px;
-}
-
-.info-window .button-wrapper.wrapper-left {
-    left: 0;
-}
-
-.info-window .button-wrapper.wrapper-right {
-    right: 0;
-}
-
-#sv-button {
-    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(249,205,158)), to(rgb(210,49,0)));
-    opacity: 0.5;
-}
-
-#sv-button.btn-primary {
-    opacity: 1;
-}
-
 /* intrinsic */
 
 #container {
@@ -306,6 +265,15 @@ img.icon {
     right: 0px;
     bottom: auto;
     z-index: 1; // upper than header and footer
+}
+
+#sv-button {
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(249,205,158)), to(rgb(210,49,0)));
+    opacity: 0.5;
+}
+
+#sv-button.btn-primary {
+    opacity: 1;
 }
 
 #streetview {
