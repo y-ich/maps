@@ -5,6 +5,8 @@
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
+  DEFAULT_ICON_SIZE = 32;
+
   MobileInfoWindow = (function(_super) {
 
     __extends(MobileInfoWindow, _super);
@@ -183,8 +185,6 @@
   RED_DOT_IMAGE = 'http://maps.google.co.jp/mapfiles/ms/icons/red-dot.png';
 
   MSMARKER_SHADOW = 'http://maps.google.co.jp/mapfiles/ms/icons/msmarker.shadow.png';
-
-  DEFAULT_ICON_SIZE = 32;
 
   map = null;
 

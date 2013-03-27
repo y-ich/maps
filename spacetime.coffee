@@ -6,7 +6,6 @@ SCOPES = [
     'https://www.googleapis.com/auth/calendar'
 ]
 MAP_STATUS = 'spacetime-map-status'
-DEFAULT_ICON_SIZE = 32
 
 map = null
 infoWindow = null

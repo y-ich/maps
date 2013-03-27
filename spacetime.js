@@ -5,6 +5,8 @@
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     _this = this;
 
+  DEFAULT_ICON_SIZE = 32;
+
   MobileInfoWindow = (function(_super) {
 
     __extends(MobileInfoWindow, _super);
@@ -183,8 +185,6 @@
   SCOPES = ['https://www.googleapis.com/auth/calendar'];
 
   MAP_STATUS = 'spacetime-map-status';
-
-  DEFAULT_ICON_SIZE = 32;
 
   map = null;
 
