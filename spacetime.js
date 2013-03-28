@@ -264,6 +264,10 @@
 
   Event = (function() {
 
+    Event.count = 0;
+
+    Event.shadow = new google.maps.MarkerImage('http://www.google.com/mapfiles/shadow50.png', null, null, new google.maps.Point(37 / 2, 34));
+
     function Event(calendarId, resource) {
       var _this = this;
       this.calendarId = calendarId;
@@ -271,7 +275,11 @@
       this.showInfoWindow = function() {
         return Event.prototype.showInfoWindow.apply(_this, arguments);
       };
-      console.log(this.resource);
+      if ((this.resource.location != null) && this.resource.location !== '' && Event.count < 26) {
+        console.log(this.resource.location, String.fromCharCode('A'.charCodeAt(0) + Event.count));
+        this.icon = new google.maps.MarkerImage("http://www.google.com/mapfiles/marker" + (String.fromCharCode('A'.charCodeAt(0) + Event.count)) + ".png");
+        Event.count += 1;
+      }
     }
 
     Event.prototype.latLng = function() {
@@ -319,24 +327,29 @@
     };
 
     Event.prototype.setMarker = function() {
-      var latLng,
+      var latLng, options, _ref1,
         _this = this;
+      if (!((this.resource.location != null) && this.resource.location !== '')) {
+        return;
+      }
       latLng = this.latLng();
+      options = {
+        map: map,
+        position: latLng,
+        icon: (_ref1 = this.icon) != null ? _ref1 : null,
+        shadow: this.icon != null ? Event.shadow : null,
+        title: this.resource.location.replace(/\(\d*\.\d*\s*,\s*\d*.\d*\)/, '')
+      };
       if (latLng != null) {
-        this.marker = new google.maps.Marker({
-          map: map,
-          position: latLng
-        });
+        this.marker = new google.maps.Marker(options);
         google.maps.event.addListener(this.marker, 'click', this.showInfoWindow);
         return true;
       } else {
         this.geocode(function() {
           latLng = _this.latLng();
           if (latLng != null) {
-            _this.marker = new google.maps.Marker({
-              map: map,
-              position: latLng
-            });
+            options.position = latLng;
+            _this.marker = new google.maps.Marker(options);
             return google.maps.event.addListener(_this.marker, 'click', _this.showInfoWindow);
           }
         });
@@ -401,6 +414,11 @@
         if (resp.error != null) {
           return console.log(resp.error);
         } else {
+          console.log(resp.items);
+          resp.items.sort(function(x, y) {
+            var _ref1, _ref2;
+            return new Date((_ref1 = x.start.dateTime) != null ? _ref1 : x.start.date + 'T00:00:00Z').getTime() - new Date((_ref2 = y.start.dateTime) != null ? _ref2 : y.start.date + 'T00:00:00Z').getTime();
+          });
           _ref1 = resp.items;
           _results = [];
           for (_i = 0, _len = _ref1.length; _i < _len; _i++) {

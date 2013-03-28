@@ -62,8 +62,13 @@ saveMapStatus = () ->
         zoom: map.getZoom()
 
 class Event
+    @count: 0
+    @shadow: new google.maps.MarkerImage('http://www.google.com/mapfiles/shadow50.png', null, null, new google.maps.Point(37 / 2, 34))
     constructor: (@calendarId, @resource) ->
-        console.log @resource
+        if @resource.location? and @resource.location isnt '' and Event.count < 26
+            console.log @resource.location, String.fromCharCode('A'.charCodeAt(0) + Event.count)
+            @icon = new google.maps.MarkerImage "http://www.google.com/mapfiles/marker#{String.fromCharCode('A'.charCodeAt(0) + Event.count)}.png"
+            Event.count += 1
 
     latLng: ->
         if match = @resource.location?.match /\((\d*\.\d*)\s*,\s*(\d*\.\d*)\)/
@@ -94,20 +99,24 @@ class Event
                 console.error status
 
     setMarker: ->
+        return unless @resource.location? and @resource.location isnt ''
         latLng = @latLng()
+        options =
+            map: map
+            position: latLng
+            icon: @icon ? null
+            shadow: if @icon? then Event.shadow else null
+            title: @resource.location.replace(/\(\d*\.\d*\s*,\s*\d*.\d*\)/, '')
         if latLng?
-            @marker = new google.maps.Marker
-                map: map
-                position: latLng
+            @marker = new google.maps.Marker options
             google.maps.event.addListener @marker, 'click', @showInfoWindow
             return true
         else
             @geocode =>
                 latLng = @latLng()
                 if latLng?
-                    @marker = new google.maps.Marker
-                        map: map
-                        position: latLng
+                    options.position = latLng
+                    @marker = new google.maps.Marker options
                     google.maps.event.addListener @marker, 'click', @showInfoWindow
             return null
 
@@ -143,6 +152,8 @@ initializeDOM = ->
             if resp.error?
                 console.log resp.error
             else
+                console.log resp.items
+                resp.items.sort (x, y) -> new Date(x.start.dateTime ? x.start.date + 'T00:00:00Z').getTime() - new Date(y.start.dateTime ? y.start.date + 'T00:00:00Z').getTime()
                 for e in resp.items
                     event= new Event id, e
                     event.setMarker()
