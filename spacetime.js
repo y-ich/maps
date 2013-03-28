@@ -61,14 +61,14 @@
     };
 
     MobileInfoWindow.prototype.open = function(map, anchor) {
-      var icon, markerAnchor, markerSize, _ref;
+      var icon, markerAnchor, markerSize, _ref, _ref1;
       this.anchor = anchor;
       if (anchor != null) {
         this.setPosition(this.anchor.getPosition());
         icon = this.anchor.getIcon();
-        if (icon != null) {
-          markerSize = icon.size;
-          markerAnchor = (_ref = icon.anchor) != null ? _ref : new google.maps.Point(Math.floor(markerSize.width / 2), markerSize.height);
+        if (typeof icon === 'object') {
+          markerSize = (_ref = icon.size) != null ? _ref : new google.maps.Size(0, 0);
+          markerAnchor = (_ref1 = icon.anchor) != null ? _ref1 : new google.maps.Point(Math.floor(markerSize.width / 2), markerSize.height);
         } else {
           markerSize = new google.maps.Size(DEFAULT_ICON_SIZE, DEFAULT_ICON_SIZE);
           markerAnchor = new google.maps.Point(DEFAULT_ICON_SIZE / 2, DEFAULT_ICON_SIZE);
@@ -170,8 +170,6 @@
     }
   }
 
-  console.log('pass');
-
   style = document.createElement('style');
 
   style.setAttribute('type', 'text/css');
@@ -266,7 +264,10 @@
 
     Event.count = 0;
 
-    Event.shadow = new google.maps.MarkerImage('http://www.google.com/mapfiles/shadow50.png', null, null, new google.maps.Point(37 / 2, 34));
+    Event.shadow = {
+      url: 'http://www.google.com/mapfiles/shadow50.png',
+      anchor: new google.maps.Point(10, 34)
+    };
 
     function Event(calendarId, resource) {
       var _this = this;
@@ -277,7 +278,9 @@
       };
       if ((this.resource.location != null) && this.resource.location !== '' && Event.count < 26) {
         console.log(this.resource.location, String.fromCharCode('A'.charCodeAt(0) + Event.count));
-        this.icon = new google.maps.MarkerImage("http://www.google.com/mapfiles/marker" + (String.fromCharCode('A'.charCodeAt(0) + Event.count)) + ".png");
+        this.icon = {
+          url: "http://www.google.com/mapfiles/marker" + (String.fromCharCode('A'.charCodeAt(0) + Event.count)) + ".png"
+        };
         Event.count += 1;
       }
     }
@@ -358,9 +361,9 @@
     };
 
     Event.prototype.showInfoWindow = function() {
-      console.log('pass');
+      var _ref1, _ref2;
       infoWindow.setOptions({
-        content: this.resource.toString()
+        content: "<h5>" + this.resource.summary + "</h5>\n<dl class=\"dl-horizontal\">\n    <dt>Location</dt>\n    <dd>" + ((_ref1 = this.resource.location) != null ? _ref1 : '') + "</dd>\n    <dt>Description</dt>\n    <dd>" + ((_ref2 = this.resource.description) != null ? _ref2 : '') + "</dd>\n</dl>"
       });
       return infoWindow.open(map, this.marker);
     };
@@ -459,6 +462,18 @@
     map.setTilt(45);
     infoWindow = new MobileInfoWindow({
       maxWidth: Math.floor(innerWidth * 0.9)
+    });
+    google.maps.event.addListener(map, 'mousedown', function(event) {
+      var $infoWindow, position, xy, _ref1, _ref2;
+      $infoWindow = $('.info-window');
+      if ($infoWindow.length > 0) {
+        xy = infoWindow.getProjection().fromLatLngToDivPixel(event.latLng);
+        position = $infoWindow.position();
+        if (((position.left <= (_ref1 = xy.x) && _ref1 <= position.left + $infoWindow.outerWidth(true))) && ((position.top <= (_ref2 = xy.y) && _ref2 <= position.top + $infoWindow.outerHeight(true)))) {
+          return;
+        }
+      }
+      return infoWindow.close();
     });
     return geocoder = new google.maps.Geocoder();
   };

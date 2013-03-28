@@ -63,11 +63,14 @@ saveMapStatus = () ->
 
 class Event
     @count: 0
-    @shadow: new google.maps.MarkerImage('http://www.google.com/mapfiles/shadow50.png', null, null, new google.maps.Point(37 / 2, 34))
+    @shadow:
+        url: 'http://www.google.com/mapfiles/shadow50.png'
+        anchor: new google.maps.Point(10, 34)
     constructor: (@calendarId, @resource) ->
         if @resource.location? and @resource.location isnt '' and Event.count < 26
             console.log @resource.location, String.fromCharCode('A'.charCodeAt(0) + Event.count)
-            @icon = new google.maps.MarkerImage "http://www.google.com/mapfiles/marker#{String.fromCharCode('A'.charCodeAt(0) + Event.count)}.png"
+            @icon =
+                url: "http://www.google.com/mapfiles/marker#{String.fromCharCode('A'.charCodeAt(0) + Event.count)}.png"
             Event.count += 1
 
     latLng: ->
@@ -121,10 +124,16 @@ class Event
             return null
 
     showInfoWindow: =>
-        console.log 'pass'
         infoWindow.setOptions
-            content: @resource.toString()
-
+            content: """
+            <h5>#{@resource.summary}</h5>
+            <dl class="dl-horizontal">
+                <dt>Location</dt>
+                <dd>#{@resource.location ? ''}</dd>
+                <dt>Description</dt>
+                <dd>#{@resource.description ? ''}</dd>
+            </dl>
+            """
         infoWindow.open map, @marker
 
 initializeDOM = ->
@@ -186,6 +195,15 @@ initializeGoogleMaps = ->
 
     infoWindow = new MobileInfoWindow
         maxWidth: Math.floor innerWidth * 0.9
+
+    google.maps.event.addListener map, 'mousedown', (event) ->
+        $infoWindow = $('.info-window')
+        if $infoWindow.length > 0
+            xy = infoWindow.getProjection().fromLatLngToDivPixel event.latLng
+            position = $infoWindow.position()
+            return if (position.left <= xy.x <= position.left + $infoWindow.outerWidth(true)) and (position.top <= xy.y <= position.top + $infoWindow.outerHeight(true))
+
+        infoWindow.close()
 
     geocoder = new google.maps.Geocoder()
 

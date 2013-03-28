@@ -40,8 +40,8 @@ class MobileInfoWindow extends google.maps.OverlayView
         if anchor?
             @setPosition @anchor.getPosition()
             icon = @anchor.getIcon()
-            if icon?
-                markerSize = icon.size
+            if typeof icon is 'object'
+                markerSize = icon.size ? new google.maps.Size 0, 0
                 markerAnchor = icon.anchor ? new google.maps.Point Math.floor(markerSize.width / 2), markerSize.height
             else
                 markerSize = new google.maps.Size DEFAULT_ICON_SIZE, DEFAULT_ICON_SIZE
@@ -110,7 +110,6 @@ for name, method of google.maps.Marker.prototype when typeof method is 'function
         MarkerWithCircle.prototype[name] = ((name) ->
             -> @marker[name]())(name) # substantiation of name
 
-console.log 'pass'
 style = document.createElement 'style'
 style.setAttribute 'type', 'text/css'
 style.innerHTML = '''
