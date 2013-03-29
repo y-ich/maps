@@ -63,6 +63,7 @@ saveMapStatus = () ->
 # is a class with a marker, responsible for modal.
 class Place
     @$modalInfo: $('#modal-info')
+    @modalPlace: null
     # constructs an instance from marker and address, gets address if missed, gets Street View info and sets event listener.
     constructor: (options, @event, @geocodedAddress) ->
         @marker = new google.maps.Marker options
@@ -74,12 +75,13 @@ class Place
         Place.$modalInfo.modal 'show'
 
     _setInfo: ->
-        Place.$modalInfo.find('input[name="summary"]').val @event.summary
-        Place.$modalInfo.find('input[name="location"]').val @event.location
-        Place.$modalInfo.find('input[name="start-date"]').val @event.start.date ? @event.start.dateTime.replace /T.*/, ''
-        Place.$modalInfo.find('input[name="start-time"]').val @event.start.dateTime?.replace /.*T|[Z+-].*/g, ''
-        Place.$modalInfo.find('input[name="end-date"]').val @event.end.date ? @event.end.dateTime.replace /T.*/, ''
-        Place.$modalInfo.find('input[name="end-time"]').val @event.end.dateTime?.replace /.*T|[Z+-].*/g, ''
+        Place.modalPlace = @
+        Place.$modalInfo.find('input[name="summary"]').val @event.resource.summary
+        Place.$modalInfo.find('input[name="location"]').val @event.resource.location
+        Place.$modalInfo.find('input[name="start-date"]').val @event.resource.start.date ? @event.resource.start.dateTime.replace /T.*/, ''
+        Place.$modalInfo.find('input[name="start-time"]').val @event.resource.start.dateTime?.replace /.*T|[Z+-].*/g, ''
+        Place.$modalInfo.find('input[name="end-date"]').val @event.resource.end.date ? @event.resource.end.dateTime.replace /T.*/, ''
+        Place.$modalInfo.find('input[name="end-time"]').val @event.resource.end.dateTime?.replace /.*T|[Z+-].*/g, ''
         if @geocodedAddress
             $('#candidate').css 'display', 'block'
             $('#candidate-address').text @geocodedAddress
@@ -98,6 +100,7 @@ class Event
         anchor: new google.maps.Point(10, 34)
 
     constructor: (@calendarId, @resource) ->
+        @candidates = null
         if @resource.location? and @resource.location isnt ''
             @icon =
                 url: "http://www.google.com/mapfiles/marker#{Event.mark}.png"
@@ -120,7 +123,7 @@ class Event
             switch status
                 when google.maps.GeocoderStatus.OK
                     if results.length is 1
-                        @_updateGeolocation results[0].geometry.location.lat(), results[0].geometry.location.lng(), results[0].formatted_address
+                        @updateGeolocation results[0].geometry.location.lat(), results[0].geometry.location.lng(), results[0].formatted_address
                     else
                         console.log 'several candicates', results
                     callback results
@@ -141,7 +144,7 @@ class Event
                 icon: @icon ? null
                 shadow: if @icon? then Event.shadow else null
                 title: @resource.location
-            , @resource
+            , @
 
     tryToSetPlace: ->
         unless @setPlace()
@@ -156,12 +159,12 @@ class Event
                                 shadow: if @icon? then Event.shadow else null
                                 title: @resource.location + '?'
                                 optimized: false
-                            , @resource, e.formatted_address
+                            , @, e.formatted_address
                     setTimeout (=>
                         $("#map img[src=\"#{@icon.url}\"]").addClass 'candidate'
                     ), 500 # 500ms is adhoc number for waiting for DOM
 
-    _updateGeolocation: (lat, lng, address) ->
+    updateGeolocation: (lat, lng, address) ->
         @resource.extendedProperties ?= {}
         @resource.extendedProperties.private ?= {}
         @resource.extendedProperties.private.geolocation = JSON.stringify
@@ -190,7 +193,7 @@ initializeDOM = ->
             else
                 $calendarList.html ("<option value=\"#{e.id}\">#{e.summary}</option>" for e in resp.items).join('')
 
-    $('#button-show').on 'click', (event) ->
+    $('#button-show').on 'click', ->
         for e in events
             e.marker?.setMap null
         events = []
@@ -211,6 +214,14 @@ initializeDOM = ->
                 for e in resp.items
                     event = new Event id, e
                     events.push event
+
+    $('#button-confirm').on 'click', ->
+        position = Place.modalPlace.marker.getPosition()
+        Place.modalPlace.event.updateGeolocation position.lat(), position.lng(), Place.modalPlace.geocodedAddress
+        Place.modalPlace.event.candidates.forEach (e) -> e.marker.setMap null
+        Place.modalPlace.event.candidates = null
+        Place.modalPlace.event.setPlace()
+        $('#candidate').css 'display', 'none'
 
 initializeGoogleMaps = ->
     mapOptions =

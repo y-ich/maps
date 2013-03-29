@@ -87,6 +87,8 @@
 
     Place.$modalInfo = $('#modal-info');
 
+    Place.modalPlace = null;
+
     function Place(options, event, geocodedAddress) {
       var _this = this;
       this.event = event;
@@ -105,12 +107,13 @@
 
     Place.prototype._setInfo = function() {
       var _ref, _ref1, _ref2, _ref3;
-      Place.$modalInfo.find('input[name="summary"]').val(this.event.summary);
-      Place.$modalInfo.find('input[name="location"]').val(this.event.location);
-      Place.$modalInfo.find('input[name="start-date"]').val((_ref = this.event.start.date) != null ? _ref : this.event.start.dateTime.replace(/T.*/, ''));
-      Place.$modalInfo.find('input[name="start-time"]').val((_ref1 = this.event.start.dateTime) != null ? _ref1.replace(/.*T|[Z+-].*/g, '') : void 0);
-      Place.$modalInfo.find('input[name="end-date"]').val((_ref2 = this.event.end.date) != null ? _ref2 : this.event.end.dateTime.replace(/T.*/, ''));
-      Place.$modalInfo.find('input[name="end-time"]').val((_ref3 = this.event.end.dateTime) != null ? _ref3.replace(/.*T|[Z+-].*/g, '') : void 0);
+      Place.modalPlace = this;
+      Place.$modalInfo.find('input[name="summary"]').val(this.event.resource.summary);
+      Place.$modalInfo.find('input[name="location"]').val(this.event.resource.location);
+      Place.$modalInfo.find('input[name="start-date"]').val((_ref = this.event.resource.start.date) != null ? _ref : this.event.resource.start.dateTime.replace(/T.*/, ''));
+      Place.$modalInfo.find('input[name="start-time"]').val((_ref1 = this.event.resource.start.dateTime) != null ? _ref1.replace(/.*T|[Z+-].*/g, '') : void 0);
+      Place.$modalInfo.find('input[name="end-date"]').val((_ref2 = this.event.resource.end.date) != null ? _ref2 : this.event.resource.end.dateTime.replace(/T.*/, ''));
+      Place.$modalInfo.find('input[name="end-time"]').val((_ref3 = this.event.resource.end.dateTime) != null ? _ref3.replace(/.*T|[Z+-].*/g, '') : void 0);
       if (this.geocodedAddress) {
         $('#candidate').css('display', 'block');
         return $('#candidate-address').text(this.geocodedAddress);
@@ -137,6 +140,7 @@
     function Event(calendarId, resource) {
       this.calendarId = calendarId;
       this.resource = resource;
+      this.candidates = null;
       if ((this.resource.location != null) && this.resource.location !== '') {
         this.icon = {
           url: "http://www.google.com/mapfiles/marker" + Event.mark + ".png"
@@ -170,7 +174,7 @@
         switch (status) {
           case google.maps.GeocoderStatus.OK:
             if (results.length === 1) {
-              _this._updateGeolocation(results[0].geometry.location.lat(), results[0].geometry.location.lng(), results[0].formatted_address);
+              _this.updateGeolocation(results[0].geometry.location.lat(), results[0].geometry.location.lng(), results[0].formatted_address);
             } else {
               console.log('several candicates', results);
             }
@@ -202,7 +206,7 @@
         icon: (_ref2 = this.icon) != null ? _ref2 : null,
         shadow: this.icon != null ? Event.shadow : null,
         title: this.resource.location
-      }, this.resource);
+      }, this);
     };
 
     Event.prototype.tryToSetPlace = function() {
@@ -221,7 +225,7 @@
                 shadow: _this.icon != null ? Event.shadow : null,
                 title: _this.resource.location + '?',
                 optimized: false
-              }, _this.resource, e.formatted_address));
+              }, _this, e.formatted_address));
             }
             return setTimeout((function() {
               return $("#map img[src=\"" + _this.icon.url + "\"]").addClass('candidate');
@@ -231,7 +235,7 @@
       }
     };
 
-    Event.prototype._updateGeolocation = function(lat, lng, address) {
+    Event.prototype.updateGeolocation = function(lat, lng, address) {
       var _base, _base1, _ref, _ref1;
       if ((_ref = (_base = this.resource).extendedProperties) == null) {
         _base.extendedProperties = {};
@@ -286,7 +290,7 @@
         }
       });
     });
-    return $('#button-show').on('click', function(event) {
+    $('#button-show').on('click', function() {
       var e, id, options, req, _i, _len, _ref;
       for (_i = 0, _len = events.length; _i < _len; _i++) {
         e = events[_i];
@@ -308,7 +312,7 @@
       }
       req = gapi.client.calendar.events.list(options);
       return req.execute(function(resp) {
-        var _j, _len1, _ref1, _results;
+        var event, _j, _len1, _ref1, _results;
         if (resp.error != null) {
           return console.error(resp);
         } else {
@@ -328,6 +332,17 @@
           return _results;
         }
       });
+    });
+    return $('#button-confirm').on('click', function() {
+      var position;
+      position = Place.modalPlace.marker.getPosition();
+      Place.modalPlace.event.updateGeolocation(position.lat(), position.lng(), Place.modalPlace.geocodedAddress);
+      Place.modalPlace.event.candidates.forEach(function(e) {
+        return e.marker.setMap(null);
+      });
+      Place.modalPlace.event.candidates = null;
+      Place.modalPlace.event.setPlace();
+      return $('#candidate').css('display', 'none');
     });
   };
 
