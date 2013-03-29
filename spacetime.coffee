@@ -61,8 +61,6 @@ saveMapStatus = () ->
         lng: pos.lng()
         zoom: map.getZoom()
 
-timeZone = (calendarId) ->
-    
 # is a class with a marker, responsible for InfoWindow.
 class Place
     # constructs an instance from marker and address, gets address if missed, gets Street View info and sets event listener.
@@ -126,6 +124,7 @@ class Event
         return null unless @resource.location? and @resource.location isnt ''
         latLng = @latLng()
         return null unless latLng
+        console.log (@resource.start.date ? @resource.start.dateTime ? '')
         @place = new Place
                 map: map
                 position: latLng
@@ -138,9 +137,9 @@ class Event
                 <dt>Location</dt>
                 <dd>#{@resource.location ? ''}</dd>
                 <dt>Start</dt>
-                <dd>#{(@resource.start.date ? @resource.start.dateTime & '') + (@resource.start.timeZone ? timeZone @calendarId)}</dd>
+                <dd>#{(@resource.start.date ? @resource.start.dateTime ? '') + (@resource.start.timeZone ? timeZone @calendarId)}</dd>
                 <dt>End</dt>
-                <dd>#{(@resource.end.date ? @resource.end.dateTime & '') + (@resource.start.timeZone ? timeZone @calendarId)}</dd>
+                <dd>#{(@resource.end.date ? @resource.end.dateTime ? '') + (@resource.start.timeZone ? timeZone @calendarId)}</dd>
                 <dt>Description</dt>
                 <dd>#{@resource.description ? ''}</dd>
             </dl>
@@ -167,16 +166,16 @@ class Event
                                 <dt>Here is</dt>
                                 <dd>#{e.formatted_address}</dd>
                                 <dt>Start</dt>
-                                <dd>#{(@resource.start.date ? @resource.start.dateTime & '') + (@resource.start.timeZone ? timeZone @calendarId)}</dd>
+                                <dd>#{(@resource.start.date ? @resource.start.dateTime ? '') + (@resource.start.timeZone ? '')}</dd>
                                 <dt>End</dt>
-                                <dd>#{(@resource.end.date ? @resource.end.dateTime & '') + (@resource.start.timeZone ? timeZone @calendarId)}</dd>
+                                <dd>#{(@resource.end.date ? @resource.end.dateTime ? '') + (@resource.start.timeZone ? '')}</dd>
                                 <dt>Description</dt>
                                 <dd>#{@resource.description ? ''}</dd>
                             </dl>
                             """
                     setTimeout (=>
                         $("#map img[src=\"#{@icon.url}\"]").addClass 'candidate'
-                    ), 500
+                    ), 500 # 500ms is adhoc number for waiting for DOM
 
     _updateGeolocation: (lat, lng, address) ->
         @resource.extendedProperties ?= {}
@@ -205,6 +204,7 @@ initializeDOM = ->
             if resp.error?
                 console.error resp
             else
+                timeZone.calendars = resp.items
                 $calendarList.html ("<option value=\"#{e.id}\">#{e.summary}</option>" for e in resp.items).join('')
 
     $('#button-show').on 'click', (event) ->
@@ -223,6 +223,7 @@ initializeDOM = ->
             if resp.error?
                 console.error resp
             else
+                console.log resp
                 resp.items.sort (x, y) -> new Date(x.start.dateTime ? x.start.date + 'T00:00:00Z').getTime() - new Date(y.start.dateTime ? y.start.date + 'T00:00:00Z').getTime()
                 Event.geocodeCount = 0
                 for e in resp.items
