@@ -2,7 +2,7 @@
 
 maps = ['googleMapsExtensions.coffee', 'maps.coffee']
 maps2 = ['googleDrive.coffee', 'maps2.coffee']
-spacetime = ['googleMapsExtensions.coffee', 'spacetime.coffee']
+spacetime = ['spacetime.coffee']
 start = 'webapp.coffee'
 start2 = 'webapp2.coffee'
 

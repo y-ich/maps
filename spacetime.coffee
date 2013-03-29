@@ -8,7 +8,6 @@ SCOPES = [
 MAP_STATUS = 'spacetime-map-status'
 
 map = null
-infoWindow = null
 events = []
 geocoder = null
 
@@ -61,20 +60,31 @@ saveMapStatus = () ->
         lng: pos.lng()
         zoom: map.getZoom()
 
-# is a class with a marker, responsible for InfoWindow.
+# is a class with a marker, responsible for modal.
 class Place
+    @$modalInfo: $('#modal-info')
     # constructs an instance from marker and address, gets address if missed, gets Street View info and sets event listener.
-    constructor: (options, @content) ->
+    constructor: (options, @event, @geocodedAddress) ->
         @marker = new google.maps.Marker options
-        google.maps.event.addListener @marker, 'click', @showInfoWindow
+        google.maps.event.addListener @marker, 'click', @showInfo
 
-    # shows its InfoWindow.
-    showInfoWindow: =>
-        @_setInfoWindow()
-        infoWindow.open @marker.getMap(), @marker
+    # shows its Modal Window.
+    showInfo: =>
+        @_setInfo()
+        Place.$modalInfo.modal 'show'
 
-    _setInfoWindow: ->
-        infoWindow.setContent @content
+    _setInfo: ->
+        Place.$modalInfo.find('input[name="summary"]').val @event.summary
+        Place.$modalInfo.find('input[name="location"]').val @event.location
+        Place.$modalInfo.find('input[name="start-date"]').val @event.start.date ? @event.start.dateTime.replace /T.*/, ''
+        Place.$modalInfo.find('input[name="start-time"]').val @event.start.dateTime?.replace /.*T|[Z+-].*/g, ''
+        Place.$modalInfo.find('input[name="end-date"]').val @event.end.date ? @event.end.dateTime.replace /T.*/, ''
+        Place.$modalInfo.find('input[name="end-time"]').val @event.end.dateTime?.replace /.*T|[Z+-].*/g, ''
+        if @geocodedAddress
+            $('#candidate').css 'display', 'block'
+            $('#candidate-address').text @geocodedAddress
+        else
+            $('#candidate').css 'display', 'none'
 
 
 # is a class of Google Calendar Event.
@@ -131,19 +141,7 @@ class Event
                 icon: @icon ? null
                 shadow: if @icon? then Event.shadow else null
                 title: @resource.location
-            , """
-            <h5>#{@resource.summary}</h5>
-            <dl class="dl-horizontal">
-                <dt>Location</dt>
-                <dd>#{@resource.location ? ''}</dd>
-                <dt>Start</dt>
-                <dd>#{(@resource.start.date ? @resource.start.dateTime ? '') + (@resource.start.timeZone ? timeZone @calendarId)}</dd>
-                <dt>End</dt>
-                <dd>#{(@resource.end.date ? @resource.end.dateTime ? '') + (@resource.start.timeZone ? timeZone @calendarId)}</dd>
-                <dt>Description</dt>
-                <dd>#{@resource.description ? ''}</dd>
-            </dl>
-            """
+            , @resource
 
     tryToSetPlace: ->
         unless @setPlace()
@@ -158,21 +156,7 @@ class Event
                                 shadow: if @icon? then Event.shadow else null
                                 title: @resource.location + '?'
                                 optimized: false
-                            , """
-                            <h5>#{@resource.summary}</h5>
-                            <dl class="dl-horizontal">
-                                <dt>Location</dt>
-                                <dd>#{@resource.location ? ''}</dd>
-                                <dt>Here is</dt>
-                                <dd>#{e.formatted_address}</dd>
-                                <dt>Start</dt>
-                                <dd>#{(@resource.start.date ? @resource.start.dateTime ? '') + (@resource.start.timeZone ? '')}</dd>
-                                <dt>End</dt>
-                                <dd>#{(@resource.end.date ? @resource.end.dateTime ? '') + (@resource.start.timeZone ? '')}</dd>
-                                <dt>Description</dt>
-                                <dd>#{@resource.description ? ''}</dd>
-                            </dl>
-                            """
+                            , @resource, e.formatted_address
                     setTimeout (=>
                         $("#map img[src=\"#{@icon.url}\"]").addClass 'candidate'
                     ), 500 # 500ms is adhoc number for waiting for DOM
@@ -204,11 +188,9 @@ initializeDOM = ->
             if resp.error?
                 console.error resp
             else
-                timeZone.calendars = resp.items
                 $calendarList.html ("<option value=\"#{e.id}\">#{e.summary}</option>" for e in resp.items).join('')
 
     $('#button-show').on 'click', (event) ->
-        infoWindow.setMap null
         for e in events
             e.marker?.setMap null
         events = []
@@ -254,18 +236,6 @@ initializeGoogleMaps = ->
 
     map = new google.maps.Map document.getElementById('map'), mapOptions
     map.setTilt 45
-
-    infoWindow = new MobileInfoWindow
-        maxWidth: Math.floor innerWidth * 0.9
-
-    google.maps.event.addListener map, 'mousedown', (event) ->
-        $infoWindow = $('.info-window')
-        if $infoWindow.length > 0
-            xy = infoWindow.getProjection().fromLatLngToDivPixel event.latLng
-            position = $infoWindow.position()
-            return if (position.left <= xy.x <= position.left + $infoWindow.outerWidth(true)) and (position.top <= xy.y <= position.top + $infoWindow.outerHeight(true))
-
-        infoWindow.close()
 
     geocoder = new google.maps.Geocoder()
 
