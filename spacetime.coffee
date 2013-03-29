@@ -61,78 +61,40 @@ saveMapStatus = () ->
         lng: pos.lng()
         zoom: map.getZoom()
 
-# is a class with a marker and an address and responsible for InfoWindow.
+timeZone = (calendarId) ->
+    
+# is a class with a marker, responsible for InfoWindow.
 class Place
     # constructs an instance from marker and address, gets address if missed, gets Street View info and sets event listener.
-    constructor: (@marker, @address) ->
-        @update()
-        google.maps.event.addListener @marker, 'click', (event) =>
-            placeContext = @
-            @showInfoWindow()
-            @update() unless @address?
-
-    update: ->
-        if not @address?
-            geocoder.geocode {latLng : @marker.getPosition() }, (result, status) =>
-                @address = if status is google.maps.GeocoderStatus.OK
-                        result[0].formatted_address.replace(/日本, /, '')
-                    else
-                        getLocalizedString 'No information'
-                $droppedMessage = $('#dropped-message')
-                if placeContext is @ and $('#info-window').length == 1 and $droppedMessage.text() isnt @address
-                    $droppedMessage.text @address 
-
-        Place._streetViewService.getPanoramaByLocation @marker.getPosition(), 49, (data, status) =>
-            if status is google.maps.StreetViewStatus.OK
-                @svLatLng = data.location.latLng
-                $('#sv-button').addClass 'btn-primary' if placeContext is @ and $('#info-window').length == 1
-
+    constructor: (options, @content) ->
+        @marker = new google.maps.Marker options
+        google.maps.event.addListener @marker, 'click', @showInfoWindow
 
     # shows its InfoWindow.
-    showInfoWindow: ->
+    showInfoWindow: =>
         @_setInfoWindow()
-        infoWindow.open map, @marker
-
-    # plain object to JSONize.
-    toObject: () ->
-        pos = @marker.getPosition()
-        {
-            lat: pos.lat()
-            lng: pos.lng()
-            title: @marker.getTitle()
-            address: @address
-        }
+        infoWindow.open @marker.getMap(), @marker
 
     _setInfoWindow: ->
-        $container = $('<div>')
-        $container.html """
-                        <table id="info-window"><tr>
-                            <td>
-                                <button id="sv-button" class="btn btn-mini#{if @svLatLng? then ' btn-primary' else ''}">
-                                    <i class="icon-user icon-white"></i>
-                                </button>
-                            </td>
-                            <td style="white-space: nowrap;"><div style="max-width:160px;overflow:hidden;">#{@marker.getTitle()}<br><span id="dropped-message" style="font-size:10px">#{@address}</span></div></td>
-                            <td>
-                                <button id="button-info" class="btn btn-mini btn-light">
-                                    <i class="icon-chevron-right icon-white"></i>
-                                </button>
-                            </td>
-                        </tr></table>
-                        """
-        infoWindow.setContent $container.append(Place._streetViewButtonWrapper, Place._infoButtonWrapper)[0]
+        infoWindow.setContent @content
 
+
+# is a class of Google Calendar Event.
+# is capable to geocode the location of events and saves it as extendedProperties.private.geolocation.
+# Event.geocodeCount should be reset to 0 when starting simultaneous geocode requests 
 class Event
-    @count: 0
-    @geocodeCount: 0
+    @mark: 'A' # next alphabetic marker
+    @geocodeCount: 0 # Google accepts only ten simultaneous geocode requests. So count them.
     @shadow:
         url: 'http://www.google.com/mapfiles/shadow50.png'
         anchor: new google.maps.Point(10, 34)
+
     constructor: (@calendarId, @resource) ->
-        if @resource.location? and @resource.location isnt '' and Event.count < 26
+        if @resource.location? and @resource.location isnt ''
             @icon =
-                url: "http://www.google.com/mapfiles/marker#{String.fromCharCode('A'.charCodeAt(0) + Event.count)}.png"
-            Event.count += 1
+                url: "http://www.google.com/mapfiles/marker#{Event.mark}.png"
+            Event.mark = String.fromCharCode Event.mark.charCodeAt(0) + 1 if Event.mark isnt 'Z'
+            @tryToSetPlace()
 
     latLng: ->
         if @resource.extendedProperties?.private?.geolocation?
@@ -141,81 +103,95 @@ class Event
         else
             null
 
-    geocode: (force, callback) ->
-        return if (not force and @latLng())
+    geocode: (callback) -> # the argument of callback is the first arugment of geocode callback.
         if Event.geocodeCount > 10
-            console.log 'too many geocode'
-            return
+            console.log 'too many geocoding requests'
+            return false
 
         geocoder.geocode { address: @resource.location }, (results, status) =>
             switch status
                 when google.maps.GeocoderStatus.OK
                     if results.length is 1
-                        @resource.extendedProperties ?= {}
-                        @resource.extendedProperties.private ?= {}
-                        @resource.extendedProperties.private.geolocation = JSON.stringify
-                            lat: results[0].geometry.location.lat()
-                            lng: results[0].geometry.location.lng()
-                            address: results[0].formatted_address
-                        req = gapi.client.calendar.events.update
-                            calendarId: @calendarId
-                            eventId: @resource.id
-                            resource: @resource
-                        req.execute (resp) ->
-                            if resp.error?
-                                console.error resp
-                            else
-                                console.log 'update succeed'
-                                console.log resp
-                        callback results
+                        @_updateGeolocation results[0].geometry.location.lat(), results[0].geometry.location.lng(), results[0].formatted_address
                     else
-                        console.log 'several candicates'
+                        console.log 'several candicates', results
+                    callback results
                 when google.maps.GeocoderStatus.ZERO_RESULTS
                     setTimeout (-> alert "Where is #{@resource.location}?"), 0
                 else
                     console.error status
         Event.geocodeCount += 1
 
-    setMarker: ->
-        return unless @resource.location? and @resource.location isnt ''
+    setPlace: ->
+        return null unless @resource.location? and @resource.location isnt ''
         latLng = @latLng()
-        options =
-            map: map
-            position: latLng
-            icon: @icon ? null
-            shadow: if @icon? then Event.shadow else null
-            title: @resource.location.replace(/\(\d*\.\d*\s*,\s*\d*.\d*\)/, '')
-        if latLng?
-            @marker = new google.maps.Marker options
-            google.maps.event.addListener @marker, 'click', @showInfoWindow
-            return true
-        else
-            @geocode false, (results) =>
-                latLng = @latLng()
-                if latLng?
-                    options.position = latLng
-                    @marker = new google.maps.Marker options
-                    google.maps.event.addListener @marker, 'click', @showInfoWindow
-                else
+        return null unless latLng
+        @place = new Place
+                map: map
+                position: latLng
+                icon: @icon ? null
+                shadow: if @icon? then Event.shadow else null
+                title: @resource.location
+            , """
+            <h5>#{@resource.summary}</h5>
+            <dl class="dl-horizontal">
+                <dt>Location</dt>
+                <dd>#{@resource.location ? ''}</dd>
+                <dt>Start</dt>
+                <dd>#{(@resource.start.date ? @resource.start.dateTime & '') + (@resource.start.timeZone ? timeZone @calendarId)}</dd>
+                <dt>End</dt>
+                <dd>#{(@resource.end.date ? @resource.end.dateTime & '') + (@resource.start.timeZone ? timeZone @calendarId)}</dd>
+                <dt>Description</dt>
+                <dd>#{@resource.description ? ''}</dd>
+            </dl>
+            """
+
+    tryToSetPlace: ->
+        unless @setPlace()
+            @geocode (results) =>
+                unless @setPlace()
                     @candidates = []
                     for e in results
-                        options.position = e.geometry.location
-                        @candicates.push new google.maps.Marker options
-                        google.maps.event.addListener @marker, 'click', @showInfoWindow
-            return null
+                        @candidates.push new Place
+                                map: map
+                                position: e.geometry.location
+                                icon: @icon ? null
+                                shadow: if @icon? then Event.shadow else null
+                                title: @resource.location + '?'
+                                optimized: false
+                            , """
+                            <h5>#{@resource.summary}</h5>
+                            <dl class="dl-horizontal">
+                                <dt>Location</dt>
+                                <dd>#{@resource.location ? ''}</dd>
+                                <dt>Here is</dt>
+                                <dd>#{e.formatted_address}</dd>
+                                <dt>Start</dt>
+                                <dd>#{(@resource.start.date ? @resource.start.dateTime & '') + (@resource.start.timeZone ? timeZone @calendarId)}</dd>
+                                <dt>End</dt>
+                                <dd>#{(@resource.end.date ? @resource.end.dateTime & '') + (@resource.start.timeZone ? timeZone @calendarId)}</dd>
+                                <dt>Description</dt>
+                                <dd>#{@resource.description ? ''}</dd>
+                            </dl>
+                            """
+                    setTimeout (=>
+                        $("#map img[src=\"#{@icon.url}\"]").addClass 'candidate'
+                    ), 500
 
-    showInfoWindow: =>
-        infoWindow.setOptions
-            content: """
-                <h5>#{@resource.summary}</h5>
-                <dl class="dl-horizontal">
-                    <dt>Location</dt>
-                    <dd>#{@resource.location ? ''}</dd>
-                    <dt>Description</dt>
-                    <dd>#{@resource.description ? ''}</dd>
-                </dl>
-                """
-        infoWindow.open map, @marker
+    _updateGeolocation: (lat, lng, address) ->
+        @resource.extendedProperties ?= {}
+        @resource.extendedProperties.private ?= {}
+        @resource.extendedProperties.private.geolocation = JSON.stringify
+            lat: lat
+            lng: lng
+            address: address
+        gapi.client.calendar.events.update(
+            calendarId: @calendarId
+            eventId: @resource.id
+            resource: @resource
+        ).execute (resp) ->
+            if resp.error?
+                console.error 'gapi.client.calendar.events.update', resp
 
 initializeDOM = ->
     localize()
@@ -251,7 +227,6 @@ initializeDOM = ->
                 Event.geocodeCount = 0
                 for e in resp.items
                     event = new Event id, e
-                    event.setMarker()
                     events.push event
 
 initializeGoogleMaps = ->
