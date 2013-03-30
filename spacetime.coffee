@@ -6,6 +6,8 @@ SCOPES = [
     'https://www.googleapis.com/auth/calendar'
 ]
 MAP_STATUS = 'spacetime-map-status'
+# TIME_ZONE_HOST = 'http://localhost:9292'
+TIME_ZONE_HOST = 'http://safari-park.herokuapp.com'
 
 map = null
 events = []
@@ -59,6 +61,29 @@ saveMapStatus = () ->
         lat: pos.lat()
         lng: pos.lng()
         zoom: map.getZoom()
+
+
+# date is an instance of Date. offset is offset seconds including day-light-saving.
+localTime = (date, offset) ->
+    twoDigitsFormat = (n) -> if n < 10 then '0' + n else n.toString()
+    offsetHours = Math.floor(offset / (60 * 60))
+    offsetMinutes = Math.floor(offset / 60 - offsetHour * 60)
+    timeDifference = (if n >= 0 then '+' else '-') + twoDigitsFormat(offsetHours) + twoDigitsFormat(offsetMinutes)
+
+    new Date(date.getTime() - (offset) * 1000).toISOString().replace /Z/, timeDifference
+
+
+# queries time zone
+# date is an instance of Date. position is an instance of LatLng.
+# argument of callback should have following properties.
+# dstOffset: daylight-savings offset (sec)
+# rawOffset: offset from UTC
+# timeZoneId:
+# timeZoneName:
+timeZone = (date, position, callback) ->
+    location = "#{position.lat()},#{position.lng()}"
+    timestamp = Math.floor(date.getTime() / 1000)
+    $.getJSON "#{TIME_ZONE_HOST}/timezone/json?location=#{location}&timestamp=#{timestamp}&sensor=false&callback=?", callback
 
 # is a class with a marker, responsible for modal.
 class Place
