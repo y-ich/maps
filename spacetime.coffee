@@ -63,15 +63,15 @@ saveMapStatus = () ->
         zoom: map.getZoom()
 
 
-# date is an instance of Date. offset is offset seconds including day-light-saving.
-localTime = (date, offset) ->
+timeDifference = (offset) ->
     twoDigitsFormat = (n) -> if n < 10 then '0' + n else n.toString()
     offsetHours = Math.floor(offset / (60 * 60))
-    offsetMinutes = Math.floor(offset / 60 - offsetHour * 60)
-    timeDifference = (if n >= 0 then '+' else '-') + twoDigitsFormat(offsetHours) + twoDigitsFormat(offsetMinutes)
+    offsetMinutes = Math.floor(offset / 60 - offsetHours * 60)
+    (if offset >= 0 then '+' else '-') + twoDigitsFormat(offsetHours) + twoDigitsFormat(offsetMinutes)
 
-    new Date(date.getTime() - (offset) * 1000).toISOString().replace /Z/, timeDifference
-
+# date is an instance of Date. offset is offset seconds including day-light-saving.
+localTime = (date, offset) ->
+    new Date(date.getTime() + offset * 1000).toISOString().replace /\..*Z/, timeDifference(offset) # ISOString is such as '2013-04-24T08:15:00.000Z'
 
 # queries time zone
 # date is an instance of Date. position is an instance of LatLng.
@@ -85,14 +85,47 @@ timeZone = (date, position, callback) ->
     timestamp = Math.floor(date.getTime() / 1000)
     $.getJSON "#{TIME_ZONE_HOST}/timezone/json?location=#{location}&timestamp=#{timestamp}&sensor=false&callback=?", callback
 
+
 # is a class with a marker, responsible for modal.
 class Place
     @$modalInfo: $('#modal-info')
     @modalPlace: null
     # constructs an instance from marker and address, gets address if missed, gets Street View info and sets event listener.
-    constructor: (options, @event, @geocodedAddress) ->
+    constructor: (options, @event, @address = null) ->
         @marker = new google.maps.Marker options
         google.maps.event.addListener @marker, 'click', @showInfo
+        timeZone new Date(@event.resource.start.dateTime ? (@event.resource.start.date + 'T00:00:00Z')), @marker.getPosition(), (obj) =>
+            @startTimeZone = obj
+        timeZone new Date(@event.resource.end.dateTime ? (@event.resource.end.date + 'T00:00:00Z')), @marker.getPosition(), (obj) =>
+            @endTimeZone = obj
+
+    getStartDateTime: ->
+        dateTime = @event.resource.start.dateTime ? (@event.resource.start.date + 'T00:00:00')
+        if @startTimeZone?
+            time = localTime new Date(dateTime), @startTimeZone.dstOffset + @startTimeZone.rawOffset
+            {
+                date: time.replace(/T.*/, '')
+                time: time.replace(/.*T|[Z+-].*/g, '')
+            }
+        else
+            {
+                date: dateTime.replace(/T.*/, '')
+                time: dateTime.replace(/.*T|[Z+-].*/g, '')
+            }
+
+    getEndDateTime: ->
+        dateTime = @event.resource.end.dateTime ? (@event.resource.end.date + 'T00:00:00')
+        if @endTimeZone?
+            time = localTime new Date(dateTime), @endTimeZone.dstOffset + @endTimeZone.rawOffset
+            {
+                date: time.replace(/T.*/, '')
+                time: time.replace(/.*T|[Z+-].*/g, '')
+            }
+        else
+            {
+                date: dateTime.replace(/T.*/, '')
+                time: dateTime.replace(/.*T|[Z+-].*/g, '')
+            }
 
     # shows its Modal Window.
     showInfo: =>
@@ -103,13 +136,25 @@ class Place
         Place.modalPlace = @
         Place.$modalInfo.find('input[name="summary"]').val @event.resource.summary
         Place.$modalInfo.find('input[name="location"]').val @event.resource.location
-        Place.$modalInfo.find('input[name="start-date"]').val @event.resource.start.date ? @event.resource.start.dateTime.replace /T.*/, ''
-        Place.$modalInfo.find('input[name="start-time"]').val @event.resource.start.dateTime?.replace /.*T|[Z+-].*/g, ''
-        Place.$modalInfo.find('input[name="end-date"]').val @event.resource.end.date ? @event.resource.end.dateTime.replace /T.*/, ''
-        Place.$modalInfo.find('input[name="end-time"]').val @event.resource.end.dateTime?.replace /.*T|[Z+-].*/g, ''
-        if @geocodedAddress
+        if @event.resource.start.date? and @event.resource.end.date?
+            $('#form-event input[name="all-day"]')[0].checked = true
+            $('#form-event input[name="all-day"]').trigger 'change'
+            Place.$modalInfo.find('input[name="start-date"]').val @event.resource.start.date
+            Place.$modalInfo.find('input[name="end-date"]').val @event.resource.end.date
+        else if @event.resource.start.dateTime? and @event.resource.end.dateTime?
+            $('#form-event input[name="all-day"]')[0].checked = false
+            $('#form-event input[name="all-day"]').trigger 'change'
+            dateTime = @getStartDateTime()
+            Place.$modalInfo.find('input[name="start-date"]').val dateTime.date
+            Place.$modalInfo.find('input[name="start-time"]').val dateTime.time
+            dateTime = @getEndDateTime()
+            Place.$modalInfo.find('input[name="end-date"]').val dateTime.date
+            Place.$modalInfo.find('input[name="end-time"]').val dateTime.time
+        else
+            console.error 'inconsistent start and end'
+        if @address
             $('#candidate').css 'display', 'block'
-            $('#candidate-address').text @geocodedAddress
+            $('#candidate-address').text @address
         else
             $('#candidate').css 'display', 'none'
 
@@ -148,9 +193,8 @@ class Event
             switch status
                 when google.maps.GeocoderStatus.OK
                     if results.length is 1
-                        @updateGeolocation results[0].geometry.location.lat(), results[0].geometry.location.lng(), results[0].formatted_address
-                    else
-                        console.log 'several candicates', results
+                        @setGeolocation results[0].geometry.location.lat(), results[0].geometry.location.lng(), results[0].formatted_address
+                        @update()
                     callback results
                 when google.maps.GeocoderStatus.ZERO_RESULTS
                     setTimeout (-> alert "Where is #{@resource.location}?"), 0
@@ -162,7 +206,6 @@ class Event
         return null unless @resource.location? and @resource.location isnt ''
         latLng = @latLng()
         return null unless latLng
-        console.log (@resource.start.date ? @resource.start.dateTime ? '')
         @place = new Place
                 map: map
                 position: latLng
@@ -189,13 +232,15 @@ class Event
                         $("#map img[src=\"#{@icon.url}\"]").addClass 'candidate'
                     ), 500 # 500ms is adhoc number for waiting for DOM
 
-    updateGeolocation: (lat, lng, address) ->
+    setGeolocation: (lat, lng, address) ->
         @resource.extendedProperties ?= {}
         @resource.extendedProperties.private ?= {}
         @resource.extendedProperties.private.geolocation = JSON.stringify
             lat: lat
             lng: lng
             address: address
+
+    update: ->
         gapi.client.calendar.events.update(
             calendarId: @calendarId
             eventId: @resource.id
@@ -233,7 +278,6 @@ initializeDOM = ->
             if resp.error?
                 console.error resp
             else
-                console.log resp
                 resp.items.sort (x, y) -> new Date(x.start.dateTime ? x.start.date + 'T00:00:00Z').getTime() - new Date(y.start.dateTime ? y.start.date + 'T00:00:00Z').getTime()
                 Event.geocodeCount = 0
                 for e in resp.items
@@ -242,11 +286,52 @@ initializeDOM = ->
 
     $('#button-confirm').on 'click', ->
         position = Place.modalPlace.marker.getPosition()
-        Place.modalPlace.event.updateGeolocation position.lat(), position.lng(), Place.modalPlace.geocodedAddress
+        Place.modalPlace.event.setGeolocation position.lat(), position.lng(), Place.modalPlace.geocodedAddress
+        Place.modalPlace.event.update()
         Place.modalPlace.event.candidates.forEach (e) -> e.marker.setMap null
         Place.modalPlace.event.candidates = null
         Place.modalPlace.event.setPlace()
         $('#candidate').css 'display', 'none'
+
+    $('#button-update').on 'click', ->
+        updateFlag = false
+        anEvent = Place.modalPlace.event
+        if anEvent.resource.summary isnt $('#form-event input[name="summary"]').val()
+            updateFlag = true
+            anEvent.resource.summary = $('#form-event input[name="summary"]').val()
+        if anEvent.resource.location isnt $('#form-event input[name="location"]').val()
+            updateFlag = true
+            anEvent.resource.location = $('#form-event input[name="location"]').val()
+            delete anEvent.resource.extendedProperties.private.geolocation
+        if $('#form-event input[name="all-day"]')[0].checked
+            if anEvent.resource.start.date isnt $('#form-event input[name="start-date"]').val().replace(/-/g, '/')
+                updateFlag = true
+                delete anEvent.resource.start.dateTime
+                anEvent.resource.start.date = $('#form-event input[name="start-date"]').val().replace(/-/g, '/')
+            if anEvent.resource.end.date isnt $('#form-event input[name="end-date"]').val().replace(/-/g, '/')
+                updateFlag = true
+                delete anEvent.resource.end.dateTime
+                anEvent.resource.end.date = $('#form-event input[name="end-date"]').val().replace(/-/g, '/')
+        else
+            timeZone = Place.modalPlace.startTimeZone
+            startDateTime = new Date $('#form-event input[name="start-date"]').val().replace(/-/g, '/') + ' ' + $('#form-event input[name="start-time"]').val() + timeDifference(timeZone.dstOffset + timeZone.rawOffset)
+            if new Date(anEvent.resource.start.dateTime).getTime() isnt startDateTime.getTime()
+                updateFlag = true
+                delete anEvent.resource.start.date
+                anEvent.resource.start.dateTime = startDateTime.toUTCString()
+                anEvent.resource.start.timeZone = timeZone.id
+            timeZone = Place.modalPlace.endTimeZone
+            endDateTime = new Date $('#form-event input[name="end-date"]').val().replace(/-/g, '/') + ' ' + $('#form-event input[name="end-time"]').val() + timeDifference(timeZone.dstOffset + timeZone.rawOffset)
+            if new Date(anEvent.resource.start.dateTime).getTime() isnt startDateTime.getTime()
+                updateFlag = true
+                delete anEvent.resource.end.date
+                anEvent.resource.end.dateTime = endDateTime.toUTCString()
+                anEvent.resource.end.timeZone = timeZone.id
+        anEvent.update() if updateFlag
+
+    $('#form-event input[name="all-day"]').on 'change', ->
+        $('#form-event input[name="start-time"]').css 'display', if @checked then 'none' else ''
+        $('#form-event input[name="end-time"]').css 'display', if @checked then 'none' else ''
 
 initializeGoogleMaps = ->
     mapOptions =
