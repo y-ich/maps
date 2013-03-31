@@ -81,10 +81,20 @@ localTime = (date, offset) ->
 # timeZoneId:
 # timeZoneName:
 timeZone = (date, position, callback) ->
+    return false if timeZone.overQueryLimit
     location = "#{position.lat()},#{position.lng()}"
     timestamp = Math.floor(date.getTime() / 1000)
-    $.getJSON "#{TIME_ZONE_HOST}/timezone/json?location=#{location}&timestamp=#{timestamp}&sensor=false&callback=?", callback
-
+    $.getJSON "#{TIME_ZONE_HOST}/timezone/json?location=#{location}&timestamp=#{timestamp}&sensor=false&callback=?", (obj) ->
+        switch obj.status
+            when 'OK'
+                callback obj
+            when 'OVER_QUERY_LIMIT'
+                timeZone.overQueryLimit = true
+                setTimeout (-> timeZone.overQueryLimit = false), 10000
+                alert obj.status
+            else
+                console.error obj
+timeZone.overQueryLimit = false
 
 # is a class with a marker, responsible for modal.
 class Place
@@ -94,14 +104,11 @@ class Place
     constructor: (options, @event, @address = null) ->
         @marker = new google.maps.Marker options
         google.maps.event.addListener @marker, 'click', @showInfo
-        timeZone new Date(@event.resource.start.dateTime ? (@event.resource.start.date + 'T00:00:00Z')), @marker.getPosition(), (obj) =>
-            @startTimeZone = obj
-        timeZone new Date(@event.resource.end.dateTime ? (@event.resource.end.date + 'T00:00:00Z')), @marker.getPosition(), (obj) =>
-            @endTimeZone = obj
 
     getStartDateTime: ->
         dateTime = @event.resource.start.dateTime ? (@event.resource.start.date + 'T00:00:00')
         if @startTimeZone?
+            console.log @startTimeZone
             time = localTime new Date(dateTime), @startTimeZone.dstOffset + @startTimeZone.rawOffset
             {
                 date: time.replace(/T.*/, '')
@@ -117,6 +124,12 @@ class Place
         dateTime = @event.resource.end.dateTime ? (@event.resource.end.date + 'T00:00:00')
         if @endTimeZone?
             time = localTime new Date(dateTime), @endTimeZone.dstOffset + @endTimeZone.rawOffset
+            {
+                date: time.replace(/T.*/, '')
+                time: time.replace(/.*T|[Z+-].*/g, '')
+            }
+        else if @startTimeZone?
+            time = localTime new Date(dateTime), @startTimeZone.dstOffset + @startTimeZone.rawOffset
             {
                 date: time.replace(/T.*/, '')
                 time: time.replace(/.*T|[Z+-].*/g, '')
@@ -144,12 +157,14 @@ class Place
         else if @event.resource.start.dateTime? and @event.resource.end.dateTime?
             $('#form-event input[name="all-day"]')[0].checked = false
             $('#form-event input[name="all-day"]').trigger 'change'
-            dateTime = @getStartDateTime()
-            Place.$modalInfo.find('input[name="start-date"]').val dateTime.date
-            Place.$modalInfo.find('input[name="start-time"]').val dateTime.time
-            dateTime = @getEndDateTime()
-            Place.$modalInfo.find('input[name="end-date"]').val dateTime.date
-            Place.$modalInfo.find('input[name="end-time"]').val dateTime.time
+            timeZone new Date(@event.resource.start.dateTime ? (@event.resource.start.date + 'T00:00:00Z')), @marker.getPosition(), (obj) =>
+                @startTimeZone = obj
+                dateTime = @getStartDateTime()
+                Place.$modalInfo.find('input[name="start-date"]').val dateTime.date
+                Place.$modalInfo.find('input[name="start-time"]').val dateTime.time
+                dateTime = @getEndDateTime()
+                Place.$modalInfo.find('input[name="end-date"]').val dateTime.date
+                Place.$modalInfo.find('input[name="end-time"]').val dateTime.time
         else
             console.error 'inconsistent start and end'
         if @address
@@ -241,6 +256,7 @@ class Event
             address: address
 
     update: ->
+        console.log @resource
         gapi.client.calendar.events.update(
             calendarId: @calendarId
             eventId: @resource.id
@@ -319,14 +335,14 @@ initializeDOM = ->
                 updateFlag = true
                 delete anEvent.resource.start.date
                 anEvent.resource.start.dateTime = startDateTime.toUTCString()
-                anEvent.resource.start.timeZone = timeZone.id
+                anEvent.resource.start.timeZone = timeZone.timeZoneId
             timeZone = Place.modalPlace.endTimeZone
             endDateTime = new Date $('#form-event input[name="end-date"]').val().replace(/-/g, '/') + ' ' + $('#form-event input[name="end-time"]').val() + timeDifference(timeZone.dstOffset + timeZone.rawOffset)
-            if new Date(anEvent.resource.start.dateTime).getTime() isnt startDateTime.getTime()
+            if new Date(anEvent.resource.end.dateTime).getTime() isnt endDateTime.getTime()
                 updateFlag = true
                 delete anEvent.resource.end.date
                 anEvent.resource.end.dateTime = endDateTime.toUTCString()
-                anEvent.resource.end.timeZone = timeZone.id
+                anEvent.resource.end.timeZone = timeZone.timeZoneId
         anEvent.update() if updateFlag
 
     $('#form-event input[name="all-day"]').on 'change', ->

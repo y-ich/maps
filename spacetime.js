@@ -105,10 +105,28 @@
 
   timeZone = function(date, position, callback) {
     var location, timestamp;
+    if (timeZone.overQueryLimit) {
+      return false;
+    }
     location = "" + (position.lat()) + "," + (position.lng());
     timestamp = Math.floor(date.getTime() / 1000);
-    return $.getJSON("" + TIME_ZONE_HOST + "/timezone/json?location=" + location + "&timestamp=" + timestamp + "&sensor=false&callback=?", callback);
+    return $.getJSON("" + TIME_ZONE_HOST + "/timezone/json?location=" + location + "&timestamp=" + timestamp + "&sensor=false&callback=?", function(obj) {
+      switch (obj.status) {
+        case 'OK':
+          return callback(obj);
+        case 'OVER_QUERY_LIMIT':
+          timeZone.overQueryLimit = true;
+          setTimeout((function() {
+            return timeZone.overQueryLimit = false;
+          }), 10000);
+          return alert(obj.status);
+        default:
+          return console.error(obj);
+      }
+    });
   };
+
+  timeZone.overQueryLimit = false;
 
   Place = (function() {
 
@@ -117,8 +135,7 @@
     Place.modalPlace = null;
 
     function Place(options, event, address) {
-      var _ref, _ref1,
-        _this = this;
+      var _this = this;
       this.event = event;
       this.address = address != null ? address : null;
       this.showInfo = function() {
@@ -126,18 +143,13 @@
       };
       this.marker = new google.maps.Marker(options);
       google.maps.event.addListener(this.marker, 'click', this.showInfo);
-      timeZone(new Date((_ref = this.event.resource.start.dateTime) != null ? _ref : this.event.resource.start.date + 'T00:00:00Z'), this.marker.getPosition(), function(obj) {
-        return _this.startTimeZone = obj;
-      });
-      timeZone(new Date((_ref1 = this.event.resource.end.dateTime) != null ? _ref1 : this.event.resource.end.date + 'T00:00:00Z'), this.marker.getPosition(), function(obj) {
-        return _this.endTimeZone = obj;
-      });
     }
 
     Place.prototype.getStartDateTime = function() {
       var dateTime, time, _ref;
       dateTime = (_ref = this.event.resource.start.dateTime) != null ? _ref : this.event.resource.start.date + 'T00:00:00';
       if (this.startTimeZone != null) {
+        console.log(this.startTimeZone);
         time = localTime(new Date(dateTime), this.startTimeZone.dstOffset + this.startTimeZone.rawOffset);
         return {
           date: time.replace(/T.*/, ''),
@@ -160,6 +172,12 @@
           date: time.replace(/T.*/, ''),
           time: time.replace(/.*T|[Z+-].*/g, '')
         };
+      } else if (this.startTimeZone != null) {
+        time = localTime(new Date(dateTime), this.startTimeZone.dstOffset + this.startTimeZone.rawOffset);
+        return {
+          date: time.replace(/T.*/, ''),
+          time: time.replace(/.*T|[Z+-].*/g, '')
+        };
       } else {
         return {
           date: dateTime.replace(/T.*/, ''),
@@ -174,7 +192,8 @@
     };
 
     Place.prototype._setInfo = function() {
-      var dateTime;
+      var _ref,
+        _this = this;
       Place.modalPlace = this;
       Place.$modalInfo.find('input[name="summary"]').val(this.event.resource.summary);
       Place.$modalInfo.find('input[name="location"]').val(this.event.resource.location);
@@ -186,12 +205,16 @@
       } else if ((this.event.resource.start.dateTime != null) && (this.event.resource.end.dateTime != null)) {
         $('#form-event input[name="all-day"]')[0].checked = false;
         $('#form-event input[name="all-day"]').trigger('change');
-        dateTime = this.getStartDateTime();
-        Place.$modalInfo.find('input[name="start-date"]').val(dateTime.date);
-        Place.$modalInfo.find('input[name="start-time"]').val(dateTime.time);
-        dateTime = this.getEndDateTime();
-        Place.$modalInfo.find('input[name="end-date"]').val(dateTime.date);
-        Place.$modalInfo.find('input[name="end-time"]').val(dateTime.time);
+        timeZone(new Date((_ref = this.event.resource.start.dateTime) != null ? _ref : this.event.resource.start.date + 'T00:00:00Z'), this.marker.getPosition(), function(obj) {
+          var dateTime;
+          _this.startTimeZone = obj;
+          dateTime = _this.getStartDateTime();
+          Place.$modalInfo.find('input[name="start-date"]').val(dateTime.date);
+          Place.$modalInfo.find('input[name="start-time"]').val(dateTime.time);
+          dateTime = _this.getEndDateTime();
+          Place.$modalInfo.find('input[name="end-date"]').val(dateTime.date);
+          return Place.$modalInfo.find('input[name="end-time"]').val(dateTime.time);
+        });
       } else {
         console.error('inconsistent start and end');
       }
@@ -330,6 +353,7 @@
     };
 
     Event.prototype.update = function() {
+      console.log(this.resource);
       return gapi.client.calendar.events.update({
         calendarId: this.calendarId,
         eventId: this.resource.id,
@@ -457,15 +481,15 @@
           updateFlag = true;
           delete anEvent.resource.start.date;
           anEvent.resource.start.dateTime = startDateTime.toUTCString();
-          anEvent.resource.start.timeZone = timeZone.id;
+          anEvent.resource.start.timeZone = timeZone.timeZoneId;
         }
         timeZone = Place.modalPlace.endTimeZone;
         endDateTime = new Date($('#form-event input[name="end-date"]').val().replace(/-/g, '/') + ' ' + $('#form-event input[name="end-time"]').val() + timeDifference(timeZone.dstOffset + timeZone.rawOffset));
-        if (new Date(anEvent.resource.start.dateTime).getTime() !== startDateTime.getTime()) {
+        if (new Date(anEvent.resource.end.dateTime).getTime() !== endDateTime.getTime()) {
           updateFlag = true;
           delete anEvent.resource.end.date;
           anEvent.resource.end.dateTime = endDateTime.toUTCString();
-          anEvent.resource.end.timeZone = timeZone.id;
+          anEvent.resource.end.timeZone = timeZone.timeZoneId;
         }
       }
       if (updateFlag) {
