@@ -1,6 +1,10 @@
 # Google Maps Web App
 # Copyright (C) 2012-2103 ICHIKAWA, Yuji (New 3 Rs) 
 
+#
+# constants
+#
+
 CLIENT_ID = '369757625302.apps.googleusercontent.com'
 SCOPES = [
     'https://www.googleapis.com/auth/calendar'
@@ -9,34 +13,24 @@ MAP_STATUS = 'spacetime-map-status'
 # TIME_ZONE_HOST = 'http://localhost:9292'
 TIME_ZONE_HOST = 'http://safari-park.herokuapp.com'
 
+
+#
+# global variables
+#
+
 map = null
-events = []
 geocoder = null
 
-handleClientLoad = ->
-    window.setTimeout authorizeFunction(CLIENT_ID, SCOPES, true, handleAuthResult), 1
-
-authorizeFunction = (client_id, scopes, immediate, callback) ->
-    ->
-        gapi.auth.authorize
-                'client_id': client_id
-                'scope': scopes
-                'immediate': immediate
-            , callback
-
-handleAuthResult = (authResult) ->
-    if authResult and not authResult.error
-        console.log 'ok'
+# Google OAuth 2.0 handler
+handleAuthResult = (result) ->
+    if result? and not result.error?
         gapi.client.load 'calendar', 'v3', ->
             $('#button-authorize').css 'display', 'none'
             $('#button-calendar').css 'display', ''
     else
-        console.log 'ng'
         $('#button-authorize').text('Authorize this app')
-                                         .attr('disabled', null)
-                                         .addClass 'primary'
-
-window.handleClientLoad = handleClientLoad
+                              .attr('disabled', null)
+                              .addClass 'primary'
 
 
 getLocalizedString = (key) ->
@@ -49,12 +43,11 @@ setLocalExpressionInto = (id, english) ->
 localize = ->
     idWordPairs = []
 
-    document.title = getLocalizedString 'Maps'
+    document.title = getLocalizedString 'Space-Time'
     # document.getElementById('search-input').placeholder = getLocalizedString 'Search or Address'
     setLocalExpressionInto key, value for key, value of idWordPairs
 
 # saves current state into localStorage
-# saves frequently changing state
 saveMapStatus = () ->
     pos = map.getCenter()
     localStorage[MAP_STATUS] = JSON.stringify
@@ -62,16 +55,18 @@ saveMapStatus = () ->
         lng: pos.lng()
         zoom: map.getZoom()
 
-
+# returns strings, that shows time difference, from offset(sec).
 timeDifference = (offset) ->
     twoDigitsFormat = (n) -> if n < 10 then '0' + n else n.toString()
     offsetHours = Math.floor(offset / (60 * 60))
     offsetMinutes = Math.floor(offset / 60 - offsetHours * 60)
     (if offset >= 0 then '+' else '-') + twoDigitsFormat(offsetHours) + twoDigitsFormat(offsetMinutes)
 
+# returns local time specified by offset in string format.
 # date is an instance of Date. offset is offset seconds including day-light-saving.
 localTime = (date, offset) ->
-    new Date(date.getTime() + offset * 1000).toISOString().replace /\..*Z/, timeDifference(offset) # ISOString is such as '2013-04-24T08:15:00.000Z'
+    new Date(date.getTime() + offset * 1000).toISOString().replace /\..*Z/, timeDifference(offset)
+    # ISOString is such as '2013-04-24T08:15:00.000Z'
 
 # queries time zone
 # date is an instance of Date. position is an instance of LatLng.
@@ -90,49 +85,36 @@ getTimeZone = (date, position, callback) ->
                 callback obj
             when 'OVER_QUERY_LIMIT'
                 timeZone.overQueryLimit = true
-                setTimeout (-> timeZone.overQueryLimit = false), 10000
+                setTimeout (-> timeZone.overQueryLimit = false), 10000 # no reason of 10s.
                 alert obj.status
             else
                 console.error obj
 getTimeZone.overQueryLimit = false
 
+
 # is a class with a marker, responsible for modal.
 class Place
     @$modalInfo: $('#modal-info')
     @modalPlace: null
-    # constructs an instance from marker and address, gets address if missed, gets Street View info and sets event listener.
+
+    # options is for Marker, @event is an Event for the Place.
+    # optional @address means the Place is one of candicates and shows the address of the Place.
     constructor: (options, @event, @address = null) ->
         @marker = new google.maps.Marker options
         google.maps.event.addListener @marker, 'click', @showInfo
 
-    getStartDateTime: ->
-        dateTime = @event.resource.start.dateTime ? (@event.resource.start.date + 'T00:00:00')
-        if @startTimeZone?
-            console.log @startTimeZone
-            time = localTime new Date(dateTime), @startTimeZone.dstOffset + @startTimeZone.rawOffset
-            {
-                date: time.replace(/T.*/, '')
-                time: time.replace(/.*T|[Z+-].*/g, '')
-            }
+    # returns Event's time (date property and time property) in local time at the Place.
+    # startOrEnd is 'start' or 'end'
+    # If doesn't get time zone information, returns dateTime as its format.
+    getDateTime: (startOrEnd) ->
+        dateTime = @event.resource[startOrEnd].dateTime ? (@event.resource[startOrEnd].date + 'T00:00:00')
+        if @["#{startOrEnd}TimeZone"]?
+            time = localTime new Date(dateTime), @["#{startOrEnd}TimeZone"].dstOffset + @["#{startOrEnd}TimeZone"].rawOffset
+            date: time.replace(/T.*/, '')
+            time: time.replace(/.*T|[Z+-].*/g, '')
         else
-            {
-                date: dateTime.replace(/T.*/, '')
-                time: dateTime.replace(/.*T|[Z+-].*/g, '')
-            }
-
-    getEndDateTime: ->
-        dateTime = @event.resource.end.dateTime ? (@event.resource.end.date + 'T00:00:00')
-        if @endTimeZone?
-            time = localTime new Date(dateTime), @endTimeZone.dstOffset + @endTimeZone.rawOffset
-            {
-                date: time.replace(/T.*/, '')
-                time: time.replace(/.*T|[Z+-].*/g, '')
-            }
-        else
-            {
-                date: dateTime.replace(/T.*/, '')
-                time: dateTime.replace(/.*T|[Z+-].*/g, '')
-            }
+            date: dateTime.replace(/T.*/, '')
+            time: dateTime.replace(/.*T|[Z+-].*/g, '')
 
     # shows its Modal Window.
     showInfo: =>
@@ -153,12 +135,12 @@ class Place
             $('#form-event input[name="all-day"]').trigger 'change'
             getTimeZone new Date(@event.resource.start.dateTime), @marker.getPosition(), (obj) =>
                 @startTimeZone = obj
-                dateTime = @getStartDateTime()
+                dateTime = @getDateTime 'start'
                 Place.$modalInfo.find('input[name="start-date"]').val dateTime.date
                 Place.$modalInfo.find('input[name="start-time"]').val dateTime.time
             getTimeZone new Date(@event.resource.end.dateTime), @marker.getPosition(), (obj) =>
                 @endTimeZone = obj
-                dateTime = @getEndDateTime()
+                dateTime = @getDateTime 'end'
                 Place.$modalInfo.find('input[name="end-date"]').val dateTime.date
                 Place.$modalInfo.find('input[name="end-time"]').val dateTime.time
         else
@@ -175,11 +157,19 @@ class Place
 # is capable to geocode the location of events and saves it as extendedProperties.private.geolocation.
 # Event.geocodeCount should be reset to 0 when starting simultaneous geocode requests 
 class Event
+    @events: []
     @mark: 'A' # next alphabetic marker
     @geocodeCount: 0 # Google accepts only ten simultaneous geocode requests. So count them.
     @shadow:
         url: 'http://www.google.com/mapfiles/shadow50.png'
         anchor: new google.maps.Point(10, 34)
+
+    # clears all events.
+    @clearAll: ->
+        for e in Event.events
+            e.marker?.setMap null
+        Event.events = []
+        Event.mark = 'A'
 
     constructor: (@calendarId, @resource) ->
         @candidates = null
@@ -188,6 +178,7 @@ class Event
                 url: "http://www.google.com/mapfiles/marker#{Event.mark}.png"
             Event.mark = String.fromCharCode Event.mark.charCodeAt(0) + 1 if Event.mark isnt 'Z'
             @tryToSetPlace()
+        Event.events.push @
 
     latLng: ->
         if @resource.extendedProperties?.private?.geolocation?
@@ -216,15 +207,17 @@ class Event
 
     setPlace: ->
         return null unless @resource.location? and @resource.location isnt ''
+
         latLng = @latLng()
         return null unless latLng
+
         @place = new Place
-                map: map
-                position: latLng
-                icon: @icon ? null
-                shadow: if @icon? then Event.shadow else null
-                title: @resource.location
-            , @
+            map: map
+            position: latLng
+            icon: @icon ? null
+            shadow: if @icon? then Event.shadow else null
+            title: @resource.location,
+            @
 
     tryToSetPlace: ->
         unless @setPlace()
@@ -233,16 +226,14 @@ class Event
                     @candidates = []
                     for e in results
                         @candidates.push new Place
-                                map: map
-                                position: e.geometry.location
-                                icon: @icon ? null
-                                shadow: if @icon? then Event.shadow else null
-                                title: @resource.location + '?'
-                                optimized: false
-                            , @, e.formatted_address
-                    setTimeout (=>
-                        $("#map img[src=\"#{@icon.url}\"]").addClass 'candidate'
-                    ), 500 # 500ms is adhoc number for waiting for DOM
+                            map: map
+                            position: e.geometry.location
+                            icon: @icon ? null
+                            shadow: if @icon? then Event.shadow else null
+                            title: @resource.location + '?'
+                            optimized: false,
+                            @, e.formatted_address
+                    setTimeout (=> $("#map img[src=\"#{@icon.url}\"]").addClass 'candidate'), 500 # 500ms is adhoc number for waiting for DOM
 
     setGeolocation: (lat, lng, address) ->
         @resource.extendedProperties ?= {}
@@ -253,7 +244,6 @@ class Event
             address: address
 
     update: ->
-        console.log @resource
         gapi.client.calendar.events.update(
             calendarId: @calendarId
             eventId: @resource.id
@@ -265,7 +255,12 @@ class Event
 initializeDOM = ->
     localize()
     $('#container').css 'display', ''
-    $('#button-authorize').on 'click', authorizeFunction CLIENT_ID, SCOPES, false, handleAuthResult
+    $('#button-authorize').on 'click', ->
+        gapi.auth.authorize
+                'client_id': CLIENT_ID
+                'scope': SCOPES
+                'immediate': false
+            , handleAuthResult
 
     $calendarList = $('#calendar-list')
     $('#modal-calendar').on 'show', (event) ->
@@ -277,10 +272,7 @@ initializeDOM = ->
                 $calendarList.html ("<option value=\"#{e.id}\">#{e.summary}</option>" for e in resp.items).join('')
 
     $('#button-show').on 'click', ->
-        for e in events
-            e.marker?.setMap null
-        events = []
-        Event.count = 0
+        Event.clearAll()
         id = $calendarList.children('option:selected').attr 'value'
         options =
             calendarId: id
@@ -295,7 +287,6 @@ initializeDOM = ->
                 Event.geocodeCount = 0
                 for e in resp.items
                     event = new Event id, e
-                    events.push event
 
     $('#button-confirm').on 'click', ->
         position = Place.modalPlace.marker.getPosition()
@@ -383,3 +374,12 @@ window.app =
         initializeGoogleMaps()
         initializeDOM()
     saveMapStatus: saveMapStatus
+
+window.handleClientLoad = -> setTimeout (->
+        gapi.auth.authorize
+                'client_id': CLIENT_ID
+                'scope': SCOPES
+                'immediate': true
+            , handleAuthResult
+    ), 1
+
