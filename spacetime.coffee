@@ -80,8 +80,8 @@ localTime = (date, offset) ->
 # rawOffset: offset from UTC
 # timeZoneId:
 # timeZoneName:
-timeZone = (date, position, callback) ->
-    return false if timeZone.overQueryLimit
+getTimeZone = (date, position, callback) ->
+    return false if getTimeZone.overQueryLimit
     location = "#{position.lat()},#{position.lng()}"
     timestamp = Math.floor(date.getTime() / 1000)
     $.getJSON "#{TIME_ZONE_HOST}/timezone/json?location=#{location}&timestamp=#{timestamp}&sensor=false&callback=?", (obj) ->
@@ -94,7 +94,7 @@ timeZone = (date, position, callback) ->
                 alert obj.status
             else
                 console.error obj
-timeZone.overQueryLimit = false
+getTimeZone.overQueryLimit = false
 
 # is a class with a marker, responsible for modal.
 class Place
@@ -128,12 +128,6 @@ class Place
                 date: time.replace(/T.*/, '')
                 time: time.replace(/.*T|[Z+-].*/g, '')
             }
-        else if @startTimeZone?
-            time = localTime new Date(dateTime), @startTimeZone.dstOffset + @startTimeZone.rawOffset
-            {
-                date: time.replace(/T.*/, '')
-                time: time.replace(/.*T|[Z+-].*/g, '')
-            }
         else
             {
                 date: dateTime.replace(/T.*/, '')
@@ -157,11 +151,13 @@ class Place
         else if @event.resource.start.dateTime? and @event.resource.end.dateTime?
             $('#form-event input[name="all-day"]')[0].checked = false
             $('#form-event input[name="all-day"]').trigger 'change'
-            timeZone new Date(@event.resource.start.dateTime ? (@event.resource.start.date + 'T00:00:00Z')), @marker.getPosition(), (obj) =>
+            getTimeZone new Date(@event.resource.start.dateTime), @marker.getPosition(), (obj) =>
                 @startTimeZone = obj
                 dateTime = @getStartDateTime()
                 Place.$modalInfo.find('input[name="start-date"]').val dateTime.date
                 Place.$modalInfo.find('input[name="start-time"]').val dateTime.time
+            getTimeZone new Date(@event.resource.end.dateTime), @marker.getPosition(), (obj) =>
+                @endTimeZone = obj
                 dateTime = @getEndDateTime()
                 Place.$modalInfo.find('input[name="end-date"]').val dateTime.date
                 Place.$modalInfo.find('input[name="end-time"]').val dateTime.time
@@ -172,6 +168,7 @@ class Place
             $('#candidate-address').text @address
         else
             $('#candidate').css 'display', 'none'
+        Place.$modalInfo.find('input[name="description"]').val @event.resource.description
 
 
 # is a class of Google Calendar Event.
@@ -334,15 +331,18 @@ initializeDOM = ->
             if new Date(anEvent.resource.start.dateTime).getTime() isnt startDateTime.getTime()
                 updateFlag = true
                 delete anEvent.resource.start.date
-                anEvent.resource.start.dateTime = startDateTime.toUTCString()
+                anEvent.resource.start.dateTime = startDateTime.toISOString()
                 anEvent.resource.start.timeZone = timeZone.timeZoneId
             timeZone = Place.modalPlace.endTimeZone
             endDateTime = new Date $('#form-event input[name="end-date"]').val().replace(/-/g, '/') + ' ' + $('#form-event input[name="end-time"]').val() + timeDifference(timeZone.dstOffset + timeZone.rawOffset)
             if new Date(anEvent.resource.end.dateTime).getTime() isnt endDateTime.getTime()
                 updateFlag = true
                 delete anEvent.resource.end.date
-                anEvent.resource.end.dateTime = endDateTime.toUTCString()
+                anEvent.resource.end.dateTime = endDateTime.toISOString()
                 anEvent.resource.end.timeZone = timeZone.timeZoneId
+        if anEvent.resource.description isnt $('#form-event input[name="description"]').val()
+            updateFlag = true
+            anEvent.resource.description = $('#form-event input[name="description"]').val()
         anEvent.update() if updateFlag
 
     $('#form-event input[name="all-day"]').on 'change', ->
