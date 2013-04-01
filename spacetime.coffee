@@ -19,6 +19,8 @@ TIME_ZONE_HOST = 'http://safari-park.herokuapp.com'
 #
 
 map = null
+calendars= null # result of calenders list
+currentCalendar = null
 geocoder = null
 
 # Google OAuth 2.0 handler
@@ -27,6 +29,7 @@ handleAuthResult = (result) ->
         gapi.client.load 'calendar', 'v3', ->
             $('#button-authorize').css 'display', 'none'
             $('#button-calendar').css 'display', ''
+            $('#modal-calendar').modal 'show'
     else
         $('#button-authorize').text('このアプリ"SpaceTime"にGoogleカレンダーへのアクセスを許可する')
                               .attr('disabled', null)
@@ -269,24 +272,42 @@ initializeDOM = ->
             if resp.error?
                 console.error resp
             else
-                $calendarList.html ("<option value=\"#{e.id}\">#{e.summary}</option>" for e in resp.items).join('')
+                calendars = resp.items
+                $calendarList.html '<option value="new">New Calendar</option>' + ("<option value=\"#{e.id}\">#{e.summary}</option>" for e in calendars).join('')
 
     $('#button-show').on 'click', ->
         Event.clearAll()
         id = $calendarList.children('option:selected').attr 'value'
-        options =
-            calendarId: id
-        options.timeMin = $('#form-calendar [name="start-date"]')[0].value + 'T00:00:00Z' unless $('#form-calendar [name="start-date"]')[0].value is ''
-        options.timeMax = $('#form-calendar [name="end-date"]')[0].value + 'T00:00:00Z' unless $('#form-calendar [name="end-date"]')[0].value is ''
-        req = gapi.client.calendar.events.list options
-        req.execute (resp) ->
-            if resp.error?
-                console.error resp
-            else
-                resp.items.sort (x, y) -> new Date(x.start.dateTime ? x.start.date + 'T00:00:00Z').getTime() - new Date(y.start.dateTime ? y.start.date + 'T00:00:00Z').getTime()
-                Event.geocodeCount = 0
-                for e in resp.items
-                    event = new Event id, e
+        if id is 'new'
+            if name = prompt '新しいカレンダーに名前をつけてください'
+                req = gapi.client.calendar.calendars.insert
+                    resource:
+                        summary: name
+                req.execute (resp) ->
+                    if resp.error?
+                        alert '新規カレンダーが作成できませんでした'
+                    else
+                        console.log resp
+                        currentCalendar = resp.result
+                        calendars.push currentCalendar
+        else
+            for e in calendars
+                if e.id is id
+                    currentCalendar = e
+                    break
+            options =
+                calendarId: id
+            options.timeMin = $('#form-calendar [name="start-date"]')[0].value + 'T00:00:00Z' unless $('#form-calendar [name="start-date"]')[0].value is ''
+            options.timeMax = $('#form-calendar [name="end-date"]')[0].value + 'T00:00:00Z' unless $('#form-calendar [name="end-date"]')[0].value is ''
+            req = gapi.client.calendar.events.list options
+            req.execute (resp) ->
+                if resp.error?
+                    console.error resp
+                else if resp.items?
+                    resp.items.sort (x, y) -> new Date(x.start.dateTime ? x.start.date + 'T00:00:00Z').getTime() - new Date(y.start.dateTime ? y.start.date + 'T00:00:00Z').getTime()
+                    Event.geocodeCount = 0
+                    for e in resp.items
+                        event = new Event id, e
 
     $('#button-confirm').on 'click', ->
         position = Place.modalPlace.marker.getPosition()
