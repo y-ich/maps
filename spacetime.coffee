@@ -382,4 +382,3 @@ window.handleClientLoad = -> setTimeout (->
                 'immediate': true
             , handleAuthResult
     ), 1
-

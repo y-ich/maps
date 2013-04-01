@@ -33,7 +33,6 @@
     <div id="container" style="display: none;"> <!-- should be displayed after localization -->
         <div id="streetview"></div>
         <div id="map"></div>
-        <div id="map-ui"></div>
 		<div id="header" class="navbar navbar-fixed-top">
 			<div class="navbar-inner">
 				<button type="button" id="button-authorize" class="btn" disabled>認証中...</button>
@@ -69,7 +68,7 @@
 				</form>
 			</div>
 			<div class="modal-footer">
-				<button id="button-show" class="btn btn-primary" data-dismiss="modal" aria-hidden="true">見る</button>
+				<button id="button-show" class="btn btn-primary" data-dismiss="modal" aria-hidden="true">カレンダーを見る</button>
 			</div>
 		</div>
 		<div id="modal-info" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="label-modal-info" aria-hidden="true">
@@ -95,7 +94,7 @@
 						<label class="control-label">候補地:</label>
 						<div class="controls">
 							<p id="candidate-address"></p>
-							<button id="button-confirm" type="button" class="btn">確定する</button>
+							<button id="button-confirm" type="button" class="btn">候補地を確定する</button>
 						</div>
 					</div>
 					<div class="control-group">
@@ -127,12 +126,12 @@
 				</form>
 			</div>
 			<div class="modal-footer">
-				<button id="button-update" class="btn btn-primary" data-dismiss="modal" aria-hidden="true">更新する</button>
+				<button id="button-update" class="btn btn-primary" data-dismiss="modal" aria-hidden="true">予定を更新する</button>
 				<button class="btn" data-dismiss="modal" aria-hidden="true">キャンセル</button>
 			</div>
 		</div>
 	</div>
-	<script type='application/javascript' src='js/fastclick.js'></script>
+	<!--<script type='application/javascript' src='js/fastclick.js'></script>-->
     <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
 	<script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
     <script type="text/javascript">

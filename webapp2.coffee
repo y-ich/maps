@@ -42,7 +42,10 @@ fullScreen() if /iPhone/.test(navigator.userAgent) and /Safari/.test(navigator.u
 window.onpagehide = app.saveMapStatus
 
 # finish startup screen
-setTimeout (->
-    $('.startup').on('webkitTransitionEnd', -> $('.startup').css 'display', 'none')
-                 .css 'opacity', '0'
-), STARTUP_TIME
+if /WebKit/.test navigator.userAgent
+    setTimeout (->
+        $('.startup').on('webkitTransitionEnd', -> $('.startup').css 'display', 'none')
+                     .css 'opacity', '0'
+    ), STARTUP_TIME
+else
+    $('.startup').css 'display', 'none'
