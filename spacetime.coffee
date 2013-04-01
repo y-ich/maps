@@ -96,15 +96,17 @@ getTimeZone.overQueryLimit = false
 
 
 # is a class with a marker, responsible for modal.
-class Place
+class Place extends google.maps.Marker
+    # Place is an extension of google.maps.Marker, but doen't extend it because google.maps.Marker is not a constructor function.
+
     @$modalInfo: $('#modal-info')
     @modalPlace: null
 
     # options is for Marker, @event is an Event for the Place.
     # optional @address means the Place is one of candicates and shows the address of the Place.
     constructor: (options, @event, @address = null) ->
-        @marker = new google.maps.Marker options
-        google.maps.event.addListener @marker, 'click', @showInfo
+        super options
+        google.maps.event.addListener @, 'click', @showInfo
 
     # returns Event's time (date property and time property) in local time at the Place.
     # startOrEnd is 'start' or 'end'
@@ -136,12 +138,12 @@ class Place
         else if @event.resource.start.dateTime? and @event.resource.end.dateTime?
             $('#form-event input[name="all-day"]')[0].checked = false
             $('#form-event input[name="all-day"]').trigger 'change'
-            getTimeZone new Date(@event.resource.start.dateTime), @marker.getPosition(), (obj) =>
+            getTimeZone new Date(@event.resource.start.dateTime), @getPosition(), (obj) =>
                 @startTimeZone = obj
                 dateTime = @getDateTime 'start'
                 Place.$modalInfo.find('input[name="start-date"]').val dateTime.date
                 Place.$modalInfo.find('input[name="start-time"]').val dateTime.time
-            getTimeZone new Date(@event.resource.end.dateTime), @marker.getPosition(), (obj) =>
+            getTimeZone new Date(@event.resource.end.dateTime), @getPosition(), (obj) =>
                 @endTimeZone = obj
                 dateTime = @getDateTime 'end'
                 Place.$modalInfo.find('input[name="end-date"]').val dateTime.date
@@ -154,6 +156,11 @@ class Place
         else
             $('#candidate').css 'display', 'none'
         Place.$modalInfo.find('input[name="description"]').val @event.resource.description
+
+# delegate
+#for name, method of MapState.prototype when typeof method is 'function'
+#    MapFSM.prototype[name] = ((name) ->
+#        -> @setState @state[name](@))(name) # substantiation of name
 
 
 # is a class of Google Calendar Event.
@@ -170,7 +177,8 @@ class Event
     # clears all events.
     @clearAll: ->
         for e in Event.events
-            e.marker?.setMap null
+            e.place?.setMap null
+            e.clearCandidates()
         Event.events = []
         Event.mark = 'A'
 
@@ -224,11 +232,11 @@ class Event
 
     tryToSetPlace: (centering) ->
         if @setPlace()
-            map.setCenter @place.marker.getPosition() if centering
+            map.setCenter @place.getPosition() if centering
         else
             @geocode (results) =>
                 if @setPlace()
-                    map.setCenter @place.marker.getPosition() if centering
+                    map.setCenter @place.getPosition() if centering
                 else
                     @candidates = []
                     for e in results
@@ -241,7 +249,7 @@ class Event
                             optimized: false,
                             @, e.formatted_address
                     setTimeout (=> $("#map img[src=\"#{@icon.url}\"]").addClass 'candidate'), 500 # 500ms is adhoc number for waiting for DOM
-                    map.setCenter @candidates[0].marker.getPosition() if centering
+                    map.setCenter @candidates[0].getPosition() if centering
 
     setGeolocation: (lat, lng, address) ->
         @resource.extendedProperties ?= {}
@@ -259,6 +267,10 @@ class Event
         ).execute (resp) ->
             if resp.error?
                 console.error 'gapi.client.calendar.events.update', resp
+
+    clearCandidates: ->
+        e.setMap null for e in @candidates if @candicates?
+        @candidates = null
 
 initializeDOM = ->
     localize()
@@ -315,11 +327,10 @@ initializeDOM = ->
                         event = new Event id, e, i == 0
 
     $('#button-confirm').on 'click', ->
-        position = Place.modalPlace.marker.getPosition()
+        position = Place.modalPlace.getPosition()
         Place.modalPlace.event.setGeolocation position.lat(), position.lng(), Place.modalPlace.geocodedAddress
         Place.modalPlace.event.update()
-        Place.modalPlace.event.candidates.forEach (e) -> e.marker.setMap null
-        Place.modalPlace.event.candidates = null
+        Place.modalPlace.event.clearCandidates()
         Place.modalPlace.event.setPlace()
         $('#candidate').css 'display', 'none'
 
