@@ -22,7 +22,7 @@
         return $('#button-calendar').css('display', '');
       });
     } else {
-      return $('#button-authorize').text('Authorize this app').attr('disabled', null).addClass('primary');
+      return $('#button-authorize').text('このアプリ"SpaceTime"にGoogleカレンダーへのアクセスを許可する').attr('disabled', null).addClass('primary');
     }
   };
 
@@ -483,7 +483,7 @@
     var mapOptions, mapStatus;
     mapOptions = {
       mapTypeId: google.maps.MapTypeId.ROADMAP,
-      disableDefaultUI: true,
+      disableDefaultUI: /iPad|iPhone/.test(navigator.userAgent),
       streetView: new google.maps.StreetViewPanorama(document.getElementById('streetview'), {
         panControl: false,
         zoomControl: false,

@@ -36,31 +36,32 @@
         <div id="map-ui"></div>
 		<div id="header" class="navbar navbar-fixed-top">
 			<div class="navbar-inner">
-				<button type="button" id="button-authorize" class="btn" disabled>Authorizing...</button>
-				<a id="button-calendar" href="#modal-calendar" role="button" class="btn" style="display: none;" data-toggle="modal">Calendar</a>
+				<button type="button" id="button-authorize" class="btn" disabled>認証中...</button>
+				<a id="button-calendar" href="#modal-calendar" role="button" class="btn" style="display: none;" data-toggle="modal">カレンダー一覧</a>
 			</div>
 		</div>
 		<div id="modal-calendar" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="label-modal-calendar" aria-hidden="true">
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-				<h5 id="label-modal-calendar">Calendar List</h5>
+				<h5 id="label-modal-calendar">カレンダーを選択してください</h5>
 			</div>
 			<div class="modal-body">
 				<form id="form-calendar" class="form-horizontal">
 					<div class="control-group">
-						<label class="control-label" for="calendar">Calendar:</label>
+						<label class="control-label" for="calendar">カレンダー:</label>
 						<div class="controls">
 							<select name="calendar" id="calendar-list"></select>
 						</div>
 					</div>
+					<p>予定を取り込む期間を入力してください。未入力の場合すべての予定を取り込みます。</p>
 					<div class="control-group">
-						<label class="control-label" for="start-date">Start:</label>
+						<label class="control-label" for="start-date">期間の始めの日:</label>
 						<div class="controls">
 							<input type="date" name="start-date" />
 						</div>
 					</div>
 					<div class="control-group">
-						<label class="control-label" for="end-date">End:</label>
+						<label class="control-label" for="end-date">期間の終わりの日:</label>
 						<div class="controls">
 							<input type="date" name="end-date" />
 						</div>
@@ -68,57 +69,57 @@
 				</form>
 			</div>
 			<div class="modal-footer">
-				<button id="button-show" class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Show</button>
+				<button id="button-show" class="btn btn-primary" data-dismiss="modal" aria-hidden="true">見る</button>
 			</div>
 		</div>
 		<div id="modal-info" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="label-modal-info" aria-hidden="true">
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-				<h5 id="label-modal-info">Event</h5>
+				<h5 id="label-modal-info">予定</h5>
 			</div>
 			<div class="modal-body">
 				<form id="form-event" class="form-horizontal">
 					<div class="control-group">
-						<label class="control-label" for="summary">Summary:</label>
+						<label class="control-label" for="summary">タイトル:</label>
 						<div class="controls">
 							<input type="text" name="summary" />
 						</div>
 					</div>
 					<div class="control-group">
-						<label class="control-label" for="location">Location:</label>
+						<label class="control-label" for="location">場所:</label>
 						<div class="controls">
 							<input type="text" name="location" />
 						</div>
 					</div>
 					<div id="candidate" class="control-group">
-						<label class="control-label">Geocode:</label>
+						<label class="control-label">候補地:</label>
 						<div class="controls">
 							<p id="candidate-address"></p>
-							<button id="button-confirm" type="button" class="btn">Confirm</button>
+							<button id="button-confirm" type="button" class="btn">確定する</button>
 						</div>
 					</div>
 					<div class="control-group">
 						<div class="controls">
 							<input type="checkbox" name="all-day" />
-							all day
+							終日
 						</div>
 					</div>
 					<div class="control-group">
-						<label class="control-label" for="start-date">Start:</label>
+						<label class="control-label" for="start-date">開始:</label>
 						<div class="controls">
 							<input type="date" name="start-date" />
 							<input type="time" name="start-time" />
 						</div>
 					</div>
 					<div class="control-group">
-						<label class="control-label" for="end-date">End:</label>
+						<label class="control-label" for="end-date">終了:</label>
 						<div class="controls">
 							<input type="date" name="end-date" />
 							<input type="time" name="end-time" />
 						</div>
 					</div>
 					<div class="control-group">
-						<label class="control-label" for="description">Description:</label>
+						<label class="control-label" for="description">詳細:</label>
 						<div class="controls">
 							<input type="text" name="description" />
 						</div>
@@ -126,8 +127,8 @@
 				</form>
 			</div>
 			<div class="modal-footer">
-				<button id="button-update" class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Update</button>
-				<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+				<button id="button-update" class="btn btn-primary" data-dismiss="modal" aria-hidden="true">更新する</button>
+				<button class="btn" data-dismiss="modal" aria-hidden="true">キャンセル</button>
 			</div>
 		</div>
 	</div>

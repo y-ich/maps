@@ -28,7 +28,7 @@ handleAuthResult = (result) ->
             $('#button-authorize').css 'display', 'none'
             $('#button-calendar').css 'display', ''
     else
-        $('#button-authorize').text('Authorize this app')
+        $('#button-authorize').text('このアプリ"SpaceTime"にGoogleカレンダーへのアクセスを許可する')
                               .attr('disabled', null)
                               .addClass 'primary'
 
@@ -343,10 +343,10 @@ initializeDOM = ->
 initializeGoogleMaps = ->
     mapOptions =
         mapTypeId: google.maps.MapTypeId.ROADMAP
-        disableDefaultUI: true
+        disableDefaultUI: /iPad|iPhone/.test(navigator.userAgent)
         streetView: new google.maps.StreetViewPanorama(document.getElementById('streetview'),
-            panControl: false,
-            zoomControl: false,
+            panControl: false
+            zoomControl: false
             visible: false
         )
 
