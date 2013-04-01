@@ -221,9 +221,12 @@
       return Event.mark = 'A';
     };
 
-    function Event(calendarId, resource) {
+    function Event(calendarId, resource, centering) {
       this.calendarId = calendarId;
       this.resource = resource;
+      if (centering == null) {
+        centering = false;
+      }
       this.candidates = null;
       if ((this.resource.location != null) && this.resource.location !== '') {
         this.icon = {
@@ -232,7 +235,7 @@
         if (Event.mark !== 'Z') {
           Event.mark = String.fromCharCode(Event.mark.charCodeAt(0) + 1);
         }
-        this.tryToSetPlace();
+        this.tryToSetPlace(centering);
       }
       Event.events.push(this);
     }
@@ -292,12 +295,20 @@
       }, this);
     };
 
-    Event.prototype.tryToSetPlace = function() {
+    Event.prototype.tryToSetPlace = function(centering) {
       var _this = this;
-      if (!this.setPlace()) {
+      if (this.setPlace()) {
+        if (centering) {
+          return map.setCenter(this.place.marker.getPosition());
+        }
+      } else {
         return this.geocode(function(results) {
           var e, _i, _len, _ref;
-          if (!_this.setPlace()) {
+          if (_this.setPlace()) {
+            if (centering) {
+              return map.setCenter(_this.place.marker.getPosition());
+            }
+          } else {
             _this.candidates = [];
             for (_i = 0, _len = results.length; _i < _len; _i++) {
               e = results[_i];
@@ -310,9 +321,12 @@
                 optimized: false
               }, _this, e.formatted_address));
             }
-            return setTimeout((function() {
+            setTimeout((function() {
               return $("#map img[src=\"" + _this.icon.url + "\"]").addClass('candidate');
             }), 500);
+            if (centering) {
+              return map.setCenter(_this.candidates[0].marker.getPosition());
+            }
           }
         });
       }
@@ -370,7 +384,7 @@
           return console.error(resp);
         } else {
           calendars = resp.items;
-          return $calendarList.html('<option value="new">New Calendar</option>' + ((function() {
+          return $calendarList.html('<option value="new">新規作成</option>' + ((function() {
             var _i, _len, _results;
             _results = [];
             for (_i = 0, _len = calendars.length; _i < _len; _i++) {
@@ -395,7 +409,7 @@
           });
           return req.execute(function(resp) {
             if (resp.error != null) {
-              return alert('新規カレンダーが作成できませんでした');
+              return alert('カレンダーが作成できませんでした');
             } else {
               console.log(resp);
               currentCalendar = resp.result;
@@ -422,20 +436,20 @@
         }
         req = gapi.client.calendar.events.list(options);
         return req.execute(function(resp) {
-          var event, _j, _len1, _ref, _results;
+          var event, i, _j, _len1, _ref, _ref1, _results;
           if (resp.error != null) {
             return console.error(resp);
-          } else if (resp.items != null) {
+          } else if (((_ref = resp.items) != null ? _ref.length : void 0) > 0) {
             resp.items.sort(function(x, y) {
-              var _ref, _ref1;
-              return new Date((_ref = x.start.dateTime) != null ? _ref : x.start.date + 'T00:00:00Z').getTime() - new Date((_ref1 = y.start.dateTime) != null ? _ref1 : y.start.date + 'T00:00:00Z').getTime();
+              var _ref1, _ref2;
+              return new Date((_ref1 = x.start.dateTime) != null ? _ref1 : x.start.date + 'T00:00:00Z').getTime() - new Date((_ref2 = y.start.dateTime) != null ? _ref2 : y.start.date + 'T00:00:00Z').getTime();
             });
             Event.geocodeCount = 0;
-            _ref = resp.items;
+            _ref1 = resp.items;
             _results = [];
-            for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
-              e = _ref[_j];
-              _results.push(event = new Event(id, e));
+            for (i = _j = 0, _len1 = _ref1.length; _j < _len1; i = ++_j) {
+              e = _ref1[i];
+              _results.push(event = new Event(id, e, i === 0));
             }
             return _results;
           }

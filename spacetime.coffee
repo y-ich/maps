@@ -174,13 +174,13 @@ class Event
         Event.events = []
         Event.mark = 'A'
 
-    constructor: (@calendarId, @resource) ->
+    constructor: (@calendarId, @resource, centering = false) ->
         @candidates = null
         if @resource.location? and @resource.location isnt ''
             @icon =
                 url: "http://www.google.com/mapfiles/marker#{Event.mark}.png"
             Event.mark = String.fromCharCode Event.mark.charCodeAt(0) + 1 if Event.mark isnt 'Z'
-            @tryToSetPlace()
+            @tryToSetPlace centering
         Event.events.push @
 
     latLng: ->
@@ -222,10 +222,14 @@ class Event
             title: @resource.location,
             @
 
-    tryToSetPlace: ->
-        unless @setPlace()
+    tryToSetPlace: (centering) ->
+        if @setPlace()
+            map.setCenter @place.marker.getPosition() if centering
+        else
             @geocode (results) =>
-                unless @setPlace()
+                if @setPlace()
+                    map.setCenter @place.marker.getPosition() if centering
+                else
                     @candidates = []
                     for e in results
                         @candidates.push new Place
@@ -237,6 +241,7 @@ class Event
                             optimized: false,
                             @, e.formatted_address
                     setTimeout (=> $("#map img[src=\"#{@icon.url}\"]").addClass 'candidate'), 500 # 500ms is adhoc number for waiting for DOM
+                    map.setCenter @candidates[0].marker.getPosition() if centering
 
     setGeolocation: (lat, lng, address) ->
         @resource.extendedProperties ?= {}
@@ -273,7 +278,7 @@ initializeDOM = ->
                 console.error resp
             else
                 calendars = resp.items
-                $calendarList.html '<option value="new">New Calendar</option>' + ("<option value=\"#{e.id}\">#{e.summary}</option>" for e in calendars).join('')
+                $calendarList.html '<option value="new">新規作成</option>' + ("<option value=\"#{e.id}\">#{e.summary}</option>" for e in calendars).join('')
 
     $('#button-show').on 'click', ->
         Event.clearAll()
@@ -285,7 +290,7 @@ initializeDOM = ->
                         summary: name
                 req.execute (resp) ->
                     if resp.error?
-                        alert '新規カレンダーが作成できませんでした'
+                        alert 'カレンダーが作成できませんでした'
                     else
                         console.log resp
                         currentCalendar = resp.result
@@ -303,11 +308,11 @@ initializeDOM = ->
             req.execute (resp) ->
                 if resp.error?
                     console.error resp
-                else if resp.items?
+                else if resp.items?.length > 0
                     resp.items.sort (x, y) -> new Date(x.start.dateTime ? x.start.date + 'T00:00:00Z').getTime() - new Date(y.start.dateTime ? y.start.date + 'T00:00:00Z').getTime()
                     Event.geocodeCount = 0
-                    for e in resp.items
-                        event = new Event id, e
+                    for e, i in resp.items
+                        event = new Event id, e, i == 0
 
     $('#button-confirm').on 'click', ->
         position = Place.modalPlace.marker.getPosition()
