@@ -31,7 +31,7 @@ handleAuthResult = (result) ->
             $('#button-authorize').css 'display', 'none'
             $('#button-calendar').css 'display', ''
     else
-        $('#button-authorize').text('このアプリ"Event Maps"にGoogleカレンダーへのアクセスを許可する')
+        $('#button-authorize').text('このアプリ"EventMaps"にGoogleカレンダーへのアクセスを許可する')
                               .attr('disabled', null)
                               .addClass 'primary'
 
@@ -46,7 +46,7 @@ setLocalExpressionInto = (id, english) ->
 localize = ->
     idWordPairs = []
 
-    document.title = getLocalizedString 'Event Maps'
+    document.title = getLocalizedString 'EventMaps'
     # document.getElementById('search-input').placeholder = getLocalizedString 'Search or Address'
     setLocalExpressionInto key, value for key, value of idWordPairs
 
@@ -333,6 +333,9 @@ class Event
 initializeDOM = ->
     localize()
     $('#container').css 'display', ''
+
+    new FastClick document.body
+
     $('#button-authorize').on 'click', ->
         gapi.auth.authorize
                 'client_id': CLIENT_ID

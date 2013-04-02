@@ -32,7 +32,7 @@
         return $('#button-calendar').css('display', '');
       });
     } else {
-      return $('#button-authorize').text('このアプリ"Event Maps"にGoogleカレンダーへのアクセスを許可する').attr('disabled', null).addClass('primary');
+      return $('#button-authorize').text('このアプリ"EventMaps"にGoogleカレンダーへのアクセスを許可する').attr('disabled', null).addClass('primary');
     }
   };
 
@@ -56,7 +56,7 @@
   localize = function() {
     var idWordPairs, key, value, _results;
     idWordPairs = [];
-    document.title = getLocalizedString('Event Maps');
+    document.title = getLocalizedString('EventMaps');
     _results = [];
     for (key in idWordPairs) {
       value = idWordPairs[key];
@@ -476,6 +476,7 @@
     var $calendarList;
     localize();
     $('#container').css('display', '');
+    new FastClick(document.body);
     $('#button-authorize').on('click', function() {
       return gapi.auth.authorize({
         'client_id': CLIENT_ID,
