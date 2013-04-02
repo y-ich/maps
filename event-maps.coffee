@@ -177,8 +177,7 @@ class Event
     # clears all events.
     @clearAll: ->
         for e in Event.events
-            e.place?.setMap null
-            e.clearCandidates()
+            e.clearMarkers()
         Event.events = []
         Event.mark = 'A'
 
@@ -196,6 +195,12 @@ class Event
             Event.mark = String.fromCharCode Event.mark.charCodeAt(0) + 1 if Event.mark isnt 'Z'
             @tryToSetPlace centering
         Event.events.push @
+
+    clearMarkers: ->
+        @place.setMap null if @place?
+        @place = null
+        e.setMap null for e in @candidates if @candicates?
+        @candidates = null
 
     latLng: ->
         if @resource.extendedProperties?.private?.geolocation?
@@ -297,9 +302,18 @@ class Event
         else
             $('#modal-calendar').modal 'show'
 
-    clearCandidates: ->
-        e.setMap null for e in @candidates if @candicates?
-        @candidates = null
+    insert: ->
+        if @calendarId?
+            gapi.client.calendar.events.insert(
+                calendarId: @calendarId
+                resource: @resource
+            ).execute (resp) =>
+                if resp.error?
+                    console.error 'gapi.client.calendar.events.update', resp
+                else
+                    @resource = resp.result
+        else
+            $('#modal-calendar').modal 'show'
 
 initializeDOM = ->
     localize()
@@ -361,52 +375,68 @@ initializeDOM = ->
         position = Place.modalPlace.getPosition()
         Place.modalPlace.event.setGeolocation position.lat(), position.lng(), Place.modalPlace.geocodedAddress
         Place.modalPlace.event.update()
-        Place.modalPlace.event.clearCandidates()
+        Place.modalPlace.event.clearMarkers()
         Place.modalPlace.event.setPlace()
         $('#candidate').css 'display', 'none'
 
     $('#button-update').on 'click', ->
-        updateFlag = false
         anEvent = Place.modalPlace.event
-        if anEvent.resource.summary isnt $('#form-event input[name="summary"]').val()
-            updateFlag = true
-            anEvent.resource.summary = $('#form-event input[name="summary"]').val()
-        if anEvent.resource.location isnt $('#form-event input[name="location"]').val()
-            updateFlag = true
-            anEvent.resource.location = $('#form-event input[name="location"]').val()
-            delete anEvent.resource.extendedProperties.private.geolocation
-        if $('#form-event input[name="all-day"]')[0].checked
-            if anEvent.resource.start.date isnt $('#form-event input[name="start-date"]').val().replace(/-/g, '/')
+        if anEvent.resource.id?
+            updateFlag = false
+            if anEvent.resource.summary isnt $('#form-event input[name="summary"]').val()
                 updateFlag = true
-                delete anEvent.resource.start.dateTime
-                anEvent.resource.start.date = $('#form-event input[name="start-date"]').val().replace(/-/g, '/')
-            if anEvent.resource.end.date isnt $('#form-event input[name="end-date"]').val().replace(/-/g, '/')
+                anEvent.resource.summary = $('#form-event input[name="summary"]').val()
+            if anEvent.resource.location isnt $('#form-event input[name="location"]').val()
                 updateFlag = true
-                delete anEvent.resource.end.dateTime
-                anEvent.resource.end.date = $('#form-event input[name="end-date"]').val().replace(/-/g, '/')
+                anEvent.resource.location = $('#form-event input[name="location"]').val()
+                delete anEvent.resource.extendedProperties.private.geolocation
+            if $('#form-event input[name="all-day"]')[0].checked
+                if anEvent.resource.start.date isnt $('#form-event input[name="start-date"]').val().replace(/-/g, '/')
+                    updateFlag = true
+                    delete anEvent.resource.start.dateTime
+                    anEvent.resource.start.date = $('#form-event input[name="start-date"]').val().replace(/-/g, '/')
+                if anEvent.resource.end.date isnt $('#form-event input[name="end-date"]').val().replace(/-/g, '/')
+                    updateFlag = true
+                    delete anEvent.resource.end.dateTime
+                    anEvent.resource.end.date = $('#form-event input[name="end-date"]').val().replace(/-/g, '/')
+            else
+                timeZone = Place.modalPlace.startTimeZone
+                startDateTime = new Date $('#form-event input[name="start-date"]').val().replace(/-/g, '/') + ' ' + $('#form-event input[name="start-time"]').val() + timeDifference(timeZone.dstOffset + timeZone.rawOffset)
+                if new Date(anEvent.resource.start.dateTime).getTime() isnt startDateTime.getTime()
+                    updateFlag = true
+                    delete anEvent.resource.start.date
+                    anEvent.resource.start.dateTime = startDateTime.toISOString()
+                    anEvent.resource.start.timeZone = timeZone.timeZoneId
+                timeZone = Place.modalPlace.endTimeZone
+                endDateTime = new Date $('#form-event input[name="end-date"]').val().replace(/-/g, '/') + ' ' + $('#form-event input[name="end-time"]').val() + timeDifference(timeZone.dstOffset + timeZone.rawOffset)
+                if new Date(anEvent.resource.end.dateTime).getTime() isnt endDateTime.getTime()
+                    updateFlag = true
+                    delete anEvent.resource.end.date
+                    anEvent.resource.end.dateTime = endDateTime.toISOString()
+                    anEvent.resource.end.timeZone = timeZone.timeZoneId
+            if anEvent.resource.description isnt $('#form-event input[name="description"]').val()
+                updateFlag = true
+                anEvent.resource.description = $('#form-event input[name="description"]').val()
+            anEvent.update() if updateFlag
         else
-            timeZone = Place.modalPlace.startTimeZone
-            startDateTime = new Date $('#form-event input[name="start-date"]').val().replace(/-/g, '/') + ' ' + $('#form-event input[name="start-time"]').val() + timeDifference(timeZone.dstOffset + timeZone.rawOffset)
-            if new Date(anEvent.resource.start.dateTime).getTime() isnt startDateTime.getTime()
-                updateFlag = true
-                delete anEvent.resource.start.date
-                anEvent.resource.start.dateTime = startDateTime.toISOString()
-                anEvent.resource.start.timeZone = timeZone.timeZoneId
-            timeZone = Place.modalPlace.endTimeZone
-            endDateTime = new Date $('#form-event input[name="end-date"]').val().replace(/-/g, '/') + ' ' + $('#form-event input[name="end-time"]').val() + timeDifference(timeZone.dstOffset + timeZone.rawOffset)
-            if new Date(anEvent.resource.end.dateTime).getTime() isnt endDateTime.getTime()
-                updateFlag = true
-                delete anEvent.resource.end.date
-                anEvent.resource.end.dateTime = endDateTime.toISOString()
-                anEvent.resource.end.timeZone = timeZone.timeZoneId
-        if anEvent.resource.description isnt $('#form-event input[name="description"]').val()
-            updateFlag = true
-            anEvent.resource.description = $('#form-event input[name="description"]').val()
-        anEvent.update() if updateFlag
+            anEvent.insert()
 
     $('#form-event input[name="all-day"]').on 'change', ->
         $('#form-event input[name="start-time"]').css 'display', if @checked then 'none' else ''
         $('#form-event input[name="end-time"]').css 'display', if @checked then 'none' else ''
+
+    $('#button-delete').on 'click', ->
+        anEvent = Place.modalPlace.event
+        if anEvent.calendarId? and anEvent.resource.id?
+            req = gapi.client.calendar.events.delete
+                calendarId: anEvent.calendarId
+                eventId: anEvent.resource.id
+            req.execute (resp) ->
+                if resp.error?
+                    alert '予定が削除できませんでした'
+        Event.events.splice Event.events.indexOf anEvent, 1
+        anEvent.clearMarkers()
+        Place.modalPlace = null
 
 initializeGoogleMaps = ->
     mapOptions =

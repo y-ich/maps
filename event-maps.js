@@ -213,14 +213,11 @@
     };
 
     Event.clearAll = function() {
-      var e, _i, _len, _ref, _ref1;
+      var e, _i, _len, _ref;
       _ref = Event.events;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         e = _ref[_i];
-        if ((_ref1 = e.place) != null) {
-          _ref1.setMap(null);
-        }
-        e.clearCandidates();
+        e.clearMarkers();
       }
       Event.events = [];
       return Event.mark = 'A';
@@ -264,6 +261,22 @@
       }
       Event.events.push(this);
     }
+
+    Event.prototype.clearMarkers = function() {
+      var e, _i, _len, _ref;
+      if (this.place != null) {
+        this.place.setMap(null);
+      }
+      this.place = null;
+      if (this.candicates != null) {
+        _ref = this.candidates;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          e = _ref[_i];
+          e.setMap(null);
+        }
+      }
+      return this.candidates = null;
+    };
 
     Event.prototype.latLng = function() {
       var geolocation, _ref, _ref1;
@@ -414,16 +427,22 @@
       }
     };
 
-    Event.prototype.clearCandidates = function() {
-      var e, _i, _len, _ref;
-      if (this.candicates != null) {
-        _ref = this.candidates;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          e = _ref[_i];
-          e.setMap(null);
-        }
+    Event.prototype.insert = function() {
+      var _this = this;
+      if (this.calendarId != null) {
+        return gapi.client.calendar.events.insert({
+          calendarId: this.calendarId,
+          resource: this.resource
+        }).execute(function(resp) {
+          if (resp.error != null) {
+            return console.error('gapi.client.calendar.events.update', resp);
+          } else {
+            return _this.resource = resp.result;
+          }
+        });
+      } else {
+        return $('#modal-calendar').modal('show');
       }
-      return this.candidates = null;
     };
 
     return Event;
@@ -542,63 +561,85 @@
       position = Place.modalPlace.getPosition();
       Place.modalPlace.event.setGeolocation(position.lat(), position.lng(), Place.modalPlace.geocodedAddress);
       Place.modalPlace.event.update();
-      Place.modalPlace.event.clearCandidates();
+      Place.modalPlace.event.clearMarkers();
       Place.modalPlace.event.setPlace();
       return $('#candidate').css('display', 'none');
     });
     $('#button-update').on('click', function() {
       var anEvent, endDateTime, startDateTime, timeZone, updateFlag;
-      updateFlag = false;
       anEvent = Place.modalPlace.event;
-      if (anEvent.resource.summary !== $('#form-event input[name="summary"]').val()) {
-        updateFlag = true;
-        anEvent.resource.summary = $('#form-event input[name="summary"]').val();
-      }
-      if (anEvent.resource.location !== $('#form-event input[name="location"]').val()) {
-        updateFlag = true;
-        anEvent.resource.location = $('#form-event input[name="location"]').val();
-        delete anEvent.resource.extendedProperties["private"].geolocation;
-      }
-      if ($('#form-event input[name="all-day"]')[0].checked) {
-        if (anEvent.resource.start.date !== $('#form-event input[name="start-date"]').val().replace(/-/g, '/')) {
+      if (anEvent.resource.id != null) {
+        updateFlag = false;
+        if (anEvent.resource.summary !== $('#form-event input[name="summary"]').val()) {
           updateFlag = true;
-          delete anEvent.resource.start.dateTime;
-          anEvent.resource.start.date = $('#form-event input[name="start-date"]').val().replace(/-/g, '/');
+          anEvent.resource.summary = $('#form-event input[name="summary"]').val();
         }
-        if (anEvent.resource.end.date !== $('#form-event input[name="end-date"]').val().replace(/-/g, '/')) {
+        if (anEvent.resource.location !== $('#form-event input[name="location"]').val()) {
           updateFlag = true;
-          delete anEvent.resource.end.dateTime;
-          anEvent.resource.end.date = $('#form-event input[name="end-date"]').val().replace(/-/g, '/');
+          anEvent.resource.location = $('#form-event input[name="location"]').val();
+          delete anEvent.resource.extendedProperties["private"].geolocation;
+        }
+        if ($('#form-event input[name="all-day"]')[0].checked) {
+          if (anEvent.resource.start.date !== $('#form-event input[name="start-date"]').val().replace(/-/g, '/')) {
+            updateFlag = true;
+            delete anEvent.resource.start.dateTime;
+            anEvent.resource.start.date = $('#form-event input[name="start-date"]').val().replace(/-/g, '/');
+          }
+          if (anEvent.resource.end.date !== $('#form-event input[name="end-date"]').val().replace(/-/g, '/')) {
+            updateFlag = true;
+            delete anEvent.resource.end.dateTime;
+            anEvent.resource.end.date = $('#form-event input[name="end-date"]').val().replace(/-/g, '/');
+          }
+        } else {
+          timeZone = Place.modalPlace.startTimeZone;
+          startDateTime = new Date($('#form-event input[name="start-date"]').val().replace(/-/g, '/') + ' ' + $('#form-event input[name="start-time"]').val() + timeDifference(timeZone.dstOffset + timeZone.rawOffset));
+          if (new Date(anEvent.resource.start.dateTime).getTime() !== startDateTime.getTime()) {
+            updateFlag = true;
+            delete anEvent.resource.start.date;
+            anEvent.resource.start.dateTime = startDateTime.toISOString();
+            anEvent.resource.start.timeZone = timeZone.timeZoneId;
+          }
+          timeZone = Place.modalPlace.endTimeZone;
+          endDateTime = new Date($('#form-event input[name="end-date"]').val().replace(/-/g, '/') + ' ' + $('#form-event input[name="end-time"]').val() + timeDifference(timeZone.dstOffset + timeZone.rawOffset));
+          if (new Date(anEvent.resource.end.dateTime).getTime() !== endDateTime.getTime()) {
+            updateFlag = true;
+            delete anEvent.resource.end.date;
+            anEvent.resource.end.dateTime = endDateTime.toISOString();
+            anEvent.resource.end.timeZone = timeZone.timeZoneId;
+          }
+        }
+        if (anEvent.resource.description !== $('#form-event input[name="description"]').val()) {
+          updateFlag = true;
+          anEvent.resource.description = $('#form-event input[name="description"]').val();
+        }
+        if (updateFlag) {
+          return anEvent.update();
         }
       } else {
-        timeZone = Place.modalPlace.startTimeZone;
-        startDateTime = new Date($('#form-event input[name="start-date"]').val().replace(/-/g, '/') + ' ' + $('#form-event input[name="start-time"]').val() + timeDifference(timeZone.dstOffset + timeZone.rawOffset));
-        if (new Date(anEvent.resource.start.dateTime).getTime() !== startDateTime.getTime()) {
-          updateFlag = true;
-          delete anEvent.resource.start.date;
-          anEvent.resource.start.dateTime = startDateTime.toISOString();
-          anEvent.resource.start.timeZone = timeZone.timeZoneId;
-        }
-        timeZone = Place.modalPlace.endTimeZone;
-        endDateTime = new Date($('#form-event input[name="end-date"]').val().replace(/-/g, '/') + ' ' + $('#form-event input[name="end-time"]').val() + timeDifference(timeZone.dstOffset + timeZone.rawOffset));
-        if (new Date(anEvent.resource.end.dateTime).getTime() !== endDateTime.getTime()) {
-          updateFlag = true;
-          delete anEvent.resource.end.date;
-          anEvent.resource.end.dateTime = endDateTime.toISOString();
-          anEvent.resource.end.timeZone = timeZone.timeZoneId;
-        }
-      }
-      if (anEvent.resource.description !== $('#form-event input[name="description"]').val()) {
-        updateFlag = true;
-        anEvent.resource.description = $('#form-event input[name="description"]').val();
-      }
-      if (updateFlag) {
-        return anEvent.update();
+        return anEvent.insert();
       }
     });
-    return $('#form-event input[name="all-day"]').on('change', function() {
+    $('#form-event input[name="all-day"]').on('change', function() {
       $('#form-event input[name="start-time"]').css('display', this.checked ? 'none' : '');
       return $('#form-event input[name="end-time"]').css('display', this.checked ? 'none' : '');
+    });
+    return $('#button-delete').on('click', function() {
+      var anEvent, req;
+      anEvent = Place.modalPlace.event;
+      if ((anEvent.calendarId != null) && (anEvent.resource.id != null)) {
+        req = gapi.client.calendar.events["delete"]({
+          calendarId: anEvent.calendarId,
+          eventId: anEvent.resource.id
+        });
+        req.execute(function(resp) {
+          if (resp.error != null) {
+            return alert('予定が削除できませんでした');
+          }
+        });
+      }
+      Event.events.splice(Event.events.indexOf(anEvent, 1));
+      anEvent.clearMarkers();
+      return Place.modalPlace = null;
     });
   };
 
