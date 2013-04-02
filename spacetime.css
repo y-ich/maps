@@ -40,7 +40,6 @@ body {
   width: 100%;
   top: 0px;
   bottom: 0px;
-  -webkit-transition: top 0.3s, bottom 0.3s;
 }
 .candidate {
   opacity: 0.5;

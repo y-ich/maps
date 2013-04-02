@@ -43,14 +43,10 @@
 
   window.onpagehide = app.saveMapStatus;
 
-  if (/WebKit/.test(navigator.userAgent)) {
-    setTimeout((function() {
-      return $('.startup').on('webkitTransitionEnd', function() {
-        return $('.startup').css('display', 'none');
-      }).css('opacity', '0');
-    }), STARTUP_TIME);
-  } else {
-    $('.startup').css('display', 'none');
-  }
+  setTimeout((function() {
+    return $('.startup').on($.support.transition.end, function() {
+      return $(this).css('display', 'none');
+    }).addClass('fade');
+  }), STARTUP_TIME);
 
 }).call(this);
