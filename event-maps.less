@@ -23,9 +23,20 @@ body {
 	padding: 0px;
 }
 
-.navbar-fixed-top {
+.navbar-fixed-top, .navbar-fixed-bottom {
 	position: fixed; // static in responsive for mobile.
 	margin: 0px; // -20px in responsive for mobile.
+}
+
+.navbar-fixed-top .navbar-inner, .navbar-fixed-bottom .navbar-inner {
+	background-color: transparent;
+	background-image: none;
+	border: none;
+	-webkit-box-shadow: none;
+}
+
+.search-query {
+	max-width: 180px;
 }
 
 .icon-chevron-right {
@@ -65,13 +76,6 @@ body {
 
 .info-window {
 	min-width: 320px;
-}
-
-#header .navbar-inner {
-	background-color: transparent;
-	background-image: none;
-	border: none;
-	-webkit-box-shadow: none;
 }
 
 // Followings are for wep app.

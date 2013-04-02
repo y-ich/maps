@@ -647,7 +647,7 @@
       $('#form-event input[name="start-time"]').css('display', this.checked ? 'none' : '');
       return $('#form-event input[name="end-time"]').css('display', this.checked ? 'none' : '');
     });
-    return $('#button-delete').on('click', function() {
+    $('#button-delete').on('click', function() {
       var anEvent, req;
       anEvent = Place.modalPlace.event;
       if ((anEvent.calendarId != null) && (anEvent.resource.id != null)) {
@@ -664,6 +664,14 @@
       Event.events.splice(Event.events.indexOf(anEvent, 1));
       anEvent.clearMarkers();
       return Place.modalPlace = null;
+    });
+    return $('#form-search').on('submit', function(event) {
+      var location;
+      location = $(this).children('[name="search"]').val();
+      new Event(currentCalendar != null ? currentCalendar.id : void 0, {
+        location: location
+      });
+      return event.preventDefault();
     });
   };
 

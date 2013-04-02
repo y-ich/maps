@@ -456,6 +456,12 @@ initializeDOM = ->
         anEvent.clearMarkers()
         Place.modalPlace = null
 
+    $('#form-search').on 'submit', (event) ->
+        location = $(this).children('[name="search"]').val()
+        new Event currentCalendar?.id,
+            location: location
+        event.preventDefault()
+
 initializeGoogleMaps = ->
     mapOptions =
         mapTypeId: google.maps.MapTypeId.ROADMAP
