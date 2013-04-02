@@ -21,6 +21,7 @@ TIME_ZONE_HOST = 'http://safari-park.herokuapp.com'
 map = null
 calendars= null # result of calenders list
 currentCalendar = null
+currentEvent = null
 geocoder = null
 spinner = new Spinner color: '#000'
 
@@ -94,6 +95,8 @@ getTimeZone = (date, position, callback) ->
                 console.error obj
 getTimeZone.overQueryLimit = false
 
+compareEventResources = (x, y) ->
+    new Date(x.start.dateTime ? x.start.date + 'T00:00:00Z').getTime() - new Date(y.start.dateTime ? y.start.date + 'T00:00:00Z').getTime()
 
 # is a class with a marker, responsible for modal.
 class Place extends google.maps.Marker
@@ -209,6 +212,8 @@ class Event
             Event.mark = String.fromCharCode Event.mark.charCodeAt(0) + 1 if Event.mark isnt 'Z'
             @tryToSetPlace centering
         Event.events.push @
+
+        currentEvent = @ if centering
 
     clearMarkers: ->
         @place.setMap null if @place?
@@ -384,7 +389,7 @@ initializeDOM = ->
                 if resp.error?
                     console.error resp
                 else if resp.items?.length > 0
-                    resp.items.sort (x, y) -> new Date(x.start.dateTime ? x.start.date + 'T00:00:00Z').getTime() - new Date(y.start.dateTime ? y.start.date + 'T00:00:00Z').getTime()
+                    resp.items.sort compareEventResources
                     Event.geocodeCount = 0
                     for e, i in resp.items
                         event = new Event id, e, i == 0
@@ -468,6 +473,18 @@ initializeDOM = ->
                     else
                         console.error status
         event.preventDefault()
+
+    $('#button-prev, #button-next').on 'click', (event) ->
+        sorted = Event.events.sort (x, y) -> compareEventResources x.resource, y.resource
+        index = if currentEvent? then sorted.indexOf currentEvent else 0
+        if this.id is 'button-prev'
+            index -= 1
+            index = sorted.length - 1 if index < 0
+        else
+            index += 1
+            index = 0 if index >= sorted.length
+        currentEvent = sorted[index]
+        map.setCenter (currentEvent.place ? currentEvent.candidates[0]).getPosition()
 
 initializeGoogleMaps = ->
     mapOptions =
