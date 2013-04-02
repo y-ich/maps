@@ -22,6 +22,7 @@ map = null
 calendars= null # result of calenders list
 currentCalendar = null
 geocoder = null
+spinner = new Spinner color: '#000'
 
 # Google OAuth 2.0 handler
 handleAuthResult = (result) ->
@@ -29,7 +30,6 @@ handleAuthResult = (result) ->
         gapi.client.load 'calendar', 'v3', ->
             $('#button-authorize').css 'display', 'none'
             $('#button-calendar').css 'display', ''
-            $('#modal-calendar').modal 'show'
     else
         $('#button-authorize').text('このアプリ"Event Maps"にGoogleカレンダーへのアクセスを許可する')
                               .attr('disabled', null)
@@ -136,18 +136,32 @@ class Place extends google.maps.Marker
             Place.$modalInfo.find('input[name="start-date"]').val @event.resource.start.date
             Place.$modalInfo.find('input[name="end-date"]').val @event.resource.end.date
         else if @event.resource.start.dateTime? and @event.resource.end.dateTime?
+            setTime = (startOrEnd) =>
+                dateTime = @getDateTime startOrEnd
+                Place.$modalInfo.find("input[name=\"#{startOrEnd}-date\"]").val dateTime.date
+                Place.$modalInfo.find("input[name=\"#{startOrEnd}-time\"]").val dateTime.time
             $('#form-event input[name="all-day"]')[0].checked = false
             $('#form-event input[name="all-day"]').trigger 'change'
-            getTimeZone new Date(@event.resource.start.dateTime), @getPosition(), (obj) =>
-                @startTimeZone = obj
-                dateTime = @getDateTime 'start'
-                Place.$modalInfo.find('input[name="start-date"]').val dateTime.date
-                Place.$modalInfo.find('input[name="start-time"]').val dateTime.time
-            getTimeZone new Date(@event.resource.end.dateTime), @getPosition(), (obj) =>
-                @endTimeZone = obj
-                dateTime = @getDateTime 'end'
-                Place.$modalInfo.find('input[name="end-date"]').val dateTime.date
-                Place.$modalInfo.find('input[name="end-time"]').val dateTime.time
+            startDeferred = $.Deferred()
+            endDeferred = $.Deferred()
+            $.when(startDeferred, endDeferred).then -> spinner.stop()
+            spinner.spin document.body
+            if @startTimeZone?
+                startDeferred.resolve()
+                setTime 'start'
+            else
+                getTimeZone new Date(@event.resource.start.dateTime), @getPosition(), (obj) =>
+                    startDeferred.resolve()
+                    @startTimeZone = obj
+                    setTime 'start'
+            if @endTimeZone?
+                endDeferred.resolve()
+                setTime 'end'
+            else
+                getTimeZone new Date(@event.resource.end.dateTime), @getPosition(), (obj) =>
+                    endDeferred.resolve()
+                    @endTimeZone = obj
+                    setTime 'end'
         else
             console.error 'inconsistent start and end'
         if @address
