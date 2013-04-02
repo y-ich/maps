@@ -399,15 +399,19 @@
     };
 
     Event.prototype.update = function() {
-      return gapi.client.calendar.events.update({
-        calendarId: this.calendarId,
-        eventId: this.resource.id,
-        resource: this.resource
-      }).execute(function(resp) {
-        if (resp.error != null) {
-          return console.error('gapi.client.calendar.events.update', resp);
-        }
-      });
+      if (this.calendarId != null) {
+        return gapi.client.calendar.events.update({
+          calendarId: this.calendarId,
+          eventId: this.resource.id,
+          resource: this.resource
+        }).execute(function(resp) {
+          if (resp.error != null) {
+            return console.error('gapi.client.calendar.events.update', resp);
+          }
+        });
+      } else {
+        return $('#modal-calendar').modal('show');
+      }
     };
 
     Event.prototype.clearCandidates = function() {
@@ -460,8 +464,10 @@
       });
     });
     $('#button-show').on('click', function() {
-      var e, id, name, options, req, _i, _len;
-      Event.clearAll();
+      var e, id, name, options, req, _i, _j, _len, _len1, _ref;
+      if (Event.events.length > 0 && (Event.events[0].calendarId != null)) {
+        Event.clearAll();
+      }
       id = $calendarList.children('option:selected').attr('value');
       if (id === 'new') {
         if (name = prompt('新しいカレンダーに名前をつけてください')) {
@@ -471,11 +477,19 @@
             }
           });
           return req.execute(function(resp) {
+            var e, _i, _len, _ref, _results;
             if (resp.error != null) {
               return alert('カレンダーが作成できませんでした');
             } else {
               currentCalendar = resp.result;
-              return calendars.push(currentCalendar);
+              calendars.push(currentCalendar);
+              _ref = Event.events;
+              _results = [];
+              for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+                e = _ref[_i];
+                _results.push(e.calendarId = currentCalendar.id);
+              }
+              return _results;
             }
           });
         }
@@ -486,6 +500,11 @@
             currentCalendar = e;
             break;
           }
+        }
+        _ref = Event.events;
+        for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
+          e = _ref[_j];
+          e.calendarId = currentCalendar.id;
         }
         options = {
           calendarId: id
@@ -498,19 +517,19 @@
         }
         req = gapi.client.calendar.events.list(options);
         return req.execute(function(resp) {
-          var event, i, _j, _len1, _ref, _ref1, _results;
+          var event, i, _k, _len2, _ref1, _ref2, _results;
           if (resp.error != null) {
             return console.error(resp);
-          } else if (((_ref = resp.items) != null ? _ref.length : void 0) > 0) {
+          } else if (((_ref1 = resp.items) != null ? _ref1.length : void 0) > 0) {
             resp.items.sort(function(x, y) {
-              var _ref1, _ref2;
-              return new Date((_ref1 = x.start.dateTime) != null ? _ref1 : x.start.date + 'T00:00:00Z').getTime() - new Date((_ref2 = y.start.dateTime) != null ? _ref2 : y.start.date + 'T00:00:00Z').getTime();
+              var _ref2, _ref3;
+              return new Date((_ref2 = x.start.dateTime) != null ? _ref2 : x.start.date + 'T00:00:00Z').getTime() - new Date((_ref3 = y.start.dateTime) != null ? _ref3 : y.start.date + 'T00:00:00Z').getTime();
             });
             Event.geocodeCount = 0;
-            _ref1 = resp.items;
+            _ref2 = resp.items;
             _results = [];
-            for (i = _j = 0, _len1 = _ref1.length; _j < _len1; i = ++_j) {
-              e = _ref1[i];
+            for (i = _k = 0, _len2 = _ref2.length; _k < _len2; i = ++_k) {
+              e = _ref2[i];
               _results.push(event = new Event(id, e, i === 0));
             }
             return _results;
@@ -614,7 +633,7 @@
     map = new google.maps.Map(document.getElementById('map'), mapOptions);
     map.setTilt(45);
     google.maps.event.addListener(map, 'click', function(event) {
-      return new Event(currentCalendar.id, {
+      return new Event(currentCalendar != null ? currentCalendar.id : void 0, {
         extendedProperties: {
           "private": {
             geolocation: JSON.stringify({

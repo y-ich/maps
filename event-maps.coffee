@@ -286,13 +286,16 @@ class Event
         @resource.location = address unless @resource.location? and @resource.location isnt ''
 
     update: ->
-        gapi.client.calendar.events.update(
-            calendarId: @calendarId
-            eventId: @resource.id
-            resource: @resource
-        ).execute (resp) ->
-            if resp.error?
-                console.error 'gapi.client.calendar.events.update', resp
+        if @calendarId?
+            gapi.client.calendar.events.update(
+                calendarId: @calendarId
+                eventId: @resource.id
+                resource: @resource
+            ).execute (resp) ->
+                if resp.error?
+                    console.error 'gapi.client.calendar.events.update', resp
+        else
+            $('#modal-calendar').modal 'show'
 
     clearCandidates: ->
         e.setMap null for e in @candidates if @candicates?
@@ -319,7 +322,8 @@ initializeDOM = ->
                 $calendarList.html '<option value="new">新規作成</option>' + ("<option value=\"#{e.id}\">#{e.summary}</option>" for e in calendars).join('')
 
     $('#button-show').on 'click', ->
-        Event.clearAll()
+        if Event.events.length > 0 and Event.events[0].calendarId?
+            Event.clearAll()
         id = $calendarList.children('option:selected').attr 'value'
         if id is 'new'
             if name = prompt '新しいカレンダーに名前をつけてください'
@@ -332,11 +336,13 @@ initializeDOM = ->
                     else
                         currentCalendar = resp.result
                         calendars.push currentCalendar
+                        e.calendarId = currentCalendar.id for e in Event.events
         else
             for e in calendars
                 if e.id is id
                     currentCalendar = e
                     break
+            e.calendarId = currentCalendar.id for e in Event.events
             options =
                 calendarId: id
             options.timeMin = $('#form-calendar [name="start-date"]')[0].value + 'T00:00:00Z' unless $('#form-calendar [name="start-date"]')[0].value is ''
@@ -432,7 +438,7 @@ initializeGoogleMaps = ->
     map.setTilt 45
 
     google.maps.event.addListener map, 'click', (event) ->
-        new Event currentCalendar.id,
+        new Event currentCalendar?.id,
             extendedProperties:
                 private:
                     geolocation: JSON.stringify(
