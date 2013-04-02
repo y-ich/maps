@@ -37,10 +37,6 @@
 
   app.initialize();
 
-  if (/iPhone/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent)) {
-    fullScreen();
-  }
-
   window.onpagehide = app.saveMapStatus;
 
   setTimeout((function() {

@@ -37,7 +37,7 @@ for type in types
     applicationCache.addEventListener type, (event) -> console.log 'cache', event.type
 
 app.initialize()
-fullScreen() if /iPhone/.test(navigator.userAgent) and /Safari/.test(navigator.userAgent)
+# fullScreen() if /iPhone/.test(navigator.userAgent) and /Safari/.test(navigator.userAgent)
 
 window.onpagehide = app.saveMapStatus
 
