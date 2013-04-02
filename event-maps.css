@@ -24,6 +24,7 @@ body {
   opacity: .25;
 }
 .modal-body {
+  max-height: 300px;
   -webkit-overflow-scrolling: touch;
 }
 /* end of cancel */
