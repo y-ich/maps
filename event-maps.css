@@ -23,6 +23,9 @@ body {
   margin-right: -6px;
   opacity: .25;
 }
+.modal-body {
+  -webkit-overflow-scrolling: touch;
+}
 /* end of cancel */
 #map img,
 #streetview img {
@@ -61,7 +64,6 @@ body {
   left: 0px;
   bottom: 0px;
   z-index: 1030;
-  -webkit-transition: opacity 1s;
 }
 #logo {
   position: absolute;
