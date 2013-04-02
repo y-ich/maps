@@ -253,7 +253,8 @@ class Event
             position: latLng
             icon: @icon ? null
             shadow: if @icon? then Event.shadow else null
-            title: @resource.location,
+            title: @resource.location
+            animation: if @address()? then null else google.maps.Animation.DROP,
             @
 
     tryToSetPlace: (centering) ->
@@ -446,14 +447,6 @@ initializeGoogleMaps = ->
             position: google.maps.ControlPosition.LEFT_CENTER
         panControlOptions:
             position: google.maps.ControlPosition.LEFT_CENTER
-        streetView: new google.maps.StreetViewPanorama(document.getElementById('streetview'),
-            panControl: false
-            zoomControl: false
-            visible: false
-        )
-
-    google.maps.event.addListener mapOptions.streetView, 'position_changed', ->
-        map.setCenter this.getPosition()
 
     # restore map status
     if localStorage[MAP_STATUS]?

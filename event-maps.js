@@ -349,7 +349,8 @@
         position: latLng,
         icon: (_ref = this.icon) != null ? _ref : null,
         shadow: this.icon != null ? Event.shadow : null,
-        title: this.resource.location
+        title: this.resource.location,
+        animation: this.address() != null ? null : google.maps.Animation.DROP
       }, this);
     };
 
@@ -653,16 +654,8 @@
       },
       panControlOptions: {
         position: google.maps.ControlPosition.LEFT_CENTER
-      },
-      streetView: new google.maps.StreetViewPanorama(document.getElementById('streetview'), {
-        panControl: false,
-        zoomControl: false,
-        visible: false
-      })
+      }
     };
-    google.maps.event.addListener(mapOptions.streetView, 'position_changed', function() {
-      return map.setCenter(this.getPosition());
-    });
     if (localStorage[MAP_STATUS] != null) {
       mapStatus = JSON.parse(localStorage[MAP_STATUS]);
       mapOptions.center = new google.maps.LatLng(mapStatus.lat, mapStatus.lng);
