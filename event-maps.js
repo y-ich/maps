@@ -29,7 +29,7 @@
         return $('#modal-calendar').modal('show');
       });
     } else {
-      return $('#button-authorize').text('このアプリ"SpaceTime"にGoogleカレンダーへのアクセスを許可する').attr('disabled', null).addClass('primary');
+      return $('#button-authorize').text('このアプリ"Event Maps"にGoogleカレンダーへのアクセスを許可する').attr('disabled', null).addClass('primary');
     }
   };
 
@@ -53,7 +53,7 @@
   localize = function() {
     var idWordPairs, key, value, _results;
     idWordPairs = [];
-    document.title = getLocalizedString('Space-Time');
+    document.title = getLocalizedString('Event Maps');
     _results = [];
     for (key in idWordPairs) {
       value = idWordPairs[key];
@@ -348,35 +348,26 @@
       }
       if (!((this.place != null) && (this.address() != null))) {
         return this.geocode(function(results) {
-          var e, _i, _len, _ref, _ref1;
-          if (results.length === 1) {
+          var e, _i, _len, _ref;
+          if (_this.place != null) {
+            return _this.setGeolocation(results[0].geometry.location.lat(), results[0].geometry.location.lng(), results[0].formatted_address);
+          } else if (results.length === 1) {
             _this.setPlace();
             if (centering) {
               return map.setCenter(_this.place.getPosition());
             }
           } else {
             _this.candidates = [];
-            if ((_this.latLng() != null) && !_this.address()) {
+            for (_i = 0, _len = results.length; _i < _len; _i++) {
+              e = results[_i];
               _this.candidates.push(new Place({
                 map: map,
-                position: results[0].geometry.location,
+                position: e.geometry.location,
                 icon: (_ref = _this.icon) != null ? _ref : null,
                 shadow: _this.icon != null ? Event.shadow : null,
                 title: _this.resource.location + '?',
                 optimized: false
-              }, _this, results[0].formatted_address));
-            } else {
-              for (_i = 0, _len = results.length; _i < _len; _i++) {
-                e = results[_i];
-                _this.candidates.push(new Place({
-                  map: map,
-                  position: e.geometry.location,
-                  icon: (_ref1 = _this.icon) != null ? _ref1 : null,
-                  shadow: _this.icon != null ? Event.shadow : null,
-                  title: _this.resource.location + '?',
-                  optimized: false
-                }, _this, e.formatted_address));
-              }
+              }, _this, e.formatted_address));
             }
             setTimeout((function() {
               return $("#map img[src=\"" + _this.icon.url + "\"]").addClass('candidate');
@@ -390,7 +381,7 @@
     };
 
     Event.prototype.setGeolocation = function(lat, lng, address) {
-      var _base, _base1, _base2, _ref, _ref1, _ref2;
+      var _base, _base1, _ref, _ref1;
       if ((_ref = (_base = this.resource).extendedProperties) == null) {
         _base.extendedProperties = {};
       }
@@ -402,8 +393,9 @@
         lng: lng,
         address: address
       });
-      console.log(address);
-      return (_ref2 = (_base2 = this.resource).location) != null ? _ref2 : _base2.location = address;
+      if (!((this.resource.location != null) && this.resource.location !== '')) {
+        return this.resource.location = address;
+      }
     };
 
     Event.prototype.update = function() {

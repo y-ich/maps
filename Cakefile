@@ -2,7 +2,7 @@
 
 maps = ['googleMapsExtensions.coffee', 'maps.coffee']
 maps2 = ['googleDrive.coffee', 'maps2.coffee']
-spacetime = ['spacetime.coffee']
+eventMaps = ['event-maps.coffee']
 start = 'webapp.coffee'
 start2 = 'webapp2.coffee'
 
@@ -33,13 +33,13 @@ task 'watch2', 'continually build with --watch', ->
     spec.stdout.on 'data', (data) -> console.log data.toString().trim()
 
 task 'watch3', 'continually build with --watch', ->
-    src = spawn 'coffee', ['-wcj', 'spacetime.js'].concat spacetime
+    src = spawn 'coffee', ['-wcj', 'event-maps.js'].concat eventMaps
     src.stdout.on 'data', (data) -> console.log data.toString().trim()
 
     src2 = spawn 'coffee', ['-wc', start2]
     src2.stdout.on 'data', (data) -> console.log data.toString().trim()
 
-    test = spawn 'coffee', ['-wcbj', 'test/spacetime.js'].concat spacetime
+    test = spawn 'coffee', ['-wcbj', 'test/event-maps.js'].concat eventMaps
     test.stdout.on 'data', (data) -> console.log data.toString().trim()
 
     spec = spawn 'coffee', ['-wc','spec']

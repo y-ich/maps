@@ -31,7 +31,7 @@ handleAuthResult = (result) ->
             $('#button-calendar').css 'display', ''
             $('#modal-calendar').modal 'show'
     else
-        $('#button-authorize').text('このアプリ"SpaceTime"にGoogleカレンダーへのアクセスを許可する')
+        $('#button-authorize').text('このアプリ"Event Maps"にGoogleカレンダーへのアクセスを許可する')
                               .attr('disabled', null)
                               .addClass 'primary'
 
@@ -46,7 +46,7 @@ setLocalExpressionInto = (id, english) ->
 localize = ->
     idWordPairs = []
 
-    document.title = getLocalizedString 'Space-Time'
+    document.title = getLocalizedString 'Event Maps'
     # document.getElementById('search-input').placeholder = getLocalizedString 'Search or Address'
     setLocalExpressionInto key, value for key, value of idWordPairs
 
@@ -255,32 +255,24 @@ class Event
         @setPlace()
         map.setCenter @place.getPosition() if @place? and centering
 
-        if not (@place? and @address()?)
+        if not (@place? and @address()?) # if place and/or address is unknown
             @geocode (results) =>
-                if results.length == 1
+                if @place? # if new event by clicking map
+                    @setGeolocation results[0].geometry.location.lat(), results[0].geometry.location.lng(), results[0].formatted_address
+                else if results.length == 1
                     @setPlace()
                     map.setCenter @place.getPosition() if centering
                 else
                     @candidates = []
-                    if @latLng()? and not @address() # if new event by clicking map
+                    for e in results
                         @candidates.push new Place
                             map: map
-                            position: results[0].geometry.location
+                            position: e.geometry.location
                             icon: @icon ? null
                             shadow: if @icon? then Event.shadow else null
                             title: @resource.location + '?'
                             optimized: false,
-                            @, results[0].formatted_address
-                    else
-                        for e in results
-                            @candidates.push new Place
-                                map: map
-                                position: e.geometry.location
-                                icon: @icon ? null
-                                shadow: if @icon? then Event.shadow else null
-                                title: @resource.location + '?'
-                                optimized: false,
-                                @, e.formatted_address
+                            @, e.formatted_address
                     setTimeout (=> $("#map img[src=\"#{@icon.url}\"]").addClass 'candidate'), 500 # 500ms is adhoc number for waiting for DOM
                     map.setCenter @candidates[0].getPosition() if centering
 
@@ -291,8 +283,7 @@ class Event
             lat: lat
             lng: lng
             address: address
-        console.log address
-        @resource.location ?= address
+        @resource.location = address unless @resource.location? and @resource.location isnt ''
 
     update: ->
         gapi.client.calendar.events.update(
