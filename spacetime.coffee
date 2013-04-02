@@ -183,8 +183,14 @@ class Event
         Event.mark = 'A'
 
     constructor: (@calendarId, @resource, centering = false) ->
+        @resource.summary ?= '新しい予定'
+        @resource.location ?= ''
+        @resource.description ?= ''
+        @resource.start ?= dateTime: new Date().toISOString()
+        @resource.end ?= dateTime: new Date().toISOString()
+
         @candidates = null
-        if @resource.location? and @resource.location isnt ''
+        if @latLng()? or (@resource.location? and @resource.location isnt '')
             @icon =
                 url: "http://www.google.com/mapfiles/marker#{Event.mark}.png"
             Event.mark = String.fromCharCode Event.mark.charCodeAt(0) + 1 if Event.mark isnt 'Z'
@@ -198,12 +204,27 @@ class Event
         else
             null
 
+    address: ->
+        if @resource.extendedProperties?.private?.geolocation?
+            geolocation = JSON.parse @resource.extendedProperties.private.geolocation
+            geolocation.address
+        else
+            null
+
     geocode: (callback) -> # the argument of callback is the first arugment of geocode callback.
         if Event.geocodeCount > 10
             console.log 'too many geocoding requests'
             return false
+        latLng = @latLng()
+        if latLng?
+            options = location: latLng
+        else if @resource.location isnt ''
+            options = address: @resource.location
+        else
+            console.error 'no hints for geocode'
+            return
 
-        geocoder.geocode { address: @resource.location }, (results, status) =>
+        geocoder.geocode options, (results, status) =>
             switch status
                 when google.maps.GeocoderStatus.OK
                     if results.length is 1
@@ -217,10 +238,10 @@ class Event
         Event.geocodeCount += 1
 
     setPlace: ->
-        return null unless @resource.location? and @resource.location isnt ''
-
         latLng = @latLng()
-        return null unless latLng
+        unless latLng
+            @place = null
+            return null
 
         @place = new Place
             map: map
@@ -231,23 +252,35 @@ class Event
             @
 
     tryToSetPlace: (centering) ->
-        if @setPlace()
-            map.setCenter @place.getPosition() if centering
-        else
+        @setPlace()
+        map.setCenter @place.getPosition() if @place? and centering
+
+        if not (@place? and @address()?)
             @geocode (results) =>
-                if @setPlace()
+                if results.length == 1
+                    @setPlace()
                     map.setCenter @place.getPosition() if centering
                 else
                     @candidates = []
-                    for e in results
+                    if @latLng()? and not @address() # if new event by clicking map
                         @candidates.push new Place
                             map: map
-                            position: e.geometry.location
+                            position: results[0].geometry.location
                             icon: @icon ? null
                             shadow: if @icon? then Event.shadow else null
                             title: @resource.location + '?'
                             optimized: false,
-                            @, e.formatted_address
+                            @, results[0].formatted_address
+                    else
+                        for e in results
+                            @candidates.push new Place
+                                map: map
+                                position: e.geometry.location
+                                icon: @icon ? null
+                                shadow: if @icon? then Event.shadow else null
+                                title: @resource.location + '?'
+                                optimized: false,
+                                @, e.formatted_address
                     setTimeout (=> $("#map img[src=\"#{@icon.url}\"]").addClass 'candidate'), 500 # 500ms is adhoc number for waiting for DOM
                     map.setCenter @candidates[0].getPosition() if centering
 
@@ -258,6 +291,8 @@ class Event
             lat: lat
             lng: lng
             address: address
+        console.log address
+        @resource.location ?= address
 
     update: ->
         gapi.client.calendar.events.update(
@@ -304,7 +339,6 @@ initializeDOM = ->
                     if resp.error?
                         alert 'カレンダーが作成できませんでした'
                     else
-                        console.log resp
                         currentCalendar = resp.result
                         calendars.push currentCalendar
         else
@@ -406,6 +440,14 @@ initializeGoogleMaps = ->
     map = new google.maps.Map document.getElementById('map'), mapOptions
     map.setTilt 45
 
+    google.maps.event.addListener map, 'click', (event) ->
+        new Event currentCalendar.id,
+            extendedProperties:
+                private:
+                    geolocation: JSON.stringify(
+                        lat: event.latLng.lat()
+                        lng: event.latLng.lng()
+                    )
     geocoder = new google.maps.Geocoder()
 
 # export

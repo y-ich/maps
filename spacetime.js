@@ -227,13 +227,33 @@
     };
 
     function Event(calendarId, resource, centering) {
+      var _base, _base1, _base2, _base3, _base4, _ref, _ref1, _ref2, _ref3, _ref4;
       this.calendarId = calendarId;
       this.resource = resource;
       if (centering == null) {
         centering = false;
       }
+      if ((_ref = (_base = this.resource).summary) == null) {
+        _base.summary = '新しい予定';
+      }
+      if ((_ref1 = (_base1 = this.resource).location) == null) {
+        _base1.location = '';
+      }
+      if ((_ref2 = (_base2 = this.resource).description) == null) {
+        _base2.description = '';
+      }
+      if ((_ref3 = (_base3 = this.resource).start) == null) {
+        _base3.start = {
+          dateTime: new Date().toISOString()
+        };
+      }
+      if ((_ref4 = (_base4 = this.resource).end) == null) {
+        _base4.end = {
+          dateTime: new Date().toISOString()
+        };
+      }
       this.candidates = null;
-      if ((this.resource.location != null) && this.resource.location !== '') {
+      if ((this.latLng() != null) || ((this.resource.location != null) && this.resource.location !== '')) {
         this.icon = {
           url: "http://www.google.com/mapfiles/marker" + Event.mark + ".png"
         };
@@ -255,15 +275,37 @@
       }
     };
 
+    Event.prototype.address = function() {
+      var geolocation, _ref, _ref1;
+      if (((_ref = this.resource.extendedProperties) != null ? (_ref1 = _ref["private"]) != null ? _ref1.geolocation : void 0 : void 0) != null) {
+        geolocation = JSON.parse(this.resource.extendedProperties["private"].geolocation);
+        return geolocation.address;
+      } else {
+        return null;
+      }
+    };
+
     Event.prototype.geocode = function(callback) {
-      var _this = this;
+      var latLng, options,
+        _this = this;
       if (Event.geocodeCount > 10) {
         console.log('too many geocoding requests');
         return false;
       }
-      geocoder.geocode({
-        address: this.resource.location
-      }, function(results, status) {
+      latLng = this.latLng();
+      if (latLng != null) {
+        options = {
+          location: latLng
+        };
+      } else if (this.resource.location !== '') {
+        options = {
+          address: this.resource.location
+        };
+      } else {
+        console.error('no hints for geocode');
+        return;
+      }
+      geocoder.geocode(options, function(results, status) {
         switch (status) {
           case google.maps.GeocoderStatus.OK:
             if (results.length === 1) {
@@ -284,11 +326,9 @@
 
     Event.prototype.setPlace = function() {
       var latLng, _ref;
-      if (!((this.resource.location != null) && this.resource.location !== '')) {
-        return null;
-      }
       latLng = this.latLng();
       if (!latLng) {
+        this.place = null;
         return null;
       }
       return this.place = new Place({
@@ -302,29 +342,41 @@
 
     Event.prototype.tryToSetPlace = function(centering) {
       var _this = this;
-      if (this.setPlace()) {
-        if (centering) {
-          return map.setCenter(this.place.getPosition());
-        }
-      } else {
+      this.setPlace();
+      if ((this.place != null) && centering) {
+        map.setCenter(this.place.getPosition());
+      }
+      if (!((this.place != null) && (this.address() != null))) {
         return this.geocode(function(results) {
-          var e, _i, _len, _ref;
-          if (_this.setPlace()) {
+          var e, _i, _len, _ref, _ref1;
+          if (results.length === 1) {
+            _this.setPlace();
             if (centering) {
               return map.setCenter(_this.place.getPosition());
             }
           } else {
             _this.candidates = [];
-            for (_i = 0, _len = results.length; _i < _len; _i++) {
-              e = results[_i];
+            if ((_this.latLng() != null) && !_this.address()) {
               _this.candidates.push(new Place({
                 map: map,
-                position: e.geometry.location,
+                position: results[0].geometry.location,
                 icon: (_ref = _this.icon) != null ? _ref : null,
                 shadow: _this.icon != null ? Event.shadow : null,
                 title: _this.resource.location + '?',
                 optimized: false
-              }, _this, e.formatted_address));
+              }, _this, results[0].formatted_address));
+            } else {
+              for (_i = 0, _len = results.length; _i < _len; _i++) {
+                e = results[_i];
+                _this.candidates.push(new Place({
+                  map: map,
+                  position: e.geometry.location,
+                  icon: (_ref1 = _this.icon) != null ? _ref1 : null,
+                  shadow: _this.icon != null ? Event.shadow : null,
+                  title: _this.resource.location + '?',
+                  optimized: false
+                }, _this, e.formatted_address));
+              }
             }
             setTimeout((function() {
               return $("#map img[src=\"" + _this.icon.url + "\"]").addClass('candidate');
@@ -338,18 +390,20 @@
     };
 
     Event.prototype.setGeolocation = function(lat, lng, address) {
-      var _base, _base1, _ref, _ref1;
+      var _base, _base1, _base2, _ref, _ref1, _ref2;
       if ((_ref = (_base = this.resource).extendedProperties) == null) {
         _base.extendedProperties = {};
       }
       if ((_ref1 = (_base1 = this.resource.extendedProperties)["private"]) == null) {
         _base1["private"] = {};
       }
-      return this.resource.extendedProperties["private"].geolocation = JSON.stringify({
+      this.resource.extendedProperties["private"].geolocation = JSON.stringify({
         lat: lat,
         lng: lng,
         address: address
       });
+      console.log(address);
+      return (_ref2 = (_base2 = this.resource).location) != null ? _ref2 : _base2.location = address;
     };
 
     Event.prototype.update = function() {
@@ -428,7 +482,6 @@
             if (resp.error != null) {
               return alert('カレンダーが作成できませんでした');
             } else {
-              console.log(resp);
               currentCalendar = resp.result;
               return calendars.push(currentCalendar);
             }
@@ -568,6 +621,18 @@
     }
     map = new google.maps.Map(document.getElementById('map'), mapOptions);
     map.setTilt(45);
+    google.maps.event.addListener(map, 'click', function(event) {
+      return new Event(currentCalendar.id, {
+        extendedProperties: {
+          "private": {
+            geolocation: JSON.stringify({
+              lat: event.latLng.lat(),
+              lng: event.latLng.lng()
+            })
+          }
+        }
+      });
+    });
     return geocoder = new google.maps.Geocoder();
   };
 
