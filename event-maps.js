@@ -350,7 +350,7 @@
             return callback(results);
           case google.maps.GeocoderStatus.ZERO_RESULTS:
             return setTimeout((function() {
-              return alert("Where is " + this.resource.location + "?");
+              return alert("" + this.resource.location + "が見つかりません");
             }), 0);
           default:
             return console.error(status);
@@ -668,9 +668,22 @@
     return $('#form-search').on('submit', function(event) {
       var location;
       location = $(this).children('[name="search"]').val();
-      new Event(currentCalendar != null ? currentCalendar.id : void 0, {
-        location: location
-      });
+      if ((location != null) && location !== '') {
+        geocoder.geocode({
+          address: location
+        }, function(results, status) {
+          switch (status) {
+            case google.maps.GeocoderStatus.OK:
+              return map.setCenter(results[0].geometry.location);
+            case google.maps.GeocoderStatus.ZERO_RESULTS:
+              return setTimeout((function() {
+                return alert('見つかりませんでした');
+              }), 0);
+            default:
+              return console.error(status);
+          }
+        });
+      }
       return event.preventDefault();
     });
   };

@@ -251,7 +251,7 @@ class Event
                         @update()
                     callback results
                 when google.maps.GeocoderStatus.ZERO_RESULTS
-                    setTimeout (-> alert "Where is #{@resource.location}?"), 0
+                    setTimeout (-> alert "#{@resource.location}が見つかりません"), 0
                 else
                     console.error status
         Event.geocodeCount += 1
@@ -458,8 +458,15 @@ initializeDOM = ->
 
     $('#form-search').on 'submit', (event) ->
         location = $(this).children('[name="search"]').val()
-        new Event currentCalendar?.id,
-            location: location
+        if location? and location isnt ''
+            geocoder.geocode { address: location }, (results, status) ->
+                switch status
+                    when google.maps.GeocoderStatus.OK
+                        map.setCenter results[0].geometry.location
+                    when google.maps.GeocoderStatus.ZERO_RESULTS
+                        setTimeout (-> alert '見つかりませんでした'), 0
+                    else
+                        console.error status
         event.preventDefault()
 
 initializeGoogleMaps = ->
