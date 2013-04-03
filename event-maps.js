@@ -282,12 +282,15 @@
       return Event.mark = 'A';
     };
 
-    function Event(calendarId, resource, centering) {
+    function Event(calendarId, resource, centering, byClick) {
       var _base, _base1, _base2, _base3, _base4, _ref, _ref1, _ref2, _ref3, _ref4;
       this.calendarId = calendarId;
       this.resource = resource;
       if (centering == null) {
         centering = false;
+      }
+      if (byClick == null) {
+        byClick = false;
       }
       if ((_ref = (_base = this.resource).summary) == null) {
         _base.summary = '新しい予定';
@@ -316,7 +319,7 @@
         if (Event.mark !== 'Z') {
           Event.mark = String.fromCharCode(Event.mark.charCodeAt(0) + 1);
         }
-        this.tryToSetPlace(centering);
+        this.tryToSetPlace(centering, byClick);
       }
       Event.events.push(this);
     }
@@ -396,26 +399,34 @@
       return Event.geocodeCount += 1;
     };
 
-    Event.prototype.setPlace = function() {
+    Event.prototype.setPlace = function(byClick) {
       var latLng, _ref;
+      if (byClick == null) {
+        byClick = false;
+      }
       latLng = this.latLng();
       if (!latLng) {
         this.place = null;
         return null;
       }
-      return this.place = new Place({
+      this.place = new Place({
         map: map,
         position: latLng,
         icon: (_ref = this.icon) != null ? _ref : null,
         shadow: this.icon != null ? Event.shadow : null,
         title: this.resource.location,
-        animation: this.address() != null ? null : google.maps.Animation.DROP
+        animation: byClick ? google.maps.Animation.DROP : null
       }, this);
+      return google.maps.event.addListener(this.place, 'animation_changed', function() {
+        if (byClick) {
+          return this.showInfo();
+        }
+      });
     };
 
-    Event.prototype.tryToSetPlace = function(centering) {
+    Event.prototype.tryToSetPlace = function(centering, byClick) {
       var _this = this;
-      this.setPlace();
+      this.setPlace(byClick);
       if ((this.place != null) && centering) {
         map.setCenter(this.place.getPosition());
         currentPlace = this.place;
@@ -426,7 +437,7 @@
           if (_this.place != null) {
             return _this.setGeolocation(results[0].geometry.location.lat(), results[0].geometry.location.lng(), results[0].formatted_address);
           } else if (results.length === 1) {
-            _this.setPlace();
+            _this.setPlace(byClick);
             if ((_this.place != null) && centering) {
               map.setCenter(_this.place.getPosition());
               return currentPlace = _this.place;
@@ -804,7 +815,7 @@
             })
           }
         }
-      });
+      }, false, true);
     });
     geocoder = new google.maps.Geocoder();
     return directionsRenderer = new google.maps.DirectionsRenderer({

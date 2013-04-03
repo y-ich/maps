@@ -222,7 +222,7 @@ class Event
         Event.events = []
         Event.mark = 'A'
 
-    constructor: (@calendarId, @resource, centering = false) ->
+    constructor: (@calendarId, @resource, centering = false, byClick = false) ->
         @resource.summary ?= '新しい予定'
         @resource.location ?= ''
         @resource.description ?= ''
@@ -234,7 +234,7 @@ class Event
             @icon =
                 url: "http://www.google.com/mapfiles/marker#{Event.mark}.png"
             Event.mark = String.fromCharCode Event.mark.charCodeAt(0) + 1 if Event.mark isnt 'Z'
-            @tryToSetPlace centering
+            @tryToSetPlace centering, byClick
         Event.events.push @
 
     clearMarkers: ->
@@ -283,7 +283,7 @@ class Event
                     console.error status
         Event.geocodeCount += 1
 
-    setPlace: ->
+    setPlace: (byClick = false) ->
         latLng = @latLng()
         unless latLng
             @place = null
@@ -294,12 +294,13 @@ class Event
             position: latLng
             icon: @icon ? null
             shadow: if @icon? then Event.shadow else null
-            title: @resource.location
-            animation: if @address()? then null else google.maps.Animation.DROP,
+            title: @resource.location,
+            animation: if byClick then google.maps.Animation.DROP else null,
             @
+        google.maps.event.addListener @place, 'animation_changed', -> @showInfo() if byClick
 
-    tryToSetPlace: (centering) ->
-        @setPlace()
+    tryToSetPlace: (centering, byClick) ->
+        @setPlace byClick
         if @place? and centering
             map.setCenter @place.getPosition()
             currentPlace = @place
@@ -309,7 +310,7 @@ class Event
                 if @place? # if new event by clicking map
                     @setGeolocation results[0].geometry.location.lat(), results[0].geometry.location.lng(), results[0].formatted_address
                 else if results.length == 1
-                    @setPlace()
+                    @setPlace byClick
                     if @place? and centering
                         map.setCenter @place.getPosition()
                         currentPlace = @place
@@ -561,7 +562,8 @@ initializeGoogleMaps = ->
                     geolocation: JSON.stringify(
                         lat: event.latLng.lat()
                         lng: event.latLng.lng()
-                    )
+                    ),
+            false, true
     geocoder = new google.maps.Geocoder()
 
     directionsRenderer = new google.maps.DirectionsRenderer
