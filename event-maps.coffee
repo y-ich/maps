@@ -19,9 +19,11 @@ TIME_ZONE_HOST = 'http://safari-park.herokuapp.com'
 #
 
 map = null
+directionsRenderer = null
 calendars= null # result of calenders list
 currentCalendar = null
-currentEvent = null
+currentPlace = null
+directionOrigin = null
 geocoder = null
 spinner = new Spinner color: '#000'
 
@@ -98,6 +100,23 @@ getTimeZone.overQueryLimit = false
 compareEventResources = (x, y) ->
     new Date(x.start.dateTime ? x.start.date + 'T00:00:00Z').getTime() - new Date(y.start.dateTime ? y.start.date + 'T00:00:00Z').getTime()
 
+searchDirections = (origin, destination, travelMode) ->
+    searchDirections.service.route
+        destination: destination
+        origin: origin
+        travelMode: travelMode,
+        (result, status) ->
+            switch status
+                when google.maps.DirectionsStatus.OK
+                    directionsRenderer.setMap map
+                    directionsRenderer.setDirections result
+                else
+                    directionsRenderer.setMap null
+                    alert '道順がみつかりませんでした'
+
+searchDirections.service = new google.maps.DirectionsService()
+
+
 # is a class with a marker, responsible for modal.
 class Place extends google.maps.Marker
     # Place is an extension of google.maps.Marker, but doen't extend it because google.maps.Marker is not a constructor function.
@@ -109,7 +128,12 @@ class Place extends google.maps.Marker
     # optional @address means the Place is one of candicates and shows the address of the Place.
     constructor: (options, @event, @address = null) ->
         super options
-        google.maps.event.addListener @, 'click', @showInfo
+        google.maps.event.addListener @, 'click', =>
+            if directionOrigin?
+                searchDirections directionOrigin, @getPosition(), google.maps.TravelMode.TRANSIT
+                directionOrigin = null
+            else
+                @showInfo()
 
     # returns Event's time (date property and time property) in local time at the Place.
     # startOrEnd is 'start' or 'end'
@@ -213,8 +237,6 @@ class Event
             @tryToSetPlace centering
         Event.events.push @
 
-        currentEvent = @ if centering
-
     clearMarkers: ->
         @place.setMap null if @place?
         @place = null
@@ -278,7 +300,9 @@ class Event
 
     tryToSetPlace: (centering) ->
         @setPlace()
-        map.setCenter @place.getPosition() if @place? and centering
+        if @place? and centering
+            map.setCenter @place.getPosition()
+            currentPlace = @place
 
         if not (@place? and @address()?) # if place and/or address is unknown
             @geocode (results) =>
@@ -286,7 +310,9 @@ class Event
                     @setGeolocation results[0].geometry.location.lat(), results[0].geometry.location.lng(), results[0].formatted_address
                 else if results.length == 1
                     @setPlace()
-                    map.setCenter @place.getPosition() if centering
+                    if @place? and centering
+                        map.setCenter @place.getPosition()
+                        currentPlace = @place
                 else
                     @candidates = []
                     for e in results
@@ -299,7 +325,9 @@ class Event
                             optimized: false,
                             @, e.formatted_address
                     setTimeout (=> $("#map img[src=\"#{@icon.url}\"]").addClass 'candidate'), 500 # 500ms is adhoc number for waiting for DOM
-                    map.setCenter @candidates[0].getPosition() if centering
+                    if centering
+                        map.setCenter @candidates[0].getPosition()
+                        currentPlace = @candidates[0]
 
     setGeolocation: (lat, lng, address) ->
         @resource.extendedProperties ?= {}
@@ -444,6 +472,8 @@ initializeDOM = ->
         else
             anEvent.insert()
 
+    $('#modal-info').on 'hide', -> spinner.stop()
+
     $('#form-event input[name="all-day"]').on 'change', ->
         $('#form-event input[name="start-time"]').css 'display', if @checked then 'none' else ''
         $('#form-event input[name="end-time"]').css 'display', if @checked then 'none' else ''
@@ -474,17 +504,34 @@ initializeDOM = ->
                         console.error status
         event.preventDefault()
 
-    $('#button-prev, #button-next').on 'click', (event) ->
+    $('#button-prev, #button-next').on 'click', ->
         sorted = Event.events.sort (x, y) -> compareEventResources x.resource, y.resource
-        index = if currentEvent? then sorted.indexOf currentEvent else 0
-        if this.id is 'button-prev'
-            index -= 1
-            index = sorted.length - 1 if index < 0
+        EventIndex = if currentPlace? then sorted.indexOf currentPlace.event else 0
+        if Event.events[EventIndex].candidates?
+            candidateIndex = Event.events[EventIndex].candidates.indexOf currentPlace
+            if this.id is 'button-prev'
+                candidateIndex -= 1
+                candidateIndex = null if candidateIndex < 0
+            else
+                candidateIndex += 1
+                candidateIndex = null if candidateIndex >= Event.events[EventIndex].candidates.length
+        if candidateIndex?
+            currentPlace = Event.events[EventIndex].candidates[candidateIndex]
         else
-            index += 1
-            index = 0 if index >= sorted.length
-        currentEvent = sorted[index]
-        map.setCenter (currentEvent.place ? currentEvent.candidates[0]).getPosition()
+            if this.id is 'button-prev'
+                EventIndex -= 1
+                EventIndex = sorted.length - 1 if EventIndex < 0
+                candidateIndex = Event.events[EventIndex].candidates?.length - 1
+            else
+                EventIndex += 1
+                EventIndex = 0 if EventIndex >= sorted.length
+                candidateIndex = 0
+            currentPlace = sorted[EventIndex].place ? sorted[EventIndex].candidates[candidateIndex]
+        map.setCenter (currentPlace).getPosition()
+
+    $('#button-direction').on 'click', (event) ->
+        directionOrigin = currentPlace.getPosition()
+        alert '目的地のマーカをクリックしてください'
 
 initializeGoogleMaps = ->
     mapOptions =
@@ -516,6 +563,11 @@ initializeGoogleMaps = ->
                         lng: event.latLng.lng()
                     )
     geocoder = new google.maps.Geocoder()
+
+    directionsRenderer = new google.maps.DirectionsRenderer
+        hideRouteList: false
+        map: map
+        panel: $('#directions-panel')[0]
 
 # export
 

@@ -59,8 +59,8 @@ body {
 .candidate {
   opacity: 0.5;
 }
-.info-window {
-  min-width: 320px;
+#directions-panel {
+  display: none;
 }
 .startup {
   position: fixed;
