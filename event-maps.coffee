@@ -27,6 +27,10 @@ originPlace = null
 geocoder = null
 spinner = new Spinner color: '#000'
 
+#
+# generic functions
+#
+
 # sums in an array
 sum = (array) ->
     array.reduce (a, b) -> a + b
@@ -34,6 +38,7 @@ sum = (array) ->
 # sums after some transformation
 mapSum = (array, fn) ->
     array.map(fn).reduce (a, b) -> a + b
+
 
 # Google OAuth 2.0 handler
 handleAuthResult = (result) ->
@@ -47,6 +52,7 @@ handleAuthResult = (result) ->
                               .addClass 'primary'
 
 
+# localization
 getLocalizedString = (key) ->
     if localizedStrings? then localizedStrings[key] ? key else key
 
@@ -60,6 +66,7 @@ localize = ->
     document.title = getLocalizedString 'EventMaps'
     # document.getElementById('search-input').placeholder = getLocalizedString 'Search or Address'
     setLocalExpressionInto key, value for key, value of idWordPairs
+
 
 # saves current state into localStorage
 saveMapStatus = () ->
@@ -105,10 +112,13 @@ getTimeZone = (date, position, callback) ->
                 console.error obj
 getTimeZone.overQueryLimit = false
 
+
+# comapres start times of event resources
 compareEventResources = (x, y) ->
     new Date(x.start.dateTime ? x.start.date + 'T00:00:00Z').getTime() - new Date(y.start.dateTime ? y.start.date + 'T00:00:00Z').getTime()
 
-searchDirections = (origin, destination, departureTime = null) ->
+# searches directions in all travel modes
+searchDirections = (origin, destination, departureTime = null, callback) ->
     travelModes = [google.maps.TravelMode.BICYCLING, google.maps.TravelMode.DRIVING, google.maps.TravelMode.TRANSIT, google.maps.TravelMode.WALKING]
     deferreds = []
     results= {}
@@ -128,16 +138,7 @@ searchDirections = (origin, destination, departureTime = null) ->
                     deferred.resolve()
             )(e, deferred)
     $.when.apply(window, deferreds).then ->
-        fastest = Infinity
-        for key, result of results when result?
-            for route in result.routes
-                route.distance = mapSum result.routes[0].legs, (e) -> e.distance.value
-                route.duration = mapSum result.routes[0].legs, (e) -> e.duration.value
-                if route.duration < fastest
-                    fastest = route.duration
-                    fastestKey = key
-        directionsRenderer.setDirections results[fastestKey]
-        directionsRenderer.setMap map
+        callback results
 
 searchDirections.service = new google.maps.DirectionsService()
 
@@ -155,7 +156,17 @@ class Place extends google.maps.Marker
         super options
         google.maps.event.addListener @, 'click', =>
             if originPlace?
-                searchDirections originPlace.getPosition(), @getPosition(), if originPlace.event.resource.end.dateTime? then new Date(originPlace.event.resource.end.dateTime) else null
+                searchDirections originPlace.getPosition(), @getPosition(), originPlace.event.getDate('end'), (results) ->
+                    fastest = Infinity
+                    for key, result of results when result?
+                        for route in result.routes
+                            route.distance = mapSum result.routes[0].legs, (e) -> e.distance.value
+                            route.duration = mapSum result.routes[0].legs, (e) -> e.duration.value
+                            if route.duration < fastest
+                                fastest = route.duration
+                                fastestKey = key
+                    directionsRenderer.setDirections results[fastestKey]
+                    directionsRenderer.setMap map
                 originPlace= null
             else
                 @showInfo()
@@ -164,7 +175,7 @@ class Place extends google.maps.Marker
     # startOrEnd is 'start' or 'end'
     # If doesn't get time zone information, returns dateTime as its format.
     getDateTime: (startOrEnd) ->
-        dateTime = @event.resource[startOrEnd].dateTime ? (@event.resource[startOrEnd].date + 'T00:00:00')
+        dateTime = @event.resource[startOrEnd].dateTime ? @event.resource[startOrEnd].date + 'T00:00:00Z'
         if @["#{startOrEnd}TimeZone"]?
             time = localTime new Date(dateTime), @["#{startOrEnd}TimeZone"].dstOffset + @["#{startOrEnd}TimeZone"].rawOffset
             date: time.replace(/T.*/, '')
@@ -267,6 +278,10 @@ class Event
         @place = null
         e.setMap null for e in @candidates if @candicates?
         @candidates = null
+
+    # returns Event's Date.
+    getDate: (startOrEnd) ->
+        new Date @resource[startOrEnd].dateTime ? @resource[startOrEnd].date + if startOrEnd is 'start' then 'T00:00:00Z' else 'T23:59:59Z'
 
     latLng: ->
         if @resource.extendedProperties?.private?.geolocation?

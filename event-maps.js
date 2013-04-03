@@ -141,7 +141,7 @@
     return new Date((_ref = x.start.dateTime) != null ? _ref : x.start.date + 'T00:00:00Z').getTime() - new Date((_ref1 = y.start.dateTime) != null ? _ref1 : y.start.date + 'T00:00:00Z').getTime();
   };
 
-  searchDirections = function(origin, destination, departureTime) {
+  searchDirections = function(origin, destination, departureTime, callback) {
     var deferred, deferreds, e, options, results, travelModes, _i, _len;
     if (departureTime == null) {
       departureTime = null;
@@ -174,29 +174,7 @@
       })(e, deferred));
     }
     return $.when.apply(window, deferreds).then(function() {
-      var fastest, fastestKey, key, result, route, _j, _len1, _ref;
-      fastest = Infinity;
-      for (key in results) {
-        result = results[key];
-        if (result != null) {
-          _ref = result.routes;
-          for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
-            route = _ref[_j];
-            route.distance = mapSum(result.routes[0].legs, function(e) {
-              return e.distance.value;
-            });
-            route.duration = mapSum(result.routes[0].legs, function(e) {
-              return e.duration.value;
-            });
-            if (route.duration < fastest) {
-              fastest = route.duration;
-              fastestKey = key;
-            }
-          }
-        }
-      }
-      directionsRenderer.setDirections(results[fastestKey]);
-      return directionsRenderer.setMap(map);
+      return callback(results);
     });
   };
 
@@ -220,7 +198,31 @@
       Place.__super__.constructor.call(this, options);
       google.maps.event.addListener(this, 'click', function() {
         if (originPlace != null) {
-          searchDirections(originPlace.getPosition(), _this.getPosition(), originPlace.event.resource.end.dateTime != null ? new Date(originPlace.event.resource.end.dateTime) : null);
+          searchDirections(originPlace.getPosition(), _this.getPosition(), originPlace.event.getDate('end'), function(results) {
+            var fastest, fastestKey, key, result, route, _i, _len, _ref;
+            fastest = Infinity;
+            for (key in results) {
+              result = results[key];
+              if (result != null) {
+                _ref = result.routes;
+                for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+                  route = _ref[_i];
+                  route.distance = mapSum(result.routes[0].legs, function(e) {
+                    return e.distance.value;
+                  });
+                  route.duration = mapSum(result.routes[0].legs, function(e) {
+                    return e.duration.value;
+                  });
+                  if (route.duration < fastest) {
+                    fastest = route.duration;
+                    fastestKey = key;
+                  }
+                }
+              }
+            }
+            directionsRenderer.setDirections(results[fastestKey]);
+            return directionsRenderer.setMap(map);
+          });
           return originPlace = null;
         } else {
           return _this.showInfo();
@@ -230,7 +232,7 @@
 
     Place.prototype.getDateTime = function(startOrEnd) {
       var dateTime, time, _ref;
-      dateTime = (_ref = this.event.resource[startOrEnd].dateTime) != null ? _ref : this.event.resource[startOrEnd].date + 'T00:00:00';
+      dateTime = (_ref = this.event.resource[startOrEnd].dateTime) != null ? _ref : this.event.resource[startOrEnd].date + 'T00:00:00Z';
       if (this["" + startOrEnd + "TimeZone"] != null) {
         time = localTime(new Date(dateTime), this["" + startOrEnd + "TimeZone"].dstOffset + this["" + startOrEnd + "TimeZone"].rawOffset);
         return {
@@ -392,6 +394,11 @@
         }
       }
       return this.candidates = null;
+    };
+
+    Event.prototype.getDate = function(startOrEnd) {
+      var _ref;
+      return new Date((_ref = this.resource[startOrEnd].dateTime) != null ? _ref : this.resource[startOrEnd].date + (startOrEnd === 'start' ? 'T00:00:00Z' : 'T23:59:59Z'));
     };
 
     Event.prototype.latLng = function() {
