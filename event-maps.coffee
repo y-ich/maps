@@ -23,9 +23,17 @@ directionsRenderer = null
 calendars= null # result of calenders list
 currentCalendar = null
 currentPlace = null
-directionOrigin = null
+originPlace = null
 geocoder = null
 spinner = new Spinner color: '#000'
+
+# sums in an array
+sum = (array) ->
+    array.reduce (a, b) -> a + b
+
+# sums after some transformation
+mapSum = (array, fn) ->
+    array.map(fn).reduce (a, b) -> a + b
 
 # Google OAuth 2.0 handler
 handleAuthResult = (result) ->
@@ -100,19 +108,36 @@ getTimeZone.overQueryLimit = false
 compareEventResources = (x, y) ->
     new Date(x.start.dateTime ? x.start.date + 'T00:00:00Z').getTime() - new Date(y.start.dateTime ? y.start.date + 'T00:00:00Z').getTime()
 
-searchDirections = (origin, destination, travelMode) ->
-    searchDirections.service.route
-        destination: destination
-        origin: origin
-        travelMode: travelMode,
-        (result, status) ->
-            switch status
-                when google.maps.DirectionsStatus.OK
-                    directionsRenderer.setMap map
-                    directionsRenderer.setDirections result
-                else
-                    directionsRenderer.setMap null
-                    alert '道順がみつかりませんでした'
+searchDirections = (origin, destination, departureTime = null) ->
+    travelModes = [google.maps.TravelMode.BICYCLING, google.maps.TravelMode.DRIVING, google.maps.TravelMode.TRANSIT, google.maps.TravelMode.WALKING]
+    deferreds = []
+    results= {}
+    for e in travelModes
+        deferred = $.Deferred()
+        deferreds.push deferred
+        options =
+            destination: destination
+            origin: origin
+            travelMode: e
+        options.transitOptions = departureTime: departureTime if departureTime?
+        searchDirections.service.route options, ((travelMode, deferred) ->
+                (result, status) ->
+                    switch status
+                        when google.maps.DirectionsStatus.OK
+                            results[travelMode] = result
+                    deferred.resolve()
+            )(e, deferred)
+    $.when.apply(window, deferreds).then ->
+        fastest = Infinity
+        for key, result of results when result?
+            for route in result.routes
+                route.distance = mapSum result.routes[0].legs, (e) -> e.distance.value
+                route.duration = mapSum result.routes[0].legs, (e) -> e.duration.value
+                if route.duration < fastest
+                    fastest = route.duration
+                    fastestKey = key
+        directionsRenderer.setDirections results[fastestKey]
+        directionsRenderer.setMap map
 
 searchDirections.service = new google.maps.DirectionsService()
 
@@ -129,9 +154,9 @@ class Place extends google.maps.Marker
     constructor: (options, @event, @address = null) ->
         super options
         google.maps.event.addListener @, 'click', =>
-            if directionOrigin?
-                searchDirections directionOrigin, @getPosition(), google.maps.TravelMode.TRANSIT
-                directionOrigin = null
+            if originPlace?
+                searchDirections originPlace.getPosition(), @getPosition(), if originPlace.event.resource.end.dateTime? then new Date(originPlace.event.resource.end.dateTime) else null
+                originPlace= null
             else
                 @showInfo()
 
@@ -531,7 +556,7 @@ initializeDOM = ->
         map.setCenter (currentPlace).getPosition()
 
     $('#button-direction').on 'click', (event) ->
-        directionOrigin = currentPlace.getPosition()
+        originPlace = Place.modalPlace
         alert '目的地のマーカをクリックしてください'
 
 initializeGoogleMaps = ->
