@@ -515,9 +515,10 @@
                 optimized: false
               }, _this, e.formatted_address));
             }
+            console.log(_this.icon.url);
             setTimeout((function() {
               return $("#map img[src=\"" + _this.icon.url + "\"]").addClass('candidate');
-            }), 500);
+            }), 2000);
             if (centering) {
               map.setCenter(_this.candidates[0].getPosition());
               return currentPlace = _this.candidates[0];

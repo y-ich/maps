@@ -362,7 +362,8 @@ class Event
                             title: @resource.location + '?'
                             optimized: false,
                             @, e.formatted_address
-                    setTimeout (=> $("#map img[src=\"#{@icon.url}\"]").addClass 'candidate'), 500 # 500ms is adhoc number for waiting for DOM
+                    console.log @icon.url
+                    setTimeout (=> $("#map img[src=\"#{@icon.url}\"]").addClass 'candidate'), 2000 # 500ms is adhoc number for waiting for DOM
                     if centering
                         map.setCenter @candidates[0].getPosition()
                         currentPlace = @candidates[0]
