@@ -865,7 +865,7 @@
           console.log(sorted[sorted.length - 1]);
           currentPlace = (_ref3 = sorted[sorted.length - 1].place) != null ? _ref3 : sorted[sorted.length - 1].candidates[sorted[sorted.length - 1].candidates.length - 1];
         }
-        return map.setCenter(currentPlace.getPosition());
+        return map.panTo(currentPlace.getPosition());
       }
     });
     $('#button-direction').on('click', function(event) {
@@ -874,7 +874,7 @@
     });
     $('#candidate select[name="candidate"]').on('change', function(event) {
       modalPlace = modalPlace.event.candidates[parseInt(this.value)];
-      return map.setCenter(modalPlace.getPosition());
+      return map.panTo(modalPlace.getPosition());
     });
     return $('#button-search').on('click', function(event) {
       var location;

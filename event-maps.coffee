@@ -592,7 +592,7 @@ initializeDOM = ->
             else
                 console.log sorted[sorted.length - 1]
                 currentPlace = sorted[sorted.length - 1].place ? sorted[sorted.length - 1].candidates[sorted[sorted.length - 1].candidates.length - 1]
-            map.setCenter currentPlace.getPosition()
+            map.panTo currentPlace.getPosition()
 
     $('#button-direction').on 'click', (event) ->
         originPlace = modalPlace
@@ -600,7 +600,7 @@ initializeDOM = ->
 
     $('#candidate select[name="candidate"]').on 'change', (event) ->
         modalPlace = modalPlace.event.candidates[parseInt @value]
-        map.setCenter modalPlace.getPosition()
+        map.panTo modalPlace.getPosition()
 
     $('#button-search').on 'click', (event) ->
         location = $('#form-event input[name="location"]').val()
