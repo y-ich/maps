@@ -24,6 +24,7 @@ calendars= null # result of calenders list
 currentCalendar = null
 currentPlace = null
 originPlace = null
+directions = null
 geocoder = null
 spinner = new Spinner color: '#000'
 
@@ -121,7 +122,7 @@ compareEventResources = (x, y) ->
 searchDirections = (origin, destination, departureTime = null, callback) ->
     travelModes = [google.maps.TravelMode.BICYCLING, google.maps.TravelMode.DRIVING, google.maps.TravelMode.TRANSIT, google.maps.TravelMode.WALKING]
     deferreds = []
-    results= {}
+    results= []
     for e in travelModes
         deferred = $.Deferred()
         deferreds.push deferred
@@ -134,7 +135,7 @@ searchDirections = (origin, destination, departureTime = null, callback) ->
                 (result, status) ->
                     switch status
                         when google.maps.DirectionsStatus.OK
-                            results[travelMode] = result
+                            results.push result
                     deferred.resolve()
             )(e, deferred)
     $.when.apply(window, deferreds).then ->
@@ -157,17 +158,18 @@ class Place extends google.maps.Marker
         google.maps.event.addListener @, 'click', =>
             if originPlace?
                 searchDirections originPlace.getPosition(), @getPosition(), originPlace.event.getDate('end'), (results) ->
-                    fastest = Infinity
-                    for key, result of results when result?
+                    for result, i in results
                         for route in result.routes
                             route.distance = mapSum result.routes[0].legs, (e) -> e.distance.value
                             route.duration = mapSum result.routes[0].legs, (e) -> e.duration.value
-                            if route.duration < fastest
-                                fastest = route.duration
-                                fastestKey = key
-                    directionsRenderer.setDirections results[fastestKey]
+                    results.sort (x, y) -> x.routes[0].duration - y.routes[0].duration
+                    directionsRenderer.setDirections results[0]
                     directionsRenderer.setMap map
-                originPlace= null
+                    $('#directions-panel').removeClass 'hide'
+                    directions =
+                        results: results
+                        index: 0
+                        routeIndex: 0
             else
                 @showInfo()
 
@@ -188,6 +190,9 @@ class Place extends google.maps.Marker
     showInfo: =>
         @_setInfo()
         Place.$modalInfo.modal 'show'
+        directions = null # cancels direction mode
+        directionsRenderer.setMap null
+        $('#directions-panel').addClass 'hide'
 
     _setInfo: ->
         Place.modalPlace = @
@@ -318,7 +323,7 @@ class Event
                         @update()
                     callback results
                 when google.maps.GeocoderStatus.ZERO_RESULTS
-                    setTimeout (-> alert "#{@resource.location}が見つかりません"), 0
+                    setTimeout (=> alert "#{@resource.location}が見つかりません"), 0
                 else
                     console.error status
         Event.geocodeCount += 1
@@ -461,7 +466,7 @@ initializeDOM = ->
                     resp.items.sort compareEventResources
                     Event.geocodeCount = 0
                     for e, i in resp.items
-                        event = new Event id, e, i == 0
+                        event = new Event id, e
 
     $('#button-confirm').on 'click', ->
         position = Place.modalPlace.getPosition()
@@ -546,29 +551,54 @@ initializeDOM = ->
         event.preventDefault()
 
     $('#button-prev, #button-next').on 'click', ->
-        sorted = Event.events.sort (x, y) -> compareEventResources x.resource, y.resource
-        EventIndex = if currentPlace? then sorted.indexOf currentPlace.event else 0
-        if Event.events[EventIndex].candidates?
-            candidateIndex = Event.events[EventIndex].candidates.indexOf currentPlace
-            if this.id is 'button-prev'
-                candidateIndex -= 1
-                candidateIndex = null if candidateIndex < 0
+        if directions?
+            if this.id is 'buttion-prev'
+                directions.routeIndex -= 1
+                if directions.routeIndex < 0
+                    directions.index -= 1
+                    if directions.index < 0
+                        directions.index = directions.results.length - 1
+                    directionsRenderer.setDirections directions.results[directions.index]
+                    directions.routeIdex = directions.results[directions.index].routes.length - 1
             else
-                candidateIndex += 1
-                candidateIndex = null if candidateIndex >= Event.events[EventIndex].candidates.length
-        if candidateIndex?
-            currentPlace = Event.events[EventIndex].candidates[candidateIndex]
+                directions.routeIndex += 1
+                if directions.routeIndex >= directions.results[directions.index].routes.length
+                    directions.index += 1
+                    if directions.index >= directions.results.length
+                        directions.index = 0
+                    directionsRenderer.setDirections directions.results[directions.index]
+                    directions.routeIdex = 0
+            directionsRenderer.setRouteIndex directions.routeIdex
         else
-            if this.id is 'button-prev'
-                EventIndex -= 1
-                EventIndex = sorted.length - 1 if EventIndex < 0
-                candidateIndex = Event.events[EventIndex].candidates?.length - 1
+            sorted = Event.events.sort (x, y) -> compareEventResources x.resource, y.resource
+            if currentPlace?
+                eventIndex = sorted.indexOf currentPlace.event
+                if Event.events[eventIndex].candidates?
+                    candidateIndex = Event.events[eventIndex].candidates.indexOf currentPlace
+                    if this.id is 'button-prev'
+                        candidateIndex -= 1
+                        candidateIndex = null if candidateIndex < 0
+                    else
+                        candidateIndex += 1
+                        candidateIndex = null if candidateIndex >= Event.events[eventIndex].candidates.length
+                if candidateIndex?
+                    currentPlace = Event.events[eventIndex].candidates[candidateIndex]
+                else
+                    if this.id is 'button-prev'
+                        eventIndex -= 1
+                        eventIndex = sorted.length - 1 if eventIndex < 0
+                        candidateIndex = Event.events[eventIndex].candidates?.length - 1
+                    else
+                        eventIndex += 1
+                        eventIndex = 0 if eventIndex >= sorted.length
+                        candidateIndex = 0
+                    currentPlace = sorted[eventIndex].place ? sorted[eventIndex].candidates[candidateIndex]
+            else if this.id is 'button-next'
+                currentPlace = sorted[0].place ? sorted[0].candidates[0]
             else
-                EventIndex += 1
-                EventIndex = 0 if EventIndex >= sorted.length
-                candidateIndex = 0
-            currentPlace = sorted[EventIndex].place ? sorted[EventIndex].candidates[candidateIndex]
-        map.setCenter (currentPlace).getPosition()
+                console.log sorted[sorted.length - 1]
+                currentPlace = sorted[sorted.length - 1].place ? sorted[sorted.length - 1].candidates[sorted[sorted.length - 1].candidates.length - 1]
+            map.setCenter currentPlace.getPosition()
 
     $('#button-direction').on 'click', (event) ->
         originPlace = Place.modalPlace

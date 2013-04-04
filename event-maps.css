@@ -60,7 +60,11 @@ body {
   opacity: 0.5;
 }
 #directions-panel {
-  display: none;
+  position: absolute;
+  width: 100%;
+  top: 0px;
+  bottom: 0px;
+  opacity: 0.5;
 }
 .startup {
   position: fixed;
