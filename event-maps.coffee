@@ -6,13 +6,11 @@
 #
 
 CLIENT_ID = '369757625302.apps.googleusercontent.com'
-SCOPES = [
-    'https://www.googleapis.com/auth/calendar'
-]
+SCOPES = ['https://www.googleapis.com/auth/calendar']
 MAP_STATUS = 'spacetime-map-status'
 # TIME_ZONE_HOST = 'http://localhost:9292'
 TIME_ZONE_HOST = 'http://safari-park.herokuapp.com'
-
+APP_NAME = 'EventMaps'
 
 #
 # global variables
@@ -20,13 +18,13 @@ TIME_ZONE_HOST = 'http://safari-park.herokuapp.com'
 
 map = null
 directionsRenderer = null
+geocoder = null
 calendars= null # result of calenders list
 currentCalendar = null
 currentPlace = null
 modalPlace = null
 originPlace = null
 directions = null
-geocoder = null
 spinner = new Spinner color: '#000'
 
 #
@@ -42,18 +40,6 @@ mapSum = (array, fn) ->
     array.map(fn).reduce (a, b) -> a + b
 
 
-# Google OAuth 2.0 handler
-handleAuthResult = (result) ->
-    if result? and not result.error?
-        gapi.client.load 'calendar', 'v3', ->
-            $('#button-authorize').css 'display', 'none'
-            $('#button-calendar').css 'display', ''
-    else
-        $('#button-authorize').text('このアプリ"EventMaps"にGoogleカレンダーへのアクセスを許可する')
-                              .attr('disabled', null)
-                              .addClass 'primary'
-
-
 # localization
 getLocalizedString = (key) ->
     if localizedStrings? then localizedStrings[key] ? key else key
@@ -64,21 +50,16 @@ setLocalExpressionInto = (id, english) ->
 
 localize = ->
     idWordPairs = []
-
-    document.title = getLocalizedString 'EventMaps'
+    document.title = getLocalizedString APP_NAME
     # document.getElementById('search-input').placeholder = getLocalizedString 'Search or Address'
     setLocalExpressionInto key, value for key, value of idWordPairs
 
 
-# saves current state into localStorage
-saveMapStatus = () ->
-    pos = map.getCenter()
-    localStorage[MAP_STATUS] = JSON.stringify
-        lat: pos.lat()
-        lng: pos.lng()
-        zoom: map.getZoom()
+#
+# Time utilities
+#
 
-# returns strings, that shows time difference, from offset(sec).
+# returns strings, that shows time difference, from offset(sec), such as '+0900'.
 timeDifference = (offset) ->
     twoDigitsFormat = (n) -> if n < 10 then '0' + n else n.toString()
     offsetHours = Math.floor(offset / (60 * 60))
@@ -115,15 +96,32 @@ getTimeZone = (date, position, callback) ->
 getTimeZone.overQueryLimit = false
 
 
-# comapres start times of event resources
+# compares start times of event resources
 compareEventResources = (x, y) ->
     new Date(x.start.dateTime ? x.start.date + 'T00:00:00Z').getTime() - new Date(y.start.dateTime ? y.start.date + 'T00:00:00Z').getTime()
 
+# Google OAuth 2.0 handler
+handleAuthResult = (result) ->
+    if result? and not result.error?
+        gapi.client.load 'calendar', 'v3', ->
+            $('#button-authorize').css 'display', 'none'
+            $('#button-calendar').css 'display', ''
+    else
+        $('#button-authorize').text("このアプリ\"#{APP_NAME}\"にGoogleカレンダーへのアクセスを許可する")
+                              .attr('disabled', null)
+                              .addClass 'primary'
+
 # searches directions in all travel modes
-searchDirections = (origin, destination, departureTime = null, callback) ->
-    travelModes = [google.maps.TravelMode.BICYCLING, google.maps.TravelMode.DRIVING, google.maps.TravelMode.TRANSIT, google.maps.TravelMode.WALKING]
+searchDirections = (origin, destination, departureTime, callback) ->
+    travelModes = [
+        google.maps.TravelMode.BICYCLING
+        google.maps.TravelMode.DRIVING
+        google.maps.TravelMode.TRANSIT
+        google.maps.TravelMode.WALKING
+    ]
     deferreds = []
     results= []
+
     for e in travelModes
         deferred = $.Deferred()
         deferreds.push deferred
@@ -144,12 +142,19 @@ searchDirections = (origin, destination, departureTime = null, callback) ->
 
 searchDirections.service = new google.maps.DirectionsService()
 
+# saves current state into localStorage
+saveMapStatus = () ->
+    pos = map.getCenter()
+    localStorage[MAP_STATUS] = JSON.stringify
+        lat: pos.lat()
+        lng: pos.lng()
+        zoom: map.getZoom()
 
 # is a class with a marker, responsible for modal.
 class Place extends google.maps.Marker
     # options is for Marker, @event is an Event for the Place.
-    # optional @address means the Place is one of candicates and shows the address of the Place.
-    constructor: (options, @event, @address = null) ->
+    # optional @candidateAddress means the Place is one of candicates and shows the address of the Place.
+    constructor: (options, @event, @candidateAddress = null) ->
         super options
         google.maps.event.addListener @, 'click', =>
             if originPlace?
@@ -224,7 +229,7 @@ class Event
         @resource.end ?= dateTime: new Date().toISOString()
 
         @candidates = null
-        if @latLng()? or (@resource.location? and @resource.location isnt '')
+        if @getPosition()? or (@resource.location? and @resource.location isnt '')
             @icon =
                 url: "http://www.google.com/mapfiles/marker#{Event.mark}.png"
             Event.mark = String.fromCharCode Event.mark.charCodeAt(0) + 1 if Event.mark isnt 'Z'
@@ -241,14 +246,14 @@ class Event
     getDate: (startOrEnd) ->
         new Date @resource[startOrEnd].dateTime ? @resource[startOrEnd].date + if startOrEnd is 'start' then 'T00:00:00Z' else 'T23:59:59Z'
 
-    latLng: ->
+    getPosition: ->
         if @resource.extendedProperties?.private?.geolocation?
             geolocation = JSON.parse @resource.extendedProperties.private.geolocation
             new google.maps.LatLng geolocation.lat, geolocation.lng
         else
             null
 
-    address: ->
+    getAddress: ->
         if @resource.extendedProperties?.private?.geolocation?
             geolocation = JSON.parse @resource.extendedProperties.private.geolocation
             geolocation.address
@@ -293,7 +298,7 @@ class Event
         if Event.geocodeCount > 10
             console.log 'too many geocoding requests'
             return false
-        latLng = @latLng()
+        latLng = @getPosition()
         if latLng?
             options = location: latLng
         else if @resource.location isnt ''
@@ -316,7 +321,7 @@ class Event
         Event.geocodeCount += 1
 
     setPlace: (byClick = false) ->
-        latLng = @latLng()
+        latLng = @getPosition()
         unless latLng
             @place = null
             return null
@@ -337,7 +342,7 @@ class Event
             map.setCenter @place.getPosition()
             currentPlace = @place
 
-        if not (@place? and @address()?) # if place and/or address is unknown
+        if not (@place? and @getAddress()?) # if place and/or address is unknown
             @geocode (results) =>
                 if @place? # if new event by clicking map
                     @setGeolocation results[0].geometry.location.lat(), results[0].geometry.location.lng(), results[0].formatted_address
@@ -402,7 +407,7 @@ class Event
             console.error 'inconsistent start and end'
         if @candidates?
             $('#candidate').css 'display', 'block'
-            $('#candidate select[name="candidate"]').html ("<option value=\"#{i}\" #{if e is place then 'selected' else ''}>#{e.address}</option>" for e, i in @candidates).join ''
+            $('#candidate select[name="candidate"]').html ("<option value=\"#{i}\" #{if e is place then 'selected' else ''}>#{e.candidateAddress}</option>" for e, i in @candidates).join ''
         else
             $('#candidate').css 'display', 'none'
         Event.$modalInfo.find('input[name="description"]').val @resource.description
