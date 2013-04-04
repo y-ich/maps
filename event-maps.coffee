@@ -563,6 +563,7 @@ initializeDOM = ->
                     directions.routeIdex = 0
             directionsRenderer.setRouteIndex directions.routeIdex
         else
+            return if Event.events.length == 0
             sorted = Event.events.sort (x, y) -> compareEventResources x.resource, y.resource
             if currentPlace?
                 eventIndex = sorted.indexOf currentPlace.event

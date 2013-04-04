@@ -819,6 +819,9 @@
         }
         return directionsRenderer.setRouteIndex(directions.routeIdex);
       } else {
+        if (Event.events.length === 0) {
+          return;
+        }
         sorted = Event.events.sort(function(x, y) {
           return compareEventResources(x.resource, y.resource);
         });
