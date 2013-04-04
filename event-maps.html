@@ -40,9 +40,6 @@
 		</div>
 		<div id="footer" class="navbar navbar-fixed-bottom">
 			<div class="navbar-inner">
-				<form id="form-search" class="navbar-search pull-left">
-					<input type="text" name="search" class="search-query" placeholder="検索">
-				</form>
 				<div class="btn-group pull-right">
 					<button type="button" id="button-prev" class="btn">前</button>
 					<button type="button" id="button-next" class="btn">次</button>
@@ -99,13 +96,17 @@
 						<label class="control-label" for="location">場所:</label>
 						<div class="controls">
 							<input type="text" name="location" />
-							<button id="button-direction" type="button" class="btn" data-dismiss="modal" aria-hidden="true">ここからの道順を調べる</button>
+							<div>
+								<button id="button-search" type="button" class="btn">位置を確認する</button>
+								<button id="button-direction" type="button" class="btn" data-dismiss="modal" aria-hidden="true">道順を調べる</button>
+							</div>
 						</div>
 					</div>
 					<div id="candidate" class="control-group">
 						<label class="control-label">候補地:</label>
 						<div class="controls">
-							<p id="candidate-address"></p>
+							<select name="candidate">
+							</select>
 							<button id="button-confirm" type="button" class="btn">候補地を確定する</button>
 						</div>
 					</div>

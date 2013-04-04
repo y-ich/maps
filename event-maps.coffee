@@ -23,6 +23,7 @@ directionsRenderer = null
 calendars= null # result of calenders list
 currentCalendar = null
 currentPlace = null
+modalPlace = null
 originPlace = null
 directions = null
 geocoder = null
@@ -146,11 +147,6 @@ searchDirections.service = new google.maps.DirectionsService()
 
 # is a class with a marker, responsible for modal.
 class Place extends google.maps.Marker
-    # Place is an extension of google.maps.Marker, but doen't extend it because google.maps.Marker is not a constructor function.
-
-    @$modalInfo: $('#modal-info')
-    @modalPlace: null
-
     # options is for Marker, @event is an Event for the Place.
     # optional @address means the Place is one of candicates and shows the address of the Place.
     constructor: (options, @event, @address = null) ->
@@ -188,56 +184,12 @@ class Place extends google.maps.Marker
 
     # shows its Modal Window.
     showInfo: =>
-        @_setInfo()
-        Place.$modalInfo.modal 'show'
+        @event.setModal @
+        Event.$modalInfo.modal 'show'
         directions = null # cancels direction mode
         directionsRenderer.setMap null
         $('#directions-panel').addClass 'hide'
 
-    _setInfo: ->
-        Place.modalPlace = @
-        Place.$modalInfo.find('input[name="summary"]').val @event.resource.summary
-        Place.$modalInfo.find('input[name="location"]').val @event.resource.location
-        if @event.resource.start.date? and @event.resource.end.date?
-            $('#form-event input[name="all-day"]')[0].checked = true
-            $('#form-event input[name="all-day"]').trigger 'change'
-            Place.$modalInfo.find('input[name="start-date"]').val @event.resource.start.date
-            Place.$modalInfo.find('input[name="end-date"]').val @event.resource.end.date
-        else if @event.resource.start.dateTime? and @event.resource.end.dateTime?
-            setTime = (startOrEnd) =>
-                dateTime = @getDateTime startOrEnd
-                Place.$modalInfo.find("input[name=\"#{startOrEnd}-date\"]").val dateTime.date
-                Place.$modalInfo.find("input[name=\"#{startOrEnd}-time\"]").val dateTime.time
-            $('#form-event input[name="all-day"]')[0].checked = false
-            $('#form-event input[name="all-day"]').trigger 'change'
-            startDeferred = $.Deferred()
-            endDeferred = $.Deferred()
-            $.when(startDeferred, endDeferred).then -> spinner.stop()
-            spinner.spin document.body
-            if @startTimeZone?
-                startDeferred.resolve()
-                setTime 'start'
-            else
-                getTimeZone new Date(@event.resource.start.dateTime), @getPosition(), (obj) =>
-                    startDeferred.resolve()
-                    @startTimeZone = obj
-                    setTime 'start'
-            if @endTimeZone?
-                endDeferred.resolve()
-                setTime 'end'
-            else
-                getTimeZone new Date(@event.resource.end.dateTime), @getPosition(), (obj) =>
-                    endDeferred.resolve()
-                    @endTimeZone = obj
-                    setTime 'end'
-        else
-            console.error 'inconsistent start and end'
-        if @address
-            $('#candidate').css 'display', 'block'
-            $('#candidate-address').text @address
-        else
-            $('#candidate').css 'display', 'none'
-        Place.$modalInfo.find('input[name="description"]').val @event.resource.description
 
 # delegate
 #for name, method of MapState.prototype when typeof method is 'function'
@@ -249,6 +201,7 @@ class Place extends google.maps.Marker
 # is capable to geocode the location of events and saves it as extendedProperties.private.geolocation.
 # Event.geocodeCount should be reset to 0 when starting simultaneous geocode requests 
 class Event
+    @$modalInfo: $('#modal-info')
     @events: []
     @mark: 'A' # next alphabetic marker
     @geocodeCount: 0 # Google accepts only ten simultaneous geocode requests. So count them.
@@ -301,6 +254,40 @@ class Event
             geolocation.address
         else
             null
+
+    setGeolocation: (lat, lng, address) ->
+        @resource.extendedProperties ?= {}
+        @resource.extendedProperties.private ?= {}
+        @resource.extendedProperties.private.geolocation = JSON.stringify
+            lat: lat
+            lng: lng
+            address: address
+        @resource.location = address unless @resource.location? and @resource.location isnt ''
+
+    update: ->
+        if @calendarId?
+            gapi.client.calendar.events.update(
+                calendarId: @calendarId
+                eventId: @resource.id
+                resource: @resource
+            ).execute (resp) ->
+                if resp.error?
+                    console.error 'gapi.client.calendar.events.update', resp
+        else
+            $('#modal-calendar').modal 'show'
+
+    insert: ->
+        if @calendarId?
+            gapi.client.calendar.events.insert(
+                calendarId: @calendarId
+                resource: @resource
+            ).execute (resp) =>
+                if resp.error?
+                    console.error 'gapi.client.calendar.events.update', resp
+                else
+                    @resource = resp.result
+        else
+            $('#modal-calendar').modal 'show'
 
     geocode: (callback) -> # the argument of callback is the first arugment of geocode callback.
         if Event.geocodeCount > 10
@@ -375,39 +362,50 @@ class Event
                         map.setCenter @candidates[0].getPosition()
                         currentPlace = @candidates[0]
 
-    setGeolocation: (lat, lng, address) ->
-        @resource.extendedProperties ?= {}
-        @resource.extendedProperties.private ?= {}
-        @resource.extendedProperties.private.geolocation = JSON.stringify
-            lat: lat
-            lng: lng
-            address: address
-        @resource.location = address unless @resource.location? and @resource.location isnt ''
-
-    update: ->
-        if @calendarId?
-            gapi.client.calendar.events.update(
-                calendarId: @calendarId
-                eventId: @resource.id
-                resource: @resource
-            ).execute (resp) ->
-                if resp.error?
-                    console.error 'gapi.client.calendar.events.update', resp
+    setModal: (place) ->
+        modalPlace = place
+        Event.$modalInfo.find('input[name="summary"]').val @resource.summary
+        Event.$modalInfo.find('input[name="location"]').val @resource.location
+        if @resource.start.date? and @resource.end.date?
+            $('#form-event input[name="all-day"]')[0].checked = true
+            $('#form-event input[name="all-day"]').trigger 'change'
+            Event.$modalInfo.find('input[name="start-date"]').val @resource.start.date
+            Event.$modalInfo.find('input[name="end-date"]').val @resource.end.date
+        else if @resource.start.dateTime? and @resource.end.dateTime?
+            setTime = (startOrEnd) ->
+                dateTime = place.getDateTime startOrEnd
+                Event.$modalInfo.find("input[name=\"#{startOrEnd}-date\"]").val dateTime.date
+                Event.$modalInfo.find("input[name=\"#{startOrEnd}-time\"]").val dateTime.time
+            $('#form-event input[name="all-day"]')[0].checked = false
+            $('#form-event input[name="all-day"]').trigger 'change'
+            startDeferred = $.Deferred()
+            endDeferred = $.Deferred()
+            $.when(startDeferred, endDeferred).then -> spinner.stop()
+            spinner.spin document.body
+            if place.startTimeZone?
+                startDeferred.resolve()
+                setTime 'start'
+            else
+                getTimeZone new Date(@resource.start.dateTime), place.getPosition(), (obj) ->
+                    startDeferred.resolve()
+                    place.startTimeZone = obj
+                    setTime 'start'
+            if place.endTimeZone?
+                endDeferred.resolve()
+                setTime 'end'
+            else
+                getTimeZone new Date(@resource.end.dateTime), place.getPosition(), (obj) ->
+                    endDeferred.resolve()
+                    place.endTimeZone = obj
+                    setTime 'end'
         else
-            $('#modal-calendar').modal 'show'
-
-    insert: ->
-        if @calendarId?
-            gapi.client.calendar.events.insert(
-                calendarId: @calendarId
-                resource: @resource
-            ).execute (resp) =>
-                if resp.error?
-                    console.error 'gapi.client.calendar.events.update', resp
-                else
-                    @resource = resp.result
+            console.error 'inconsistent start and end'
+        if @candidates?
+            $('#candidate').css 'display', 'block'
+            $('#candidate select[name="candidate"]').html ("<option value=\"#{i}\" #{if e is place then 'selected' else ''}>#{e.address}</option>" for e, i in @candidates).join ''
         else
-            $('#modal-calendar').modal 'show'
+            $('#candidate').css 'display', 'none'
+        Event.$modalInfo.find('input[name="description"]').val @resource.description
 
 initializeDOM = ->
     localize()
@@ -469,15 +467,17 @@ initializeDOM = ->
                         event = new Event id, e
 
     $('#button-confirm').on 'click', ->
-        position = Place.modalPlace.getPosition()
-        Place.modalPlace.event.setGeolocation position.lat(), position.lng(), Place.modalPlace.geocodedAddress
-        Place.modalPlace.event.update()
-        Place.modalPlace.event.clearMarkers()
-        Place.modalPlace.event.setPlace()
+        candidateIndex = parseInt $('#form-event input[name="candidate"]').val()
+        candidate = modalPlace.event.candidates[candidateIndex]
+        position = candidate.getPosition()
+        modalPlace.event.setGeolocation position.lat(), position.lng(), candidate.address
+        modalPlace.event.update()
+        modalPlace.event.clearMarkers()
+        modalPlace.event.setPlace()
         $('#candidate').css 'display', 'none'
 
     $('#button-update').on 'click', ->
-        anEvent = Place.modalPlace.event
+        anEvent = modalPlace.event
         if anEvent.resource.id?
             updateFlag = false
             if anEvent.resource.summary isnt $('#form-event input[name="summary"]').val()
@@ -497,14 +497,14 @@ initializeDOM = ->
                     delete anEvent.resource.end.dateTime
                     anEvent.resource.end.date = $('#form-event input[name="end-date"]').val().replace(/-/g, '/')
             else
-                timeZone = Place.modalPlace.startTimeZone
+                timeZone = modalPlace.startTimeZone
                 startDateTime = new Date $('#form-event input[name="start-date"]').val().replace(/-/g, '/') + ' ' + $('#form-event input[name="start-time"]').val() + timeDifference(timeZone.dstOffset + timeZone.rawOffset)
                 if new Date(anEvent.resource.start.dateTime).getTime() isnt startDateTime.getTime()
                     updateFlag = true
                     delete anEvent.resource.start.date
                     anEvent.resource.start.dateTime = startDateTime.toISOString()
                     anEvent.resource.start.timeZone = timeZone.timeZoneId
-                timeZone = Place.modalPlace.endTimeZone
+                timeZone = modalPlace.endTimeZone
                 endDateTime = new Date $('#form-event input[name="end-date"]').val().replace(/-/g, '/') + ' ' + $('#form-event input[name="end-time"]').val() + timeDifference(timeZone.dstOffset + timeZone.rawOffset)
                 if new Date(anEvent.resource.end.dateTime).getTime() isnt endDateTime.getTime()
                     updateFlag = true
@@ -525,7 +525,7 @@ initializeDOM = ->
         $('#form-event input[name="end-time"]').css 'display', if @checked then 'none' else ''
 
     $('#button-delete').on 'click', ->
-        anEvent = Place.modalPlace.event
+        anEvent = modalPlace.event
         if anEvent.calendarId? and anEvent.resource.id?
             req = gapi.client.calendar.events.delete
                 calendarId: anEvent.calendarId
@@ -535,20 +535,7 @@ initializeDOM = ->
                     alert '予定が削除できませんでした'
         Event.events.splice Event.events.indexOf anEvent, 1
         anEvent.clearMarkers()
-        Place.modalPlace = null
-
-    $('#form-search').on 'submit', (event) ->
-        location = $(this).children('[name="search"]').val()
-        if location? and location isnt ''
-            geocoder.geocode { address: location }, (results, status) ->
-                switch status
-                    when google.maps.GeocoderStatus.OK
-                        map.setCenter results[0].geometry.location
-                    when google.maps.GeocoderStatus.ZERO_RESULTS
-                        setTimeout (-> alert '見つかりませんでした'), 0
-                    else
-                        console.error status
-        event.preventDefault()
+        modalPlace = null
 
     $('#button-prev, #button-next').on 'click', ->
         if directions?
@@ -601,9 +588,14 @@ initializeDOM = ->
             map.setCenter currentPlace.getPosition()
 
     $('#button-direction').on 'click', (event) ->
-        originPlace = Place.modalPlace
-        alert '目的地のマーカをクリックしてください'
+        originPlace = modalPlace
+        alert 'ここからの道順を調べます。目的地のマーカをクリックしてください'
 
+###
+    $('#button-search').on 'click', (event) ->
+        $('#form-event input[name="location"]').val()
+        modalPlace.event
+###
 initializeGoogleMaps = ->
     mapOptions =
         mapTypeId: google.maps.MapTypeId.ROADMAP
