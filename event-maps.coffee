@@ -591,6 +591,10 @@ initializeDOM = ->
         originPlace = modalPlace
         alert 'ここからの道順を調べます。目的地のマーカをクリックしてください'
 
+    $('#candidate select[name="candidate"]').on 'change', (event) ->
+        modalPlace = modalPlace.event.candidates[parseInt @value]
+        map.setCenter modalPlace.getPosition()
+
 ###
     $('#button-search').on 'click', (event) ->
         $('#form-event input[name="location"]').val()

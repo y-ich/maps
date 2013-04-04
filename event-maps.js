@@ -865,9 +865,13 @@
         return map.setCenter(currentPlace.getPosition());
       }
     });
-    return $('#button-direction').on('click', function(event) {
+    $('#button-direction').on('click', function(event) {
       originPlace = modalPlace;
       return alert('ここからの道順を調べます。目的地のマーカをクリックしてください');
+    });
+    return $('#candidate select[name="candidate"]').on('change', function(event) {
+      modalPlace = modalPlace.event.candidates[parseInt(this.value)];
+      return map.setCenter(modalPlace.getPosition());
     });
   };
 
