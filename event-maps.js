@@ -882,8 +882,8 @@
     });
   };
 
-  initializeGoogleMaps = function() {
-    var mapOptions, mapStatus;
+  initializeGoogleMaps = function(callback) {
+    var callbackId, mapOptions, mapStatus;
     mapOptions = {
       mapTypeId: google.maps.MapTypeId.ROADMAP,
       disableDefaultUI: /iPad|iPhone/.test(navigator.userAgent),
@@ -904,7 +904,11 @@
     }
     map = new google.maps.Map(document.getElementById('map'), mapOptions);
     map.setTilt(45);
-    google.maps.event.addListener(map, 'click', function(event) {
+    callbackId = map.addListener('tilesloaded', function() {
+      google.maps.event.removeListener(callbackId);
+      return callback();
+    });
+    map.addListener('click', function(event) {
       return new Event(currentCalendar != null ? currentCalendar.id : void 0, {
         extendedProperties: {
           "private": {
@@ -925,8 +929,8 @@
   };
 
   window.app = {
-    initialize: function() {
-      initializeGoogleMaps();
+    initialize: function(mapsCallback) {
+      initializeGoogleMaps(mapsCallback);
       return initializeDOM();
     },
     saveMapStatus: saveMapStatus

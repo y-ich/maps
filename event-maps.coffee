@@ -607,7 +607,7 @@ initializeDOM = ->
         modalPlace.event.tryToSetPlace true, false
         modalPlace = currentPlace
 
-initializeGoogleMaps = ->
+initializeGoogleMaps = (callback) ->
     mapOptions =
         mapTypeId: google.maps.MapTypeId.ROADMAP
         disableDefaultUI: /iPad|iPhone/.test(navigator.userAgent)
@@ -628,7 +628,11 @@ initializeGoogleMaps = ->
     map = new google.maps.Map document.getElementById('map'), mapOptions
     map.setTilt 45
 
-    google.maps.event.addListener map, 'click', (event) ->
+    callbackId = map.addListener 'tilesloaded', ->
+        google.maps.event.removeListener callbackId
+        callback()
+
+    map.addListener 'click', (event) ->
         new Event currentCalendar?.id,
             extendedProperties:
                 private:
@@ -637,6 +641,7 @@ initializeGoogleMaps = ->
                         lng: event.latLng.lng()
                     ),
             false, true
+
     geocoder = new google.maps.Geocoder()
 
     directionsRenderer = new google.maps.DirectionsRenderer
@@ -647,8 +652,8 @@ initializeGoogleMaps = ->
 # export
 
 window.app =
-    initialize: ->
-        initializeGoogleMaps()
+    initialize: (mapsCallback) ->
+        initializeGoogleMaps mapsCallback
         initializeDOM()
     saveMapStatus: saveMapStatus
 

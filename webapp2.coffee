@@ -2,7 +2,6 @@
 # Copyright (C) 2012-2013 ICHIKAWA, Yuji (New 3 Rs) 
 
 VERSION = '(C) 2013 ICHIKAWA, Yuji (New 3 Rs)<br>Maps ver. 2.0.0'
-STARTUP_TIME = 2000 # ms
 
 # function definitions
 
@@ -36,13 +35,9 @@ types = ['checking', 'noupdate', 'downloading', 'progress','cached', 'updateread
 for type in types
     applicationCache.addEventListener type, (event) -> console.log 'cache', event.type
 
-app.initialize()
+app.initialize ->
+    $('.startup').on($.support.transition.end, -> $(this).css 'display', 'none')
+                 .addClass 'fade'
 # fullScreen() if /iPhone/.test(navigator.userAgent) and /Safari/.test(navigator.userAgent)
 
 window.onpagehide = app.saveMapStatus
-
-# finish startup screen
-setTimeout (->
-    $('.startup').on($.support.transition.end, -> $(this).css 'display', 'none')
-                 .addClass 'fade'
-), STARTUP_TIME
