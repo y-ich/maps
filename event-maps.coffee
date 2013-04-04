@@ -595,11 +595,12 @@ initializeDOM = ->
         modalPlace = modalPlace.event.candidates[parseInt @value]
         map.setCenter modalPlace.getPosition()
 
-###
     $('#button-search').on 'click', (event) ->
-        $('#form-event input[name="location"]').val()
-        modalPlace.event
-###
+        location = $('#form-event input[name="location"]').val()
+        modalPlace.event.clearMarkers()
+        modalPlace.event.tryToSetPlace true, false
+        modalPlace = currentPlace
+
 initializeGoogleMaps = ->
     mapOptions =
         mapTypeId: google.maps.MapTypeId.ROADMAP

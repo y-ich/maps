@@ -56,13 +56,6 @@ body {
 .candidate {
   opacity: 0.5;
 }
-#directions-panel {
-  position: absolute;
-  width: 100%;
-  top: 0px;
-  bottom: 0px;
-  opacity: 0.5;
-}
 .startup {
   position: fixed;
   width: 100%;

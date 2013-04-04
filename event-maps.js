@@ -869,18 +869,18 @@
       originPlace = modalPlace;
       return alert('ここからの道順を調べます。目的地のマーカをクリックしてください');
     });
-    return $('#candidate select[name="candidate"]').on('change', function(event) {
+    $('#candidate select[name="candidate"]').on('change', function(event) {
       modalPlace = modalPlace.event.candidates[parseInt(this.value)];
       return map.setCenter(modalPlace.getPosition());
     });
+    return $('#button-search').on('click', function(event) {
+      var location;
+      location = $('#form-event input[name="location"]').val();
+      modalPlace.event.clearMarkers();
+      modalPlace.event.tryToSetPlace(true, false);
+      return modalPlace = currentPlace;
+    });
   };
-
-  /*
-      $('#button-search').on 'click', (event) ->
-          $('#form-event input[name="location"]').val()
-          modalPlace.event
-  */
-
 
   initializeGoogleMaps = function() {
     var mapOptions, mapStatus;
