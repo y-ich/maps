@@ -333,7 +333,7 @@
         this.place.setMap(null);
       }
       this.place = null;
-      if (this.candicates != null) {
+      if (this.candidates != null) {
         _ref = this.candidates;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           e = _ref[_i];
@@ -705,11 +705,11 @@
     });
     $('#button-confirm').on('click', function() {
       var candidate, candidateIndex, position;
-      candidateIndex = parseInt($('#form-event input[name="candidate"]').val());
+      candidateIndex = parseInt($('#form-event select[name="candidate"]').val());
       candidate = modalPlace.event.candidates[candidateIndex];
+      console.log(candidateIndex, candidate);
       position = candidate.getPosition();
       modalPlace.event.setGeolocation(position.lat(), position.lng(), candidate.address);
-      modalPlace.event.update();
       modalPlace.event.clearMarkers();
       modalPlace.event.setPlace();
       return $('#candidate').css('display', 'none');

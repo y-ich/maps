@@ -239,7 +239,7 @@ class Event
     clearMarkers: ->
         @place.setMap null if @place?
         @place = null
-        e.setMap null for e in @candidates if @candicates?
+        e.setMap null for e in @candidates if @candidates?
         @candidates = null
 
     # returns Event's Date.
@@ -473,11 +473,11 @@ initializeDOM = ->
                         event = new Event id, e
 
     $('#button-confirm').on 'click', ->
-        candidateIndex = parseInt $('#form-event input[name="candidate"]').val()
+        candidateIndex = parseInt $('#form-event select[name="candidate"]').val()
         candidate = modalPlace.event.candidates[candidateIndex]
+        console.log candidateIndex, candidate
         position = candidate.getPosition()
         modalPlace.event.setGeolocation position.lat(), position.lng(), candidate.address
-        modalPlace.event.update()
         modalPlace.event.clearMarkers()
         modalPlace.event.setPlace()
         $('#candidate').css 'display', 'none'
