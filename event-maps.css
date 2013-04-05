@@ -31,8 +31,10 @@ body {
   margin-right: -6px;
   opacity: .25;
 }
+.modal {
+  max-height: 90%;
+}
 .modal-body {
-  max-height: 300px;
   -webkit-overflow-scrolling: touch;
 }
 /* end of cancel */
@@ -56,6 +58,16 @@ body {
 .candidate {
   opacity: 0.5;
 }
+#directions-panel {
+  position: absolute;
+  width: 100%;
+  top: 0px;
+  bottom: 0px;
+  background-color: white;
+  z-index: 1030;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
 .startup {
   position: fixed;
   width: 100%;
@@ -63,7 +75,7 @@ body {
   background-color: white;
   left: 0px;
   bottom: 0px;
-  z-index: 1030;
+  z-index: 1031;
 }
 #logo {
   position: absolute;

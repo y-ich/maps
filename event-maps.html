@@ -38,20 +38,19 @@
 				<a id="button-calendar" href="#modal-calendar" role="button" class="btn" style="display: none;" data-toggle="modal">カレンダー一覧</a>
 			</div>
 		</div>
+		<div id="directions-panel" class="hide"></div>
 		<div id="footer" class="navbar navbar-fixed-bottom">
 			<div class="navbar-inner">
+				<div class="btn-group pull-left">
+					<button type="button" id="button-route-info" class="btn hide">道順情報</button>
+				</div>
 				<div class="btn-group pull-right">
 					<button type="button" id="button-prev" class="btn">前</button>
 					<button type="button" id="button-next" class="btn">次</button>
 				</div>
 			</div>
 		</div>
-		<div id="directions-panel" class="hide"></div>
 		<div id="modal-calendar" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="label-modal-calendar" aria-hidden="true">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-				<h5 id="label-modal-calendar">カレンダーを選択してください</h5>
-			</div>
 			<div class="modal-body">
 				<form id="form-calendar" class="form-horizontal">
 					<div class="control-group">
@@ -60,15 +59,14 @@
 							<select name="calendar" id="calendar-list"></select>
 						</div>
 					</div>
-					<p>予定を取り込む期間を入力してください。未入力の場合すべての予定を取り込みます。</p>
 					<div class="control-group">
-						<label class="control-label" for="start-date">期間の始めの日:</label>
+						<label class="control-label" for="start-date">この日以後:(省略可)</label>
 						<div class="controls">
 							<input type="date" name="start-date" />
 						</div>
 					</div>
 					<div class="control-group">
-						<label class="control-label" for="end-date">期間の終わりの日:</label>
+						<label class="control-label" for="end-date">この日以前:(省略可)</label>
 						<div class="controls">
 							<input type="date" name="end-date" />
 						</div>
@@ -77,6 +75,7 @@
 			</div>
 			<div class="modal-footer">
 				<button id="button-show" class="btn btn-primary" data-dismiss="modal" aria-hidden="true">カレンダーを見る</button>
+				<button class="btn" data-dismiss="modal" aria-hidden="true">キャンセル</button>
 			</div>
 		</div>
 		<div id="modal-info" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="label-modal-info" aria-hidden="true">

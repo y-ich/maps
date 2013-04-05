@@ -217,7 +217,7 @@
             });
             directionsRenderer.setDirections(results[0]);
             directionsRenderer.setMap(map);
-            $('#directions-panel').removeClass('hide');
+            $('#button-route-info').removeClass('hide');
             return directions = {
               results: results,
               index: 0,
@@ -252,7 +252,7 @@
       Event.$modalInfo.modal('show');
       directions = null;
       directionsRenderer.setMap(null);
-      return $('#directions-panel').addClass('hide');
+      return $('#button-route-info').addClass('hide');
     };
 
     return Place;
@@ -804,6 +804,10 @@
     $('#button-prev, #button-next').on('click', function() {
       var candidateIndex, eventIndex, sorted, _ref, _ref1, _ref2, _ref3;
       if (directions != null) {
+        if (directions.results.length === 1 && directions.results[0].routes.length === 1) {
+          alert('道順は１つしか見つかりませんでした');
+          return;
+        }
         if (this.id === 'buttion-prev') {
           directions.routeIndex -= 1;
           if (directions.routeIndex < 0) {
@@ -883,7 +887,7 @@
       modalPlace = modalPlace.event.candidates[parseInt(this.value)];
       return map.panTo(modalPlace.getPosition());
     });
-    return $('#button-search').on('click', function(event) {
+    $('#button-search').on('click', function(event) {
       var _ref, _ref1;
       modalPlace.event.resource.location = $('#form-event input[name="location"]').val();
       modalPlace.event.clearMarkers();
@@ -895,6 +899,16 @@
       return modalPlace.event.tryToSetPlace(true, false, function() {
         return currentPlace.event.setModal(currentPlace);
       });
+    });
+    $('#button-route-info').on('click', function() {
+      if ($('#directions-panel').hasClass('hide')) {
+        return $('#directions-panel').removeClass('hide');
+      } else {
+        return $('#directions-panel').addClass('hide');
+      }
+    });
+    return $('#directions-panel').on('click', function() {
+      return $('#directions-panel').addClass('hide');
     });
   };
 

@@ -166,7 +166,7 @@ class Place extends google.maps.Marker
                     results.sort (x, y) -> x.routes[0].duration - y.routes[0].duration
                     directionsRenderer.setDirections results[0]
                     directionsRenderer.setMap map
-                    $('#directions-panel').removeClass 'hide'
+                    $('#button-route-info').removeClass 'hide'
                     directions =
                         results: results
                         index: 0
@@ -193,7 +193,7 @@ class Place extends google.maps.Marker
         Event.$modalInfo.modal 'show'
         directions = null # cancels direction mode
         directionsRenderer.setMap null
-        $('#directions-panel').addClass 'hide'
+        $('#button-route-info').addClass 'hide'
 
 
 # delegate
@@ -551,6 +551,9 @@ initializeDOM = ->
 
     $('#button-prev, #button-next').on 'click', ->
         if directions?
+            if directions.results.length == 1 and directions.results[0].routes.length == 1
+                alert '道順は１つしか見つかりませんでした'
+                return
             if this.id is 'buttion-prev'
                 directions.routeIndex -= 1
                 if directions.routeIndex < 0
@@ -612,6 +615,15 @@ initializeDOM = ->
         modalPlace.event.clearMarkers()
         modalPlace.event.resource.extendedProperties?.private?.geolocation = null
         modalPlace.event.tryToSetPlace true, false, -> currentPlace.event.setModal currentPlace
+
+    $('#button-route-info').on 'click', ->
+        if $('#directions-panel').hasClass 'hide'
+            $('#directions-panel').removeClass 'hide'
+        else
+            $('#directions-panel').addClass 'hide'
+
+    $('#directions-panel').on 'click', ->
+        $('#directions-panel').addClass 'hide'
 
 initializeGoogleMaps = (callback = ->) ->
     mapOptions =

@@ -42,8 +42,11 @@ body {
 	opacity: .25;
 }
 
+.modal {
+	max-height: 90%;
+}
+
 .modal-body {
-	max-height: 300px;
 	-webkit-overflow-scrolling: touch;
 }
 /* end of cancel */
@@ -75,7 +78,10 @@ body {
     width: 100%;
     top: 0px;
     bottom: 0px;
-	opacity: 0.5;
+	background-color: white;
+	z-index: 1030; // more than header/footer
+	overflow: auto;
+	-webkit-overflow-scrolling: touch;
 }
 
 // Followings are for wep app.
@@ -86,7 +92,7 @@ body {
     background-color: white;
     left: 0px;
     bottom: 0px;
-    z-index: 1030; // more than navbar-fixed-top
+    z-index: 1031; // more than navbar-fixed-top
 }
 
 #logo {
