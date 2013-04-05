@@ -617,6 +617,7 @@ initializeGoogleMaps = (callback = ->) ->
     mapOptions =
         mapTypeId: google.maps.MapTypeId.ROADMAP
         disableDefaultUI: /iPad|iPhone/.test(navigator.userAgent)
+        mapTypeControl: false
         zoomControlOptions:
             position: google.maps.ControlPosition.LEFT_CENTER
         panControlOptions:
