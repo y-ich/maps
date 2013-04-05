@@ -108,10 +108,10 @@
         case 'OK':
           return callback(obj);
         case 'OVER_QUERY_LIMIT':
-          timeZone.overQueryLimit = true;
+          getTimeZone.overQueryLimit = true;
           setTimeout((function() {
-            return timeZone.overQueryLimit = false;
-          }), 10000);
+            return getTimeZone.overQueryLimit = false;
+          }), 1000);
           return alert(obj.status);
         default:
           return console.error(obj);
@@ -282,7 +282,7 @@
         e.clearMarkers();
       }
       Event.events = [];
-      return Event.mark = 'A';
+      return Event.placeNumber = 0;
     };
 
     function Event(calendarId, resource, centering, byClick) {
@@ -314,6 +314,7 @@
           dateTime: new Date().toISOString()
         };
       }
+      this.dirty = false;
       this.candidates = null;
       if ((this.getPosition() != null) || ((this.resource.location != null) && this.resource.location !== '')) {
         this.placeNumber = Event.placeNumber;
@@ -456,19 +457,41 @@
     };
 
     Event.prototype.getIcon = function(candidate) {
-      var alphabet;
+      var alphabet, remainder;
       if (candidate == null) {
         candidate = false;
       }
-      alphabet = String.fromCharCode(Math.min('A'.charCodeAt(0) + this.placeNumber, 'Z'.charCodeAt(0)));
+      remainder = function(m, n) {
+        return m - Math.floor(m / n) * n;
+      };
+      alphabet = String.fromCharCode(Math.min('A'.charCodeAt(0) + remainder(this.placeNumber, 26), 'Z'.charCodeAt(0)));
       if (candidate) {
         return {
           url: "http://maps.google.com/mapfiles/marker_grey" + alphabet + ".png"
         };
       } else {
-        return {
-          url: "http://maps.google.com/mapfiles/marker" + alphabet + ".png"
-        };
+        switch (Math.floor(this.placeNumber / 26)) {
+          case 0:
+            return {
+              url: "http://maps.google.com/mapfiles/marker" + alphabet + ".png"
+            };
+          case 1:
+            return {
+              url: "http://maps.google.com/mapfiles/marker_orange" + alphabet + ".png"
+            };
+          case 2:
+            return {
+              url: "http://maps.google.com/mapfiles/marker_yellow" + alphabet + ".png"
+            };
+          case 3:
+            return {
+              url: "http://maps.google.com/mapfiles/marker_green" + alphabet + ".png"
+            };
+          default:
+            return {
+              url: "http://maps.google.com/mapfiles/marker_blue" + alphabet + ".png"
+            };
+        }
       }
     };
 
@@ -724,35 +747,34 @@
       var candidate, candidateIndex, position;
       candidateIndex = parseInt($('#form-event select[name="candidate"]').val());
       candidate = modalPlace.event.candidates[candidateIndex];
-      console.log(candidateIndex, candidate);
       position = candidate.getPosition();
-      modalPlace.event.setGeolocation(position.lat(), position.lng(), candidate.address);
+      modalPlace.event.setGeolocation(position.lat(), position.lng(), candidate.candidateAddress);
+      modalPlace.event.dirty = true;
       modalPlace.event.clearMarkers();
       modalPlace.event.setPlace();
       return $('#candidate').css('display', 'none');
     });
     $('#button-update').on('click', function() {
-      var anEvent, endDateTime, startDateTime, timeZone, updateFlag;
+      var anEvent, endDateTime, startDateTime, timeZone;
       anEvent = modalPlace.event;
       if (anEvent.resource.id != null) {
-        updateFlag = false;
         if (anEvent.resource.summary !== $('#form-event input[name="summary"]').val()) {
-          updateFlag = true;
+          anEvent.dirty = true;
           anEvent.resource.summary = $('#form-event input[name="summary"]').val();
         }
         if (anEvent.resource.location !== $('#form-event input[name="location"]').val()) {
-          updateFlag = true;
+          anEvent.dirty = true;
           anEvent.resource.location = $('#form-event input[name="location"]').val();
           delete anEvent.resource.extendedProperties["private"].geolocation;
         }
         if ($('#form-event input[name="all-day"]')[0].checked) {
           if (anEvent.resource.start.date !== $('#form-event input[name="start-date"]').val().replace(/-/g, '/')) {
-            updateFlag = true;
+            anEvent.dirty = true;
             delete anEvent.resource.start.dateTime;
             anEvent.resource.start.date = $('#form-event input[name="start-date"]').val().replace(/-/g, '/');
           }
           if (anEvent.resource.end.date !== $('#form-event input[name="end-date"]').val().replace(/-/g, '/')) {
-            updateFlag = true;
+            anEvent.dirty = true;
             delete anEvent.resource.end.dateTime;
             anEvent.resource.end.date = $('#form-event input[name="end-date"]').val().replace(/-/g, '/');
           }
@@ -760,7 +782,7 @@
           timeZone = modalPlace.startTimeZone;
           startDateTime = new Date($('#form-event input[name="start-date"]').val().replace(/-/g, '/') + ' ' + $('#form-event input[name="start-time"]').val() + timeDifference(timeZone.dstOffset + timeZone.rawOffset));
           if (new Date(anEvent.resource.start.dateTime).getTime() !== startDateTime.getTime()) {
-            updateFlag = true;
+            anEvent.dirty = true;
             delete anEvent.resource.start.date;
             anEvent.resource.start.dateTime = startDateTime.toISOString();
             anEvent.resource.start.timeZone = timeZone.timeZoneId;
@@ -768,17 +790,17 @@
           timeZone = modalPlace.endTimeZone;
           endDateTime = new Date($('#form-event input[name="end-date"]').val().replace(/-/g, '/') + ' ' + $('#form-event input[name="end-time"]').val() + timeDifference(timeZone.dstOffset + timeZone.rawOffset));
           if (new Date(anEvent.resource.end.dateTime).getTime() !== endDateTime.getTime()) {
-            updateFlag = true;
+            anEvent.dirty = true;
             delete anEvent.resource.end.date;
             anEvent.resource.end.dateTime = endDateTime.toISOString();
             anEvent.resource.end.timeZone = timeZone.timeZoneId;
           }
         }
         if (anEvent.resource.description !== $('#form-event input[name="description"]').val()) {
-          updateFlag = true;
+          anEvent.dirty = true;
           anEvent.resource.description = $('#form-event input[name="description"]').val();
         }
-        if (updateFlag) {
+        if (anEvent.dirty) {
           return anEvent.update();
         }
       } else {

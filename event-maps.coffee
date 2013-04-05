@@ -88,8 +88,8 @@ getTimeZone = (date, position, callback) ->
             when 'OK'
                 callback obj
             when 'OVER_QUERY_LIMIT'
-                timeZone.overQueryLimit = true
-                setTimeout (-> timeZone.overQueryLimit = false), 10000 # no reason of 10s.
+                getTimeZone.overQueryLimit = true
+                setTimeout (-> getTimeZone.overQueryLimit = false), 1000 # no reason of 1s.
                 alert obj.status
             else
                 console.error obj
@@ -219,7 +219,7 @@ class Event
         for e in Event.events
             e.clearMarkers()
         Event.events = []
-        Event.mark = 'A'
+        Event.placeNumber = 0
 
     constructor: (@calendarId, @resource, centering = false, byClick = false) ->
         @resource.summary ?= '新しい予定'
@@ -227,6 +227,7 @@ class Event
         @resource.description ?= ''
         @resource.start ?= dateTime: new Date().toISOString()
         @resource.end ?= dateTime: new Date().toISOString()
+        @dirty = false
 
         @candidates = null
         if @getPosition()? or (@resource.location? and @resource.location isnt '')
@@ -320,11 +321,22 @@ class Event
         Event.geocodeCount += 1
 
     getIcon: (candidate = false) ->
-        alphabet = String.fromCharCode Math.min 'A'.charCodeAt(0) + @placeNumber, 'Z'.charCodeAt(0)
+        remainder = (m, n) -> m - Math.floor(m / n) * n
+        alphabet = String.fromCharCode Math.min 'A'.charCodeAt(0) + remainder(@placeNumber, 26), 'Z'.charCodeAt(0)
         if candidate
             url: "http://maps.google.com/mapfiles/marker_grey#{alphabet}.png"
         else
-            url: "http://maps.google.com/mapfiles/marker#{alphabet}.png"
+            switch Math.floor @placeNumber / 26
+                when 0
+                    url: "http://maps.google.com/mapfiles/marker#{alphabet}.png"
+                when 1
+                    url: "http://maps.google.com/mapfiles/marker_orange#{alphabet}.png"
+                when 2
+                    url: "http://maps.google.com/mapfiles/marker_yellow#{alphabet}.png"
+                when 3
+                    url: "http://maps.google.com/mapfiles/marker_green#{alphabet}.png"
+                else
+                    url: "http://maps.google.com/mapfiles/marker_blue#{alphabet}.png"
 
     setPlace: (byClick = false) ->
         latLng = @getPosition()
@@ -485,9 +497,9 @@ initializeDOM = ->
     $('#button-confirm').on 'click', ->
         candidateIndex = parseInt $('#form-event select[name="candidate"]').val()
         candidate = modalPlace.event.candidates[candidateIndex]
-        console.log candidateIndex, candidate
         position = candidate.getPosition()
-        modalPlace.event.setGeolocation position.lat(), position.lng(), candidate.address
+        modalPlace.event.setGeolocation position.lat(), position.lng(), candidate.candidateAddress
+        modalPlace.event.dirty = true
         modalPlace.event.clearMarkers()
         modalPlace.event.setPlace()
         $('#candidate').css 'display', 'none'
@@ -495,42 +507,41 @@ initializeDOM = ->
     $('#button-update').on 'click', ->
         anEvent = modalPlace.event
         if anEvent.resource.id?
-            updateFlag = false
             if anEvent.resource.summary isnt $('#form-event input[name="summary"]').val()
-                updateFlag = true
+                anEvent.dirty = true
                 anEvent.resource.summary = $('#form-event input[name="summary"]').val()
             if anEvent.resource.location isnt $('#form-event input[name="location"]').val()
-                updateFlag = true
+                anEvent.dirty = true
                 anEvent.resource.location = $('#form-event input[name="location"]').val()
                 delete anEvent.resource.extendedProperties.private.geolocation
             if $('#form-event input[name="all-day"]')[0].checked
                 if anEvent.resource.start.date isnt $('#form-event input[name="start-date"]').val().replace(/-/g, '/')
-                    updateFlag = true
+                    anEvent.dirty = true
                     delete anEvent.resource.start.dateTime
                     anEvent.resource.start.date = $('#form-event input[name="start-date"]').val().replace(/-/g, '/')
                 if anEvent.resource.end.date isnt $('#form-event input[name="end-date"]').val().replace(/-/g, '/')
-                    updateFlag = true
+                    anEvent.dirty = true
                     delete anEvent.resource.end.dateTime
                     anEvent.resource.end.date = $('#form-event input[name="end-date"]').val().replace(/-/g, '/')
             else
                 timeZone = modalPlace.startTimeZone
                 startDateTime = new Date $('#form-event input[name="start-date"]').val().replace(/-/g, '/') + ' ' + $('#form-event input[name="start-time"]').val() + timeDifference(timeZone.dstOffset + timeZone.rawOffset)
                 if new Date(anEvent.resource.start.dateTime).getTime() isnt startDateTime.getTime()
-                    updateFlag = true
+                    anEvent.dirty = true
                     delete anEvent.resource.start.date
                     anEvent.resource.start.dateTime = startDateTime.toISOString()
                     anEvent.resource.start.timeZone = timeZone.timeZoneId
                 timeZone = modalPlace.endTimeZone
                 endDateTime = new Date $('#form-event input[name="end-date"]').val().replace(/-/g, '/') + ' ' + $('#form-event input[name="end-time"]').val() + timeDifference(timeZone.dstOffset + timeZone.rawOffset)
                 if new Date(anEvent.resource.end.dateTime).getTime() isnt endDateTime.getTime()
-                    updateFlag = true
+                    anEvent.dirty = true
                     delete anEvent.resource.end.date
                     anEvent.resource.end.dateTime = endDateTime.toISOString()
                     anEvent.resource.end.timeZone = timeZone.timeZoneId
             if anEvent.resource.description isnt $('#form-event input[name="description"]').val()
-                updateFlag = true
+                anEvent.dirty = true
                 anEvent.resource.description = $('#form-event input[name="description"]').val()
-            anEvent.update() if updateFlag
+            anEvent.update() if anEvent.dirty
         else
             anEvent.insert()
 
