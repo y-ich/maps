@@ -265,7 +265,7 @@
 
     Event.events = [];
 
-    Event.mark = 'A';
+    Event.placeNumber = 0;
 
     Event.geocodeCount = 0;
 
@@ -316,12 +316,8 @@
       }
       this.candidates = null;
       if ((this.getPosition() != null) || ((this.resource.location != null) && this.resource.location !== '')) {
-        this.icon = {
-          url: "http://www.google.com/mapfiles/marker" + Event.mark + ".png"
-        };
-        if (Event.mark !== 'Z') {
-          Event.mark = String.fromCharCode(Event.mark.charCodeAt(0) + 1);
-        }
+        this.placeNumber = Event.placeNumber;
+        Event.placeNumber += 1;
         this.tryToSetPlace(centering, byClick);
       }
       Event.events.push(this);
@@ -459,8 +455,25 @@
       return Event.geocodeCount += 1;
     };
 
+    Event.prototype.getIcon = function(candidate) {
+      var alphabet;
+      if (candidate == null) {
+        candidate = false;
+      }
+      alphabet = String.fromCharCode(Math.min('A'.charCodeAt(0) + this.placeNumber, 'Z'.charCodeAt(0)));
+      if (candidate) {
+        return {
+          url: "http://maps.google.com/mapfiles/marker_grey" + alphabet + ".png"
+        };
+      } else {
+        return {
+          url: "http://maps.google.com/mapfiles/marker" + alphabet + ".png"
+        };
+      }
+    };
+
     Event.prototype.setPlace = function(byClick) {
-      var latLng, _ref;
+      var latLng;
       if (byClick == null) {
         byClick = false;
       }
@@ -472,8 +485,8 @@
       this.place = new Place({
         map: map,
         position: latLng,
-        icon: (_ref = this.icon) != null ? _ref : null,
-        shadow: this.icon != null ? Event.shadow : null,
+        icon: this.getIcon(),
+        shadow: Event.shadow,
         title: this.resource.location,
         animation: byClick ? google.maps.Animation.DROP : null
       }, this);
@@ -499,7 +512,7 @@
         return;
       }
       return this.geocode(function(results) {
-        var e, _i, _len, _ref;
+        var e, _i, _len;
         if (byClick) {
           _this.setGeolocation(results[0].geometry.location.lat(), results[0].geometry.location.lng(), results[0].formatted_address);
         } else if (results.length === 1) {
@@ -516,16 +529,12 @@
             _this.candidates.push(new Place({
               map: map,
               position: e.geometry.location,
-              icon: (_ref = _this.icon) != null ? _ref : null,
-              shadow: _this.icon != null ? Event.shadow : null,
+              icon: _this.getIcon(true),
+              shadow: Event.shadow,
               title: _this.resource.location + '?',
               optimized: false
             }, _this, e.formatted_address));
           }
-          console.log(_this.icon.url);
-          setTimeout((function() {
-            return $("#map img[src=\"" + _this.icon.url + "\"]").addClass('candidate');
-          }), 2000);
           if (centering) {
             map.setCenter(_this.candidates[0].getPosition());
             currentPlace = _this.candidates[0];

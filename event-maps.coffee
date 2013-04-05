@@ -208,7 +208,7 @@ class Place extends google.maps.Marker
 class Event
     @$modalInfo: $('#modal-info')
     @events: []
-    @mark: 'A' # next alphabetic marker
+    @placeNumber: 0
     @geocodeCount: 0 # Google accepts only ten simultaneous geocode requests. So count them.
     @shadow:
         url: 'http://www.google.com/mapfiles/shadow50.png'
@@ -230,9 +230,8 @@ class Event
 
         @candidates = null
         if @getPosition()? or (@resource.location? and @resource.location isnt '')
-            @icon =
-                url: "http://www.google.com/mapfiles/marker#{Event.mark}.png"
-            Event.mark = String.fromCharCode Event.mark.charCodeAt(0) + 1 if Event.mark isnt 'Z'
+            @placeNumber= Event.placeNumber
+            Event.placeNumber += 1
             @tryToSetPlace centering, byClick
         Event.events.push @
 
@@ -320,6 +319,13 @@ class Event
                     console.error status
         Event.geocodeCount += 1
 
+    getIcon: (candidate = false) ->
+        alphabet = String.fromCharCode Math.min 'A'.charCodeAt(0) + @placeNumber, 'Z'.charCodeAt(0)
+        if candidate
+            url: "http://maps.google.com/mapfiles/marker_grey#{alphabet}.png"
+        else
+            url: "http://maps.google.com/mapfiles/marker#{alphabet}.png"
+
     setPlace: (byClick = false) ->
         latLng = @getPosition()
         unless latLng
@@ -329,8 +335,8 @@ class Event
         @place = new Place
             map: map
             position: latLng
-            icon: @icon ? null
-            shadow: if @icon? then Event.shadow else null
+            icon: @getIcon()
+            shadow: Event.shadow
             title: @resource.location,
             animation: if byClick then google.maps.Animation.DROP else null,
             @
@@ -361,13 +367,11 @@ class Event
                     @candidates.push new Place
                         map: map
                         position: e.geometry.location
-                        icon: @icon ? null
-                        shadow: if @icon? then Event.shadow else null
+                        icon: @getIcon(true)
+                        shadow: Event.shadow
                         title: @resource.location + '?'
                         optimized: false,
                         @, e.formatted_address
-                console.log @icon.url
-                setTimeout (=> $("#map img[src=\"#{@icon.url}\"]").addClass 'candidate'), 2000 # 500ms is adhoc number for waiting for DOM
                 if centering
                     map.setCenter @candidates[0].getPosition()
                     currentPlace = @candidates[0]
