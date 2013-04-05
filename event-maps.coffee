@@ -22,8 +22,9 @@ geocoder = null
 calendars= null # result of calenders list
 currentCalendar = null
 currentPlace = null
-modalPlace = null
-originPlace = null
+directionsCondition =
+    origin: null
+    time: null
 directions = null
 spinner = new Spinner color: '#000'
 
@@ -157,8 +158,13 @@ class Place extends google.maps.Marker
     constructor: (options, @event, @candidateAddress = null) ->
         super options
         google.maps.event.addListener @, 'click', =>
-            if originPlace?
-                searchDirections originPlace.getPosition(), @getPosition(), originPlace.event.getDate('end'), (results) ->
+            if directionsCondition.origin?
+                time = switch directionsCondition.time
+                    when 'now' then new Date()
+                    when 'origin' then directionsCondition.origin.event.getDate('end')
+                    when 'destination' then @event.getDate('start')
+                    else null
+                searchDirections directionsCondition.origin.getPosition(), @getPosition(), time, (results) ->
                     for result, i in results
                         for route in result.routes
                             route.distance = mapSum result.routes[0].legs, (e) -> e.distance.value
@@ -190,7 +196,7 @@ class Place extends google.maps.Marker
     # shows its Modal Window.
     showInfo: =>
         @event.setModal @
-        Event.$modalInfo.modal 'show'
+        Event.$modal.modal 'show'
         directions = null # cancels direction mode
         directionsRenderer.setMap null
         $('#button-route-info').addClass 'hide'
@@ -206,7 +212,7 @@ class Place extends google.maps.Marker
 # is capable to geocode the location of events and saves it as extendedProperties.private.geolocation.
 # Event.geocodeCount should be reset to 0 when starting simultaneous geocode requests 
 class Event
-    @$modalInfo: $('#modal-info')
+    @$modal: $('#modal-info')
     @events: []
     @placeNumber: 0
     @geocodeCount: 0 # Google accepts only ten simultaneous geocode requests. So count them.
@@ -230,6 +236,7 @@ class Event
         @dirty = false
 
         @candidates = null
+        console.log @getPosition()?
         if @getPosition()? or (@resource.location? and @resource.location isnt '')
             @placeNumber= Event.placeNumber
             Event.placeNumber += 1
@@ -249,7 +256,7 @@ class Event
     getPosition: ->
         if @resource.extendedProperties?.private?.geolocation?
             geolocation = JSON.parse @resource.extendedProperties.private.geolocation
-            if geolocation.location is @resource.location
+            if not geolocation.location? or geolocation.location is @resource.location
                 new google.maps.LatLng geolocation.lat, geolocation.lng
             else null
         else
@@ -366,7 +373,6 @@ class Event
         if @place? and @getAddress()?
             callback()
             return
-
         @geocode (results) =>
             if byClick
                 @setGeolocation results[0].geometry.location.lat(), results[0].geometry.location.lng(), results[0].formatted_address
@@ -393,20 +399,20 @@ class Event
             callback()
 
     setModal: (place) ->
-        modalPlace = place
+        Event.$modal.data 'place', place
         currentPlace = place
-        Event.$modalInfo.find('input[name="summary"]').val @resource.summary
-        Event.$modalInfo.find('input[name="location"]').val @resource.location
+        Event.$modal.find('input[name="summary"]').val @resource.summary
+        Event.$modal.find('input[name="location"]').val @resource.location
         if @resource.start.date? and @resource.end.date?
             $('#form-event input[name="all-day"]')[0].checked = true
             $('#form-event input[name="all-day"]').trigger 'change'
-            Event.$modalInfo.find('input[name="start-date"]').val @resource.start.date
-            Event.$modalInfo.find('input[name="end-date"]').val @resource.end.date
+            Event.$modal.find('input[name="start-date"]').val @resource.start.date
+            Event.$modal.find('input[name="end-date"]').val @resource.end.date
         else if @resource.start.dateTime? and @resource.end.dateTime?
             setTime = (startOrEnd) ->
                 dateTime = place.getDateTime startOrEnd
-                Event.$modalInfo.find("input[name=\"#{startOrEnd}-date\"]").val dateTime.date
-                Event.$modalInfo.find("input[name=\"#{startOrEnd}-time\"]").val dateTime.time
+                Event.$modal.find("input[name=\"#{startOrEnd}-date\"]").val dateTime.date
+                Event.$modal.find("input[name=\"#{startOrEnd}-time\"]").val dateTime.time
             $('#form-event input[name="all-day"]')[0].checked = false
             $('#form-event input[name="all-day"]').trigger 'change'
             startDeferred = $.Deferred()
@@ -436,7 +442,7 @@ class Event
             $('#candidate select[name="candidate"]').html ("<option value=\"#{i}\" #{if e is place then 'selected' else ''}>#{e.candidateAddress}</option>" for e, i in @candidates).join ''
         else
             $('#candidate').css 'display', 'none'
-        Event.$modalInfo.find('input[name="description"]').val @resource.description
+        Event.$modal.find('input[name="description"]').val @resource.description
 
 initializeDOM = ->
     localize()
@@ -500,16 +506,16 @@ initializeDOM = ->
 
     $('#button-confirm').on 'click', ->
         candidateIndex = parseInt $('#form-event select[name="candidate"]').val()
-        candidate = modalPlace.event.candidates[candidateIndex]
+        candidate = Event.$modal.data('place').event.candidates[candidateIndex]
         position = candidate.getPosition()
-        modalPlace.event.setGeolocation position.lat(), position.lng(), candidate.candidateAddress
-        modalPlace.event.dirty = true
-        modalPlace.event.clearMarkers()
-        modalPlace.event.setPlace()
+        Event.$modal.data('place').event.setGeolocation position.lat(), position.lng(), candidate.candidateAddress
+        Event.$modal.data('place').event.dirty = true
+        Event.$modal.data('place').event.clearMarkers()
+        Event.$modal.data('place').event.setPlace()
         $('#candidate').css 'display', 'none'
 
     $('#button-update').on 'click', ->
-        anEvent = modalPlace.event
+        anEvent = Event.$modal.data('place').event
         if anEvent.resource.id?
             if anEvent.resource.summary isnt $('#form-event input[name="summary"]').val()
                 anEvent.dirty = true
@@ -528,14 +534,14 @@ initializeDOM = ->
                     delete anEvent.resource.end.dateTime
                     anEvent.resource.end.date = $('#form-event input[name="end-date"]').val().replace(/-/g, '/')
             else
-                timeZone = modalPlace.startTimeZone
+                timeZone = Event.$modal.data('place').startTimeZone
                 startDateTime = new Date $('#form-event input[name="start-date"]').val().replace(/-/g, '/') + ' ' + $('#form-event input[name="start-time"]').val() + timeDifference(timeZone.dstOffset + timeZone.rawOffset)
                 if new Date(anEvent.resource.start.dateTime).getTime() isnt startDateTime.getTime()
                     anEvent.dirty = true
                     delete anEvent.resource.start.date
                     anEvent.resource.start.dateTime = startDateTime.toISOString()
                     anEvent.resource.start.timeZone = timeZone.timeZoneId
-                timeZone = modalPlace.endTimeZone
+                timeZone = Event.$modal.data('place').endTimeZone
                 endDateTime = new Date $('#form-event input[name="end-date"]').val().replace(/-/g, '/') + ' ' + $('#form-event input[name="end-time"]').val() + timeDifference(timeZone.dstOffset + timeZone.rawOffset)
                 if new Date(anEvent.resource.end.dateTime).getTime() isnt endDateTime.getTime()
                     anEvent.dirty = true
@@ -556,7 +562,7 @@ initializeDOM = ->
         $('#form-event input[name="end-time"]').css 'display', if @checked then 'none' else ''
 
     $('#button-delete').on 'click', ->
-        anEvent = modalPlace.event
+        anEvent = Event.$modal.data('place').event
         if anEvent.calendarId? and anEvent.resource.id?
             req = gapi.client.calendar.events.delete
                 calendarId: anEvent.calendarId
@@ -566,7 +572,7 @@ initializeDOM = ->
                     alert '予定が削除できませんでした'
         Event.events.splice Event.events.indexOf anEvent, 1
         anEvent.clearMarkers()
-        modalPlace = null
+        Event.$modal.data 'place', null
 
     $('#button-prev, #button-next').on 'click', ->
         if directions?
@@ -622,18 +628,21 @@ initializeDOM = ->
             map.panTo currentPlace.getPosition()
 
     $('#button-direction').on 'click', (event) ->
-        originPlace = modalPlace
-        alert 'ここからの道順を調べます。目的地のマーカをクリックしてください'
+        directionsCondition.origin = Event.$modal.data 'place'
+        $('#modal-directions').modal 'show'
+
+    $('#button-direction-search').on 'click', (event) ->
+        directionsCondition.time = $('#form-directions input:checked').val()
 
     $('#candidate select[name="candidate"]').on 'change', (event) ->
-        modalPlace = modalPlace.event.candidates[parseInt @value]
-        map.panTo modalPlace.getPosition()
+        Event.$modal.data 'place', Event.$modal.data('place').event.candidates[parseInt @value]
+        map.panTo Event.$modal.data('place').getPosition()
 
     $('#button-search').on 'click', (event) ->
-        modalPlace.event.resource.location = $('#form-event input[name="location"]').val()
-        modalPlace.event.clearMarkers()
-        modalPlace.event.resource.extendedProperties?.private?.geolocation = null
-        modalPlace.event.tryToSetPlace true, false, -> currentPlace.event.setModal currentPlace
+        Event.$modal.data('place').event.resource.location = $('#form-event input[name="location"]').val()
+        Event.$modal.data('place').event.clearMarkers()
+        Event.$modal.data('place').event.resource.extendedProperties?.private?.geolocation = null
+        Event.$modal.data('place').event.tryToSetPlace true, false, -> currentPlace.event.setModal currentPlace
 
     $('#button-route-info').on 'click', ->
         if $('#directions-panel').hasClass 'hide'

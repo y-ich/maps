@@ -143,6 +143,31 @@
 				<button class="btn" data-dismiss="modal" aria-hidden="true">キャンセル</button>
 			</div>
 		</div>
+		<div id="modal-directions" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="label-modal-directions" aria-hidden="true">
+			<div class="modal-header">
+				<p>以下で公共交通機関の時刻指定をした後、目的地のマーカをクリックしてください</p>
+			</div>
+			<div class="modal-body">
+				<form id="form-directions" class="form-horizontal">
+					<label class="radio">
+						<input type="radio" name="directions-time" value="origin" checked />
+						出発地の予定終了時刻
+					</label>
+					<label class="radio">
+						<input type="radio" name="directions-time" value="destination" />
+						目的地の予定開始時刻
+					</label>
+					<label class="radio">
+						<input type="radio" name="directions-time" value="now" />
+						現在時刻に出発
+					</label>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button id="button-direction-search" class="btn btn-primary" data-dismiss="modal" aria-hidden="true">検索</button>
+				<button class="btn" data-dismiss="modal" aria-hidden="true">キャンセル</button>
+			</div>
+		</div>
 	</div>
 	<script type='application/javascript' src='js/fastclick.js'></script>
     <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
