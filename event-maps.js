@@ -484,48 +484,55 @@
       });
     };
 
-    Event.prototype.tryToSetPlace = function(centering, byClick) {
+    Event.prototype.tryToSetPlace = function(centering, byClick, callback) {
       var _this = this;
+      if (callback == null) {
+        callback = function() {};
+      }
       this.setPlace(byClick);
       if ((this.place != null) && centering) {
         map.setCenter(this.place.getPosition());
         currentPlace = this.place;
       }
-      if (!((this.place != null) && (this.getAddress() != null))) {
-        return this.geocode(function(results) {
-          var e, _i, _len, _ref;
-          if (_this.place != null) {
-            return _this.setGeolocation(results[0].geometry.location.lat(), results[0].geometry.location.lng(), results[0].formatted_address);
-          } else if (results.length === 1) {
-            _this.setPlace(byClick);
-            if ((_this.place != null) && centering) {
-              map.setCenter(_this.place.getPosition());
-              return currentPlace = _this.place;
-            }
-          } else {
-            _this.candidates = [];
-            for (_i = 0, _len = results.length; _i < _len; _i++) {
-              e = results[_i];
-              _this.candidates.push(new Place({
-                map: map,
-                position: e.geometry.location,
-                icon: (_ref = _this.icon) != null ? _ref : null,
-                shadow: _this.icon != null ? Event.shadow : null,
-                title: _this.resource.location + '?',
-                optimized: false
-              }, _this, e.formatted_address));
-            }
-            console.log(_this.icon.url);
-            setTimeout((function() {
-              return $("#map img[src=\"" + _this.icon.url + "\"]").addClass('candidate');
-            }), 2000);
-            if (centering) {
-              map.setCenter(_this.candidates[0].getPosition());
-              return currentPlace = _this.candidates[0];
-            }
-          }
-        });
+      if ((this.place != null) && (this.getAddress() != null)) {
+        callback();
+        return;
       }
+      return this.geocode(function(results) {
+        var e, _i, _len, _ref;
+        if (byClick) {
+          _this.setGeolocation(results[0].geometry.location.lat(), results[0].geometry.location.lng(), results[0].formatted_address);
+        } else if (results.length === 1) {
+          _this.setGeolocation(results[0].geometry.location.lat(), results[0].geometry.location.lng(), results[0].formatted_address);
+          _this.setPlace();
+          if ((_this.place != null) && centering) {
+            map.setCenter(_this.place.getPosition());
+            currentPlace = _this.place;
+          }
+        } else {
+          _this.candidates = [];
+          for (_i = 0, _len = results.length; _i < _len; _i++) {
+            e = results[_i];
+            _this.candidates.push(new Place({
+              map: map,
+              position: e.geometry.location,
+              icon: (_ref = _this.icon) != null ? _ref : null,
+              shadow: _this.icon != null ? Event.shadow : null,
+              title: _this.resource.location + '?',
+              optimized: false
+            }, _this, e.formatted_address));
+          }
+          console.log(_this.icon.url);
+          setTimeout((function() {
+            return $("#map img[src=\"" + _this.icon.url + "\"]").addClass('candidate');
+          }), 2000);
+          if (centering) {
+            map.setCenter(_this.candidates[0].getPosition());
+            currentPlace = _this.candidates[0];
+          }
+        }
+        return callback();
+      });
     };
 
     Event.prototype.setModal = function(place) {
@@ -877,16 +884,25 @@
       return map.panTo(modalPlace.getPosition());
     });
     return $('#button-search').on('click', function(event) {
-      var location;
-      location = $('#form-event input[name="location"]').val();
+      var _ref, _ref1;
+      modalPlace.event.resource.location = $('#form-event input[name="location"]').val();
       modalPlace.event.clearMarkers();
-      modalPlace.event.tryToSetPlace(true, false);
-      return modalPlace = currentPlace;
+      if ((_ref = modalPlace.event.resource.extendedProperties) != null) {
+        if ((_ref1 = _ref["private"]) != null) {
+          _ref1.geolocation = null;
+        }
+      }
+      return modalPlace.event.tryToSetPlace(true, false, function() {
+        return currentPlace.event.setModal(currentPlace);
+      });
     });
   };
 
   initializeGoogleMaps = function(callback) {
     var callbackId, mapOptions, mapStatus;
+    if (callback == null) {
+      callback = function() {};
+    }
     mapOptions = {
       mapTypeId: google.maps.MapTypeId.ROADMAP,
       disableDefaultUI: /iPad|iPhone/.test(navigator.userAgent),

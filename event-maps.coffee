@@ -336,37 +336,42 @@ class Event
             @
         google.maps.event.addListener @place, 'animation_changed', -> @showInfo() if byClick
 
-    tryToSetPlace: (centering, byClick) ->
+    tryToSetPlace: (centering, byClick, callback = ->) ->
         @setPlace byClick
         if @place? and centering
             map.setCenter @place.getPosition()
             currentPlace = @place
 
-        if not (@place? and @getAddress()?) # if place and/or address is unknown
-            @geocode (results) =>
-                if @place? # if new event by clicking map
-                    @setGeolocation results[0].geometry.location.lat(), results[0].geometry.location.lng(), results[0].formatted_address
-                else if results.length == 1
-                    @setPlace byClick
-                    if @place? and centering
-                        map.setCenter @place.getPosition()
-                        currentPlace = @place
-                else
-                    @candidates = []
-                    for e in results
-                        @candidates.push new Place
-                            map: map
-                            position: e.geometry.location
-                            icon: @icon ? null
-                            shadow: if @icon? then Event.shadow else null
-                            title: @resource.location + '?'
-                            optimized: false,
-                            @, e.formatted_address
-                    console.log @icon.url
-                    setTimeout (=> $("#map img[src=\"#{@icon.url}\"]").addClass 'candidate'), 2000 # 500ms is adhoc number for waiting for DOM
-                    if centering
-                        map.setCenter @candidates[0].getPosition()
-                        currentPlace = @candidates[0]
+        if @place? and @getAddress()?
+            callback()
+            return
+
+        @geocode (results) =>
+            if byClick
+                @setGeolocation results[0].geometry.location.lat(), results[0].geometry.location.lng(), results[0].formatted_address
+            else if results.length == 1
+                @setGeolocation results[0].geometry.location.lat(), results[0].geometry.location.lng(), results[0].formatted_address
+                @setPlace()
+                if @place? and centering
+                    map.setCenter @place.getPosition()
+                    currentPlace = @place
+            else
+                @candidates = []
+                for e in results
+                    @candidates.push new Place
+                        map: map
+                        position: e.geometry.location
+                        icon: @icon ? null
+                        shadow: if @icon? then Event.shadow else null
+                        title: @resource.location + '?'
+                        optimized: false,
+                        @, e.formatted_address
+                console.log @icon.url
+                setTimeout (=> $("#map img[src=\"#{@icon.url}\"]").addClass 'candidate'), 2000 # 500ms is adhoc number for waiting for DOM
+                if centering
+                    map.setCenter @candidates[0].getPosition()
+                    currentPlace = @candidates[0]
+            callback()
 
     setModal: (place) ->
         modalPlace = place
@@ -603,12 +608,12 @@ initializeDOM = ->
         map.panTo modalPlace.getPosition()
 
     $('#button-search').on 'click', (event) ->
-        location = $('#form-event input[name="location"]').val()
+        modalPlace.event.resource.location = $('#form-event input[name="location"]').val()
         modalPlace.event.clearMarkers()
-        modalPlace.event.tryToSetPlace true, false
-        modalPlace = currentPlace
+        modalPlace.event.resource.extendedProperties?.private?.geolocation = null
+        modalPlace.event.tryToSetPlace true, false, -> currentPlace.event.setModal currentPlace
 
-initializeGoogleMaps = (callback) ->
+initializeGoogleMaps = (callback = ->) ->
     mapOptions =
         mapTypeId: google.maps.MapTypeId.ROADMAP
         disableDefaultUI: /iPad|iPhone/.test(navigator.userAgent)
