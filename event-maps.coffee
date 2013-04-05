@@ -444,6 +444,7 @@ initializeDOM = ->
     $('#button-show').on 'click', ->
         if Event.events.length > 0 and Event.events[0].calendarId?
             Event.clearAll()
+        currentPlace = null
         id = $calendarList.children('option:selected').attr 'value'
         if id is 'new'
             if name = prompt '新しいカレンダーに名前をつけてください'
@@ -595,7 +596,6 @@ initializeDOM = ->
             else if this.id is 'button-next'
                 currentPlace = sorted[0].place ? sorted[0].candidates[0]
             else
-                console.log sorted[sorted.length - 1]
                 currentPlace = sorted[sorted.length - 1].place ? sorted[sorted.length - 1].candidates[sorted[sorted.length - 1].candidates.length - 1]
             map.panTo currentPlace.getPosition()
 

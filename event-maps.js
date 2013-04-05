@@ -644,6 +644,7 @@
       if (Event.events.length > 0 && (Event.events[0].calendarId != null)) {
         Event.clearAll();
       }
+      currentPlace = null;
       id = $calendarList.children('option:selected').attr('value');
       if (id === 'new') {
         if (name = prompt('新しいカレンダーに名前をつけてください')) {
@@ -869,7 +870,6 @@
         } else if (this.id === 'button-next') {
           currentPlace = (_ref2 = sorted[0].place) != null ? _ref2 : sorted[0].candidates[0];
         } else {
-          console.log(sorted[sorted.length - 1]);
           currentPlace = (_ref3 = sorted[sorted.length - 1].place) != null ? _ref3 : sorted[sorted.length - 1].candidates[sorted[sorted.length - 1].candidates.length - 1];
         }
         return map.panTo(currentPlace.getPosition());
