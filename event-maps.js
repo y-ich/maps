@@ -349,7 +349,11 @@
       var geolocation, _ref, _ref1;
       if (((_ref = this.resource.extendedProperties) != null ? (_ref1 = _ref["private"]) != null ? _ref1.geolocation : void 0 : void 0) != null) {
         geolocation = JSON.parse(this.resource.extendedProperties["private"].geolocation);
-        return new google.maps.LatLng(geolocation.lat, geolocation.lng);
+        if (geolocation.location === this.resource.location) {
+          return new google.maps.LatLng(geolocation.lat, geolocation.lng);
+        } else {
+          return null;
+        }
       } else {
         return null;
       }
@@ -373,14 +377,15 @@
       if ((_ref1 = (_base1 = this.resource.extendedProperties)["private"]) == null) {
         _base1["private"] = {};
       }
-      this.resource.extendedProperties["private"].geolocation = JSON.stringify({
+      if (!((this.resource.location != null) && this.resource.location !== '')) {
+        this.resource.location = address;
+      }
+      return this.resource.extendedProperties["private"].geolocation = JSON.stringify({
         lat: lat,
         lng: lng,
-        address: address
+        address: address,
+        location: this.resource.location
       });
-      if (!((this.resource.location != null) && this.resource.location !== '')) {
-        return this.resource.location = address;
-      }
     };
 
     Event.prototype.update = function() {
@@ -570,6 +575,7 @@
     Event.prototype.setModal = function(place) {
       var e, endDeferred, i, setTime, startDeferred;
       modalPlace = place;
+      currentPlace = place;
       Event.$modalInfo.find('input[name="summary"]').val(this.resource.summary);
       Event.$modalInfo.find('input[name="location"]').val(this.resource.location);
       if ((this.resource.start.date != null) && (this.resource.end.date != null)) {
@@ -865,7 +871,9 @@
         if (Event.events.length === 0) {
           return;
         }
-        sorted = Event.events.sort(function(x, y) {
+        sorted = Event.events.filter(function(e) {
+          return (e.place != null) || (e.candidates != null);
+        }).sort(function(x, y) {
           return compareEventResources(x.resource, y.resource);
         });
         if (currentPlace != null) {

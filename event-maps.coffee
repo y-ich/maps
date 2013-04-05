@@ -249,7 +249,9 @@ class Event
     getPosition: ->
         if @resource.extendedProperties?.private?.geolocation?
             geolocation = JSON.parse @resource.extendedProperties.private.geolocation
-            new google.maps.LatLng geolocation.lat, geolocation.lng
+            if geolocation.location is @resource.location
+                new google.maps.LatLng geolocation.lat, geolocation.lng
+            else null
         else
             null
 
@@ -263,11 +265,12 @@ class Event
     setGeolocation: (lat, lng, address) ->
         @resource.extendedProperties ?= {}
         @resource.extendedProperties.private ?= {}
+        @resource.location = address unless @resource.location? and @resource.location isnt ''
         @resource.extendedProperties.private.geolocation = JSON.stringify
             lat: lat
             lng: lng
             address: address
-        @resource.location = address unless @resource.location? and @resource.location isnt ''
+            location: @resource.location
 
     update: ->
         if @calendarId?
@@ -391,6 +394,7 @@ class Event
 
     setModal: (place) ->
         modalPlace = place
+        currentPlace = place
         Event.$modalInfo.find('input[name="summary"]').val @resource.summary
         Event.$modalInfo.find('input[name="location"]').val @resource.location
         if @resource.start.date? and @resource.end.date?
@@ -588,7 +592,7 @@ initializeDOM = ->
             directionsRenderer.setRouteIndex directions.routeIdex
         else
             return if Event.events.length == 0
-            sorted = Event.events.sort (x, y) -> compareEventResources x.resource, y.resource
+            sorted = Event.events.filter((e) -> e.place? or e.candidates?).sort (x, y) -> compareEventResources x.resource, y.resource
             if currentPlace?
                 eventIndex = sorted.indexOf currentPlace.event
                 if Event.events[eventIndex].candidates?
