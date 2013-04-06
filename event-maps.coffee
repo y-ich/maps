@@ -24,6 +24,7 @@ currentCalendar = null
 currentPlace = null
 directionsCondition =
     origin: null
+    destination: null
     time: null
 directions = null
 spinner = new Spinner color: '#000'
@@ -135,6 +136,7 @@ searchDirections = (origin, destination, departureTime, callback) ->
                 (result, status) ->
                     switch status
                         when google.maps.DirectionsStatus.OK
+                            result.travelMode = travelMode
                             results.push result
                     deferred.resolve()
             )(e, deferred)
@@ -158,7 +160,8 @@ class Place extends google.maps.Marker
     constructor: (options, @event, @candidateAddress = null) ->
         super options
         google.maps.event.addListener @, 'click', =>
-            if directionsCondition.origin?
+            if directionsCondition.origin? and not directionsCondition.destination?
+                directionsCondition.destination = @
                 time = switch directionsCondition.time
                     when 'now' then new Date()
                     when 'origin' then directionsCondition.origin.event.getDate('end')
@@ -172,6 +175,9 @@ class Place extends google.maps.Marker
                     results.sort (x, y) -> x.routes[0].duration - y.routes[0].duration
                     directionsRenderer.setDirections results[0]
                     directionsRenderer.setMap map
+                    map.setMapTypeId switch results[0].travelMode
+                        when google.maps.TravelMode.BICYCLING, google.maps.TravelMode.WALKING then google.maps.MapTypeId.TERRAIN
+                        else google.maps.MapTypeId.ROADMAP
                     $('#button-route-info').removeClass 'hide'
                     directions =
                         results: results
@@ -197,8 +203,14 @@ class Place extends google.maps.Marker
     showInfo: =>
         @event.setModal @
         Event.$modal.modal 'show'
-        directions = null # cancels direction mode
+        # cancels direction mode
+        directionsCondition =
+            origin: null
+            destination: null
+            time: null
+        directions = null
         directionsRenderer.setMap null
+        map.setMapTypeId google.maps.MapTypeId.ROADMAP
         $('#button-route-info').addClass 'hide'
 
 
@@ -236,7 +248,6 @@ class Event
         @dirty = false
 
         @candidates = null
-        console.log @getPosition()?
         if @getPosition()? or (@resource.location? and @resource.location isnt '')
             @placeNumber= Event.placeNumber
             Event.placeNumber += 1
@@ -586,6 +597,9 @@ initializeDOM = ->
                     if directions.index < 0
                         directions.index = directions.results.length - 1
                     directionsRenderer.setDirections directions.results[directions.index]
+                    map.setMapTypeId switch directions.results[directions.index].travelMode
+                        when google.maps.TravelMode.BICYCLING, google.maps.TravelMode.WALKING then google.maps.MapTypeId.TERRAIN
+                        else google.maps.MapTypeId.ROADMAP
                     directions.routeIdex = directions.results[directions.index].routes.length - 1
             else
                 directions.routeIndex += 1
@@ -594,6 +608,9 @@ initializeDOM = ->
                     if directions.index >= directions.results.length
                         directions.index = 0
                     directionsRenderer.setDirections directions.results[directions.index]
+                    map.setMapTypeId switch directions.results[directions.index].travelMode
+                        when google.maps.TravelMode.BICYCLING, google.maps.TravelMode.WALKING then google.maps.MapTypeId.TERRAIN
+                        else google.maps.MapTypeId.ROADMAP
                     directions.routeIdex = 0
             directionsRenderer.setRouteIndex directions.routeIdex
         else

@@ -29,6 +29,7 @@
 
   directionsCondition = {
     origin: null,
+    destination: null,
     time: null
   };
 
@@ -161,6 +162,7 @@
         return function(result, status) {
           switch (status) {
             case google.maps.DirectionsStatus.OK:
+              result.travelMode = travelMode;
               results.push(result);
           }
           return deferred.resolve();
@@ -198,7 +200,8 @@
       Place.__super__.constructor.call(this, options);
       google.maps.event.addListener(this, 'click', function() {
         var time;
-        if (directionsCondition.origin != null) {
+        if ((directionsCondition.origin != null) && (directionsCondition.destination == null)) {
+          directionsCondition.destination = _this;
           time = (function() {
             switch (directionsCondition.time) {
               case 'now':
@@ -231,6 +234,15 @@
             });
             directionsRenderer.setDirections(results[0]);
             directionsRenderer.setMap(map);
+            map.setMapTypeId((function() {
+              switch (results[0].travelMode) {
+                case google.maps.TravelMode.BICYCLING:
+                case google.maps.TravelMode.WALKING:
+                  return google.maps.MapTypeId.TERRAIN;
+                default:
+                  return google.maps.MapTypeId.ROADMAP;
+              }
+            })());
             $('#button-route-info').removeClass('hide');
             return directions = {
               results: results,
@@ -264,8 +276,14 @@
     Place.prototype.showInfo = function() {
       this.event.setModal(this);
       Event.$modal.modal('show');
+      directionsCondition = {
+        origin: null,
+        destination: null,
+        time: null
+      };
       directions = null;
       directionsRenderer.setMap(null);
+      map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
       return $('#button-route-info').addClass('hide');
     };
 
@@ -330,7 +348,6 @@
       }
       this.dirty = false;
       this.candidates = null;
-      console.log(this.getPosition() != null);
       if ((this.getPosition() != null) || ((this.resource.location != null) && this.resource.location !== '')) {
         this.placeNumber = Event.placeNumber;
         Event.placeNumber += 1;
@@ -868,6 +885,15 @@
               directions.index = directions.results.length - 1;
             }
             directionsRenderer.setDirections(directions.results[directions.index]);
+            map.setMapTypeId((function() {
+              switch (directions.results[directions.index].travelMode) {
+                case google.maps.TravelMode.BICYCLING:
+                case google.maps.TravelMode.WALKING:
+                  return google.maps.MapTypeId.TERRAIN;
+                default:
+                  return google.maps.MapTypeId.ROADMAP;
+              }
+            })());
             directions.routeIdex = directions.results[directions.index].routes.length - 1;
           }
         } else {
@@ -878,6 +904,15 @@
               directions.index = 0;
             }
             directionsRenderer.setDirections(directions.results[directions.index]);
+            map.setMapTypeId((function() {
+              switch (directions.results[directions.index].travelMode) {
+                case google.maps.TravelMode.BICYCLING:
+                case google.maps.TravelMode.WALKING:
+                  return google.maps.MapTypeId.TERRAIN;
+                default:
+                  return google.maps.MapTypeId.ROADMAP;
+              }
+            })());
             directions.routeIdex = 0;
           }
         }
