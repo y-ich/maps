@@ -238,12 +238,10 @@ class Place extends google.maps.Marker
             when 'destination' then @event.getDate('start')
             else null
         searchDirections directionsCondition.origin.getPosition(), @getPosition(), time, (results) ->
-            ###
             for result, i in results
                 for route in result.routes
                     route.distance = mapSum result.routes[0].legs, (e) -> e.distance.value
                     route.duration = mapSum result.routes[0].legs, (e) -> e.duration.value
-            ###
             results.sort (x, y) -> x.routes[0].duration - y.routes[0].duration
             directionsController = new DirectionsController results
             directionsController.show()

@@ -338,12 +338,20 @@
         }
       }).call(this);
       return searchDirections(directionsCondition.origin.getPosition(), this.getPosition(), time, function(results) {
-        /*
-        for result, i in results
-            for route in result.routes
-                route.distance = mapSum result.routes[0].legs, (e) -> e.distance.value
-                route.duration = mapSum result.routes[0].legs, (e) -> e.duration.value
-        */
+        var i, result, route, _i, _j, _len, _len1, _ref;
+        for (i = _i = 0, _len = results.length; _i < _len; i = ++_i) {
+          result = results[i];
+          _ref = result.routes;
+          for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
+            route = _ref[_j];
+            route.distance = mapSum(result.routes[0].legs, function(e) {
+              return e.distance.value;
+            });
+            route.duration = mapSum(result.routes[0].legs, function(e) {
+              return e.duration.value;
+            });
+          }
+        }
         results.sort(function(x, y) {
           return x.routes[0].duration - y.routes[0].duration;
         });
