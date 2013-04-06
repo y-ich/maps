@@ -17,7 +17,6 @@ APP_NAME = 'EventMaps'
 #
 
 map = null
-directionsRenderer = null
 calendars= null # result of calenders list
 currentCalendar = null
 currentPlace = null
@@ -27,6 +26,7 @@ directionsCondition =
     time: null
 directions = null
 spinner = new Spinner color: '#000'
+directionsController = null
 
 #
 # generic functions
@@ -139,19 +139,51 @@ searchDirections = (origin, destination, departureTime, callback) ->
 
 searchDirections.service = new google.maps.DirectionsService()
 
-showDirections = (directionsResult, routeIndex = 0) ->
-    map.setMapTypeId switch directionsResult.travelMode
-        when google.maps.TravelMode.BICYCLING, google.maps.TravelMode.WALKING then google.maps.MapTypeId.TERRAIN
-        else google.maps.MapTypeId.ROADMAP
-    directionsRenderer.setDirections directionsResult
-    directionsRenderer.setRouteIndex routeIndex
-    directionsRenderer.setMap map
-    $('#button-route-info').removeClass 'hide'
+class DirectionsController
+    @renderer: new google.maps.DirectionsRenderer
+        hideRouteList: false
+        map: null
+        panel: $('#directions-panel')[0]
 
-clearDirections = ->
-    directionsRenderer.setMap null
-    map.setMapTypeId google.maps.MapTypeId.ROADMAP
-    $('#button-route-info').addClass 'hide'
+    constructor: (@results) ->
+        @index = 0
+        @routeIndex = 0
+
+    currentResult: -> @results[@index]
+
+    numOfResults: -> sum (e.routes.length for e in @results)
+
+    next: ->
+        @routeIndex += 1
+        if @routeIndex >= @results[@index].routes.length
+            @index += 1
+            if @index >= @results.length
+                @index = 0
+            @routeIdex = 0
+
+    prev: ->
+        @routeIndex -= 1
+        if @routeIndex < 0
+            @index -= 1
+            if @index < 0
+                @index = @results.length - 1
+            @routeIdex = @results[@index].routes.length - 1
+
+    show: ->
+        result = @currentResult()
+        map.setMapTypeId switch result.travelMode
+            when google.maps.TravelMode.BICYCLING, google.maps.TravelMode.WALKING then google.maps.MapTypeId.TERRAIN
+            else google.maps.MapTypeId.ROADMAP
+        DirectionsController.renderer.setDirections result
+        DirectionsController.renderer.setRouteIndex @routeIndex
+        DirectionsController.renderer.setMap map
+        $('#button-route-info').removeClass 'hide'
+
+    clear: ->
+        DirectionsController.renderer.setMap null
+        map.setMapTypeId google.maps.MapTypeId.ROADMAP
+        $('#button-route-info').addClass 'hide'
+        @results = null
 
 # saves current state into localStorage
 saveMapStatus = () ->
@@ -195,8 +227,9 @@ class Place extends google.maps.Marker
             origin: null
             destination: null
             time: null
-        directions = null
-        clearDirections()
+        if directionsController?
+            directionsController.clear()
+            directionsController = null
 
     showDirections: ->
         directionsCondition.destination = @
@@ -213,11 +246,8 @@ class Place extends google.maps.Marker
                     route.duration = mapSum result.routes[0].legs, (e) -> e.duration.value
             ###
             results.sort (x, y) -> x.routes[0].duration - y.routes[0].duration
-            showDirections results[0]
-            directions =
-                results: results
-                index: 0
-                routeIndex: 0
+            directionsController = new DirectionsController results
+            directionsController.show()
 
 # delegate
 #for name, method of MapState.prototype when typeof method is 'function'
@@ -587,25 +617,15 @@ initializeDOM = ->
         Event.$modal.data 'place', null
 
     $('#button-prev, #button-next').on 'click', ->
-        if directions?
-            if directions.results.length == 1 and directions.results[0].routes.length == 1
+        if directionsController?
+            if directionsController.numOfResults() == 1
                 alert '道順は１つしか見つかりませんでした'
                 return
             if this.id is 'buttion-prev'
-                directions.routeIndex -= 1
-                if directions.routeIndex < 0
-                    directions.index -= 1
-                    if directions.index < 0
-                        directions.index = directions.results.length - 1
-                    directions.routeIdex = directions.results[directions.index].routes.length - 1
+                directionsController.prev()
             else
-                directions.routeIndex += 1
-                if directions.routeIndex >= directions.results[directions.index].routes.length
-                    directions.index += 1
-                    if directions.index >= directions.results.length
-                        directions.index = 0
-                    directions.routeIdex = 0
-            showDirections directions.results[directions.index], directions.routeIdex
+                directionsController.next()
+            directionsController.show()
         else
             return if Event.events.length == 0
             sorted = Event.events.filter((e) -> e.place? or e.candidates?).sort (x, y) -> compareEventResources x.resource, y.resource
@@ -698,11 +718,6 @@ initializeGoogleMaps = (callback = ->) ->
                         lng: event.latLng.lng()
                     ),
             false, true
-
-    directionsRenderer = new google.maps.DirectionsRenderer
-        hideRouteList: false
-        map: map
-        panel: $('#directions-panel')[0]
 
 # export
 
