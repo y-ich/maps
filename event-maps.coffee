@@ -24,9 +24,8 @@ directionsCondition =
     origin: null
     destination: null
     time: null
-directions = null
-spinner = new Spinner color: '#000'
 directionsController = null
+spinner = new Spinner color: '#000'
 
 #
 # generic functions
@@ -262,7 +261,6 @@ class Event
     @$modal: $('#modal-info')
     @events: []
     @placeNumber: 0
-    @geocoder: new google.maps.Geocoder()
     @geocodeCount: 0 # Google accepts only ten simultaneous geocode requests. So count them.
     @shadow:
         url: 'http://www.google.com/mapfiles/shadow50.png'
@@ -364,7 +362,7 @@ class Event
             console.error 'no hints for geocode'
             return
 
-        Event.geocoder.geocode options, (results, status) =>
+        new google.maps.Geocoder().geocode options, (results, status) =>
             switch status
                 when google.maps.GeocoderStatus.OK
                     if results.length is 1
@@ -404,7 +402,7 @@ class Event
             title: @resource.location,
             animation: if byClick then google.maps.Animation.DROP else null,
             @
-        google.maps.event.addListener @place, 'animation_changed', -> @showInfo() if byClick
+        @place.addListener 'animation_changed', -> @showInfo() if byClick
 
     tryToSetPlace: (centering, byClick, callback = ->) ->
         @setPlace byClick
@@ -433,7 +431,6 @@ class Event
                         icon: @getIcon(true)
                         shadow: Event.shadow
                         title: @resource.location + '?'
-                        optimized: false,
                         @, e.formatted_address
                 if centering
                     map.setCenter @candidates[0].getPosition()
@@ -705,8 +702,8 @@ initializeGoogleMaps = (callback = ->) ->
     map = new google.maps.Map document.getElementById('map'), mapOptions
     map.setTilt 45
 
-    callbackId = map.addListener 'tilesloaded', ->
-        google.maps.event.removeListener callbackId
+    listener = map.addListener 'tilesloaded', ->
+        google.maps.event.removeListener listener
         callback()
 
     map.addListener 'click', (event) ->
