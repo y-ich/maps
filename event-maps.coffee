@@ -18,7 +18,6 @@ APP_NAME = 'EventMaps'
 
 map = null
 directionsRenderer = null
-geocoder = null
 calendars= null # result of calenders list
 currentCalendar = null
 currentPlace = null
@@ -113,24 +112,19 @@ handleAuthResult = (result) ->
                               .attr('disabled', null)
                               .addClass 'primary'
 
-# searches directions in all travel modes
+# searches directions in all travel modes and call callback.
 searchDirections = (origin, destination, departureTime, callback) ->
-    travelModes = [
-        google.maps.TravelMode.BICYCLING
-        google.maps.TravelMode.DRIVING
-        google.maps.TravelMode.TRANSIT
-        google.maps.TravelMode.WALKING
-    ]
-    deferreds = []
+    TRAVEL_MODES = (value for key, value of google.maps.TravelMode)
     results= []
+    deferreds = []
 
-    for e in travelModes
+    for travelMode in TRAVEL_MODES
         deferred = $.Deferred()
         deferreds.push deferred
         options =
             destination: destination
             origin: origin
-            travelMode: e
+            travelMode: travelMode
         options.transitOptions = departureTime: departureTime if departureTime?
         searchDirections.service.route options, ((travelMode, deferred) ->
                 (result, status) ->
@@ -139,11 +133,25 @@ searchDirections = (origin, destination, departureTime, callback) ->
                             result.travelMode = travelMode
                             results.push result
                     deferred.resolve()
-            )(e, deferred)
+            )(travelMode, deferred)
     $.when.apply(window, deferreds).then ->
         callback results
 
 searchDirections.service = new google.maps.DirectionsService()
+
+showDirections = (directionsResult, routeIndex = 0) ->
+    map.setMapTypeId switch directionsResult.travelMode
+        when google.maps.TravelMode.BICYCLING, google.maps.TravelMode.WALKING then google.maps.MapTypeId.TERRAIN
+        else google.maps.MapTypeId.ROADMAP
+    directionsRenderer.setDirections directionsResult
+    directionsRenderer.setRouteIndex routeIndex
+    directionsRenderer.setMap map
+    $('#button-route-info').removeClass 'hide'
+
+clearDirections = ->
+    directionsRenderer.setMap null
+    map.setMapTypeId google.maps.MapTypeId.ROADMAP
+    $('#button-route-info').addClass 'hide'
 
 # saves current state into localStorage
 saveMapStatus = () ->
@@ -161,28 +169,7 @@ class Place extends google.maps.Marker
         super options
         google.maps.event.addListener @, 'click', =>
             if directionsCondition.origin? and not directionsCondition.destination?
-                directionsCondition.destination = @
-                time = switch directionsCondition.time
-                    when 'now' then new Date()
-                    when 'origin' then directionsCondition.origin.event.getDate('end')
-                    when 'destination' then @event.getDate('start')
-                    else null
-                searchDirections directionsCondition.origin.getPosition(), @getPosition(), time, (results) ->
-                    for result, i in results
-                        for route in result.routes
-                            route.distance = mapSum result.routes[0].legs, (e) -> e.distance.value
-                            route.duration = mapSum result.routes[0].legs, (e) -> e.duration.value
-                    results.sort (x, y) -> x.routes[0].duration - y.routes[0].duration
-                    directionsRenderer.setDirections results[0]
-                    directionsRenderer.setMap map
-                    map.setMapTypeId switch results[0].travelMode
-                        when google.maps.TravelMode.BICYCLING, google.maps.TravelMode.WALKING then google.maps.MapTypeId.TERRAIN
-                        else google.maps.MapTypeId.ROADMAP
-                    $('#button-route-info').removeClass 'hide'
-                    directions =
-                        results: results
-                        index: 0
-                        routeIndex: 0
+                @showDirections()
             else
                 @showInfo()
 
@@ -200,7 +187,7 @@ class Place extends google.maps.Marker
             time: dateTime.replace(/.*T|[Z+-].*/g, '')
 
     # shows its Modal Window.
-    showInfo: =>
+    showInfo: ->
         @event.setModal @
         Event.$modal.modal 'show'
         # cancels direction mode
@@ -209,10 +196,28 @@ class Place extends google.maps.Marker
             destination: null
             time: null
         directions = null
-        directionsRenderer.setMap null
-        map.setMapTypeId google.maps.MapTypeId.ROADMAP
-        $('#button-route-info').addClass 'hide'
+        clearDirections()
 
+    showDirections: ->
+        directionsCondition.destination = @
+        time = switch directionsCondition.time
+            when 'now' then new Date()
+            when 'origin' then directionsCondition.origin.event.getDate('end')
+            when 'destination' then @event.getDate('start')
+            else null
+        searchDirections directionsCondition.origin.getPosition(), @getPosition(), time, (results) ->
+            ###
+            for result, i in results
+                for route in result.routes
+                    route.distance = mapSum result.routes[0].legs, (e) -> e.distance.value
+                    route.duration = mapSum result.routes[0].legs, (e) -> e.duration.value
+            ###
+            results.sort (x, y) -> x.routes[0].duration - y.routes[0].duration
+            showDirections results[0]
+            directions =
+                results: results
+                index: 0
+                routeIndex: 0
 
 # delegate
 #for name, method of MapState.prototype when typeof method is 'function'
@@ -227,6 +232,7 @@ class Event
     @$modal: $('#modal-info')
     @events: []
     @placeNumber: 0
+    @geocoder: new google.maps.Geocoder()
     @geocodeCount: 0 # Google accepts only ten simultaneous geocode requests. So count them.
     @shadow:
         url: 'http://www.google.com/mapfiles/shadow50.png'
@@ -328,7 +334,7 @@ class Event
             console.error 'no hints for geocode'
             return
 
-        geocoder.geocode options, (results, status) =>
+        Event.geocoder.geocode options, (results, status) =>
             switch status
                 when google.maps.GeocoderStatus.OK
                     if results.length is 1
@@ -348,16 +354,11 @@ class Event
             url: "http://maps.google.com/mapfiles/marker_grey#{alphabet}.png"
         else
             switch Math.floor @placeNumber / 26
-                when 0
-                    url: "http://maps.google.com/mapfiles/marker#{alphabet}.png"
-                when 1
-                    url: "http://maps.google.com/mapfiles/marker_orange#{alphabet}.png"
-                when 2
-                    url: "http://maps.google.com/mapfiles/marker_yellow#{alphabet}.png"
-                when 3
-                    url: "http://maps.google.com/mapfiles/marker_green#{alphabet}.png"
-                else
-                    url: "http://maps.google.com/mapfiles/marker_blue#{alphabet}.png"
+                when 0 then url: "http://maps.google.com/mapfiles/marker#{alphabet}.png"
+                when 1 then url: "http://maps.google.com/mapfiles/marker_orange#{alphabet}.png"
+                when 2 then url: "http://maps.google.com/mapfiles/marker_yellow#{alphabet}.png"
+                when 3 then url: "http://maps.google.com/mapfiles/marker_green#{alphabet}.png"
+                else url: "http://maps.google.com/mapfiles/marker_blue#{alphabet}.png"
 
     setPlace: (byClick = false) ->
         latLng = @getPosition()
@@ -596,10 +597,6 @@ initializeDOM = ->
                     directions.index -= 1
                     if directions.index < 0
                         directions.index = directions.results.length - 1
-                    directionsRenderer.setDirections directions.results[directions.index]
-                    map.setMapTypeId switch directions.results[directions.index].travelMode
-                        when google.maps.TravelMode.BICYCLING, google.maps.TravelMode.WALKING then google.maps.MapTypeId.TERRAIN
-                        else google.maps.MapTypeId.ROADMAP
                     directions.routeIdex = directions.results[directions.index].routes.length - 1
             else
                 directions.routeIndex += 1
@@ -607,12 +604,8 @@ initializeDOM = ->
                     directions.index += 1
                     if directions.index >= directions.results.length
                         directions.index = 0
-                    directionsRenderer.setDirections directions.results[directions.index]
-                    map.setMapTypeId switch directions.results[directions.index].travelMode
-                        when google.maps.TravelMode.BICYCLING, google.maps.TravelMode.WALKING then google.maps.MapTypeId.TERRAIN
-                        else google.maps.MapTypeId.ROADMAP
                     directions.routeIdex = 0
-            directionsRenderer.setRouteIndex directions.routeIdex
+            showDirections directions.results[directions.index], directions.routeIdex
         else
             return if Event.events.length == 0
             sorted = Event.events.filter((e) -> e.place? or e.candidates?).sort (x, y) -> compareEventResources x.resource, y.resource
@@ -705,8 +698,6 @@ initializeGoogleMaps = (callback = ->) ->
                         lng: event.latLng.lng()
                     ),
             false, true
-
-    geocoder = new google.maps.Geocoder()
 
     directionsRenderer = new google.maps.DirectionsRenderer
         hideRouteList: false
