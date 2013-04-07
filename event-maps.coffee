@@ -7,7 +7,8 @@
 
 CLIENT_ID = '369757625302.apps.googleusercontent.com'
 SCOPES = ['https://www.googleapis.com/auth/calendar']
-MAP_STATUS = 'spacetime-map-status'
+MAP_STATUS = 'eventmaps-map-status'
+LOCAL_CALENDAR = 'eventmaps-calendar'
 # TIME_ZONE_HOST = 'http://localhost:9292'
 TIME_ZONE_HOST = 'http://safari-park.herokuapp.com'
 APP_NAME = 'EventMaps'
@@ -25,6 +26,7 @@ directionsCondition =
     destination: null
     time: null
 directionsController = null
+authorizeStatus = false
 spinner = new Spinner color: '#000'
 
 #
@@ -110,6 +112,7 @@ compareEventResources = (x, y) ->
 # Google OAuth 2.0 handler
 handleAuthResult = (result) ->
     if result? and not result.error?
+        authorizeStatus = true
         gapi.client.load 'calendar', 'v3', ->
             $('#button-calendar').removeClass 'hide'
             $('#button-authorize').addClass 'hide'
@@ -187,6 +190,7 @@ class DirectionsController
 
 # saves current state into localStorage
 saveMapStatus = () ->
+    localStorage.removeItem 'spacetime-map-status'
     pos = map.getCenter()
     localStorage[MAP_STATUS] = JSON.stringify
         lat: pos.lat()
@@ -268,6 +272,10 @@ class Event
 
     @changeCalendarId: (id) -> e.calendarId = id for e in Event.events
 
+    # returns Event's Date.
+    @getDate: (resource, startOrEnd) ->
+        new Date resource[startOrEnd].dateTime ? resource[startOrEnd].date + if startOrEnd is 'start' then 'T00:00:00Z' else 'T23:59:59Z'
+
     constructor: (@calendarId, @resource, centering = false, byClick = false) ->
         @resource.summary ?= '新しい予定'
         @resource.location ?= ''
@@ -321,18 +329,32 @@ class Event
 
     update: ->
         if @calendarId?
-            gapi.client.calendar.events.update(
-                calendarId: @calendarId
-                eventId: @resource.id
-                resource: @resource
-            ).execute (resp) ->
-                if resp.error?
-                    console.error 'gapi.client.calendar.events.update', resp
+            if @calendarId is 'local'
+                if localStorage[LOCAL_CALENDAR]?
+                    events = JSON.parse localStorage[LOCAL_CALENDAR]
+                    for e, i in events
+                        break if e.id is @resource.id
+                    if i < events.length
+                        events[i] = @resource
+                        localStorage[LOCAL_CALENDAR] = JSON.stringify events
+            else
+                gapi.client.calendar.events.update(
+                    calendarId: @calendarId
+                    eventId: @resource.id
+                    resource: @resource
+                ).execute (resp) ->
+                    if resp.error?
+                        console.error 'gapi.client.calendar.events.update', resp
         else
             $('#modal-calendar').modal 'show'
 
     insert: ->
-        if @calendarId?
+        if not @calendarId? or @calendarId is 'local'
+            events = if localStorage[LOCAL_CALENDAR]? then JSON.parse localStorage[LOCAL_CALENDAR] else []
+            @resource.id = new Date().getTime().toString()
+            events.push @resource
+            localStorage[LOCAL_CALENDAR] = JSON.stringify events
+        else
             gapi.client.calendar.events.insert(
                 calendarId: @calendarId
                 resource: @resource
@@ -341,8 +363,6 @@ class Event
                     console.error 'gapi.client.calendar.events.update', resp
                 else
                     @resource = resp.result
-        else
-            $('#modal-calendar').modal 'show'
 
     geocode: (callback) -> # the argument of callback is the first arugment of geocode callback.
         if Event.geocodeCount > 10
@@ -493,46 +513,64 @@ initializeDOM = ->
 
     $calendarList = $('#calendar-list')
     $('#modal-calendar').on 'show', (event) ->
-        req = gapi.client.calendar.calendarList.list()
-        req.execute (resp) ->
-            if resp.error?
-                console.error resp
-            else
-                calendars = resp.items
-                $calendarList.html '<option value="new">新規作成</option>' + ("<option value=\"#{e.id}\">#{e.summary}</option>" for e in calendars).join('')
+        if authorizeStatus
+            req = gapi.client.calendar.calendarList.list()
+            req.execute (resp) ->
+                if resp.error?
+                    console.error resp
+                else
+                    calendars = resp.items
+                    $calendarList.html '<option value="local">アプリ内カレンダー</option>' +
+                        ("<option value=\"#{e.id}\">#{e.summary}</option>" for e in calendars).join('') +
+                        '<option value="new">新規Goolgeカレンダー</option>'
 
     $('#button-show').on 'click', ->
         if Event.events.length > 0 and Event.events[0].calendarId? # if treated specific calendar right before.
             Event.clearAll()
         currentPlace = null
         id = $calendarList.children('option:selected').attr 'value'
-        if id is 'new'
-            if name = prompt '新しいカレンダーに名前をつけてください'
-                req = gapi.client.calendar.calendars.insert
-                    resource:
-                        summary: name
+        timeMin = $('#form-calendar [name="start-date"]')[0].value + 'T00:00:00Z' unless $('#form-calendar [name="start-date"]')[0].value is ''
+        timeMax = $('#form-calendar [name="end-date"]')[0].value + 'T00:00:00Z' unless $('#form-calendar [name="end-date"]')[0].value is ''
+        switch id
+            when 'local'
+                events = if localStorage[LOCAL_CALENDAR]? then JSON.parse localStorage[LOCAL_CALENDAR] else []
+                if timeMin isnt ''
+                    time = new Date(timeMin).getTime()
+                    events = events.filter (e) -> Event.getDate(e, 'start').getTime() >= time
+                if timeMax isnt ''
+                    time = new Date(timeMax).getTime()
+                    events = events.filter (e) -> Event.getDate(e, 'start').getTime() <= time
+                events.sort compareEventResources
+                Event.geocodeCount = 0
+                for e, i in events
+                    event = new Event id, e
+            when 'new'
+                if name = prompt '新しいカレンダーに名前をつけてください'
+                    req = gapi.client.calendar.calendars.insert
+                        resource:
+                            summary: name
+                    req.execute (resp) ->
+                        if resp.error?
+                            alert 'カレンダーが作成できませんでした'
+                        else
+                            currentCalendar = resp.result
+                            calendars.push currentCalendar
+                            Event.changeCalendarId currentCalendar.id # changes calendarId of events in previously non-specific calendar
+            else
+                currentCalendar = findCalendarById calendars, id
+                Event.changeCalendarId currentCalendar.id
+                options = calendarId: id
+                options.timeMin = timeMin
+                options.timeMax = timeMax
+                req = gapi.client.calendar.events.list options
                 req.execute (resp) ->
                     if resp.error?
-                        alert 'カレンダーが作成できませんでした'
-                    else
-                        currentCalendar = resp.result
-                        calendars.push currentCalendar
-                        Event.changeCalendarId currentCalendar.id # changes calendarId of events in previously non-specific calendar
-        else
-            currentCalendar = findCalendarById calendars, id
-            Event.changeCalendarId currentCalendar.id
-            options = calendarId: id
-            options.timeMin = $('#form-calendar [name="start-date"]')[0].value + 'T00:00:00Z' unless $('#form-calendar [name="start-date"]')[0].value is ''
-            options.timeMax = $('#form-calendar [name="end-date"]')[0].value + 'T00:00:00Z' unless $('#form-calendar [name="end-date"]')[0].value is ''
-            req = gapi.client.calendar.events.list options
-            req.execute (resp) ->
-                if resp.error?
-                    console.error resp
-                else if resp.items?.length > 0
-                    resp.items.sort compareEventResources
-                    Event.geocodeCount = 0
-                    for e, i in resp.items
-                        event = new Event id, e
+                        console.error resp
+                    else if resp.items?.length > 0
+                        resp.items.sort compareEventResources
+                        Event.geocodeCount = 0
+                        for e, i in resp.items
+                            event = new Event id, e
 
     $('#button-confirm').on 'click', ->
         candidateIndex = parseInt $('#form-event select[name="candidate"]').val()
