@@ -35,7 +35,6 @@ body {
   opacity: .25;
 }
 .modal-body {
-  max-height: 40%;
   overflow: scroll;
   -webkit-overflow-scrolling: touch;
 }
