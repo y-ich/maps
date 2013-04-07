@@ -270,7 +270,7 @@
         return e.routes.length;
       }) + this.routeIndex + 1) + " / " + (this.numOfRoutes()));
       setTimeout((function() {
-        return $('#route-info').html(_this.currentResult().travelMode + $('.adp-summary').html());
+        return $('#route-info').html(_this.currentResult().travelMode[0] + $('.adp-summary').html());
       }), 0);
       return $('.route').removeClass('hide');
     };

@@ -180,7 +180,7 @@ class DirectionsController
         DirectionsController.renderer.setRouteIndex @routeIndex
         DirectionsController.renderer.setMap map
         $('#route-number').text("#{mapSum(@results.slice(0, @index), (e) -> e.routes.length) + @routeIndex + 1} / #{@numOfRoutes()}")
-        setTimeout (=> $('#route-info').html @currentResult().travelMode + $('.adp-summary').html()), 0
+        setTimeout (=> $('#route-info').html @currentResult().travelMode[0] + $('.adp-summary').html()), 0
         $('.route').removeClass 'hide'
 
     clear: ->
