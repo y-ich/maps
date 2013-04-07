@@ -523,6 +523,7 @@ initializeDOM = ->
     localize()
     $('#container').css 'display', ''
 
+    $('.modal-body').css 'max-height', "#{innerHeight - 59 - 60 - Math.floor(innerHeight / 5)}px" # header is 59px, footer is 60px, margin 10% 
     new FastClick document.body
 
     $('#button-authorize').on 'click', ->
