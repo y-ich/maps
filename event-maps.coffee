@@ -5,7 +5,7 @@
 # constants
 #
 
-CLIENT_ID = '369757625302.apps.googleusercontent.com'
+CLIENT_ID = '369757625302-nrt8f6gef412ttl04ojrnhotpgj4b04k.apps.googleusercontent.com'
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 MAP_STATUS = 'eventmaps-map-status'
 LOCAL_CALENDAR = 'eventmaps-calendar'

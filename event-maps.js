@@ -4,7 +4,7 @@
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  CLIENT_ID = '369757625302.apps.googleusercontent.com';
+  CLIENT_ID = '369757625302-nrt8f6gef412ttl04ojrnhotpgj4b04k.apps.googleusercontent.com';
 
   SCOPES = ['https://www.googleapis.com/auth/calendar'];
 
