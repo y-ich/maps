@@ -147,7 +147,6 @@
     if ((result != null) && (result.error == null)) {
       authorizeStatus = true;
       return gapi.client.load('calendar', 'v3', function() {
-        $('#button-calendar').removeClass('hide');
         return $('#button-authorize').addClass('hide');
       });
     }
@@ -893,13 +892,13 @@
       switch (id) {
         case 'local':
           events = localStorage[LOCAL_CALENDAR] != null ? JSON.parse(localStorage[LOCAL_CALENDAR]) : [];
-          if (timeMin !== '') {
+          if (timeMin != null) {
             time = new Date(timeMin).getTime();
             events = events.filter(function(e) {
               return Event.getDate(e, 'start').getTime() >= time;
             });
           }
-          if (timeMax !== '') {
+          if (timeMax != null) {
             time = new Date(timeMax).getTime();
             events = events.filter(function(e) {
               return Event.getDate(e, 'start').getTime() <= time;
@@ -939,8 +938,12 @@
           options = {
             calendarId: id
           };
-          options.timeMin = timeMin;
-          options.timeMax = timeMax;
+          if (timeMin != null) {
+            options.timeMin = timeMin;
+          }
+          if (timeMax != null) {
+            options.timeMax = timeMax;
+          }
           req = gapi.client.calendar.events.list(options);
           return req.execute(function(resp) {
             var _j, _len1, _ref, _ref1, _results1;

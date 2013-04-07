@@ -114,7 +114,6 @@ handleAuthResult = (result) ->
     if result? and not result.error?
         authorizeStatus = true
         gapi.client.load 'calendar', 'v3', ->
-            $('#button-calendar').removeClass 'hide'
             $('#button-authorize').addClass 'hide'
 
 # searches directions in all travel modes and call callback.
@@ -556,10 +555,10 @@ initializeDOM = ->
         switch id
             when 'local'
                 events = if localStorage[LOCAL_CALENDAR]? then JSON.parse localStorage[LOCAL_CALENDAR] else []
-                if timeMin isnt ''
+                if timeMin?
                     time = new Date(timeMin).getTime()
                     events = events.filter (e) -> Event.getDate(e, 'start').getTime() >= time
-                if timeMax isnt ''
+                if timeMax?
                     time = new Date(timeMax).getTime()
                     events = events.filter (e) -> Event.getDate(e, 'start').getTime() <= time
                 events.sort compareEventResources
@@ -582,8 +581,8 @@ initializeDOM = ->
                 currentCalendar = findCalendarById calendars, id
                 Event.changeCalendarId currentCalendar.id
                 options = calendarId: id
-                options.timeMin = timeMin
-                options.timeMax = timeMax
+                options.timeMin = timeMin if timeMin?
+                options.timeMax = timeMax if timeMax?
                 req = gapi.client.calendar.events.list options
                 req.execute (resp) ->
                     if resp.error?
