@@ -578,6 +578,37 @@
       }
     };
 
+    Event.prototype["delete"] = function() {
+      var e, events, i, req, _i, _len;
+      if ((this.calendarId != null) && (this.resource.id != null)) {
+        if (this.calendarId === 'local') {
+          events = localStorage[LOCAL_CALENDAR] != null ? JSON.parse(localStorage[LOCAL_CALENDAR]) : [];
+          for (i = _i = 0, _len = events.length; _i < _len; i = ++_i) {
+            e = events[i];
+            if (e.id === this.resource.id) {
+              break;
+            }
+          }
+          if (i < events.length) {
+            events.splice(i, 1);
+            localStorage[LOCAL_CALENDAR] = JSON.stringify(events);
+          }
+        } else {
+          req = gapi.client.calendar.events["delete"]({
+            calendarId: this.calendarId,
+            eventId: this.resource.id
+          });
+          req.execute(function(resp) {
+            if (resp.error != null) {
+              return alert('予定が削除できませんでした');
+            }
+          });
+        }
+      }
+      Event.events.splice(Event.events.indexOf(this, 1));
+      return this.clearMarkers();
+    };
+
     Event.prototype.geocode = function(callback) {
       var latLng, options,
         _this = this;
@@ -989,21 +1020,7 @@
       return $('#form-event input[name="end-time"]').css('display', this.checked ? 'none' : '');
     });
     $('#button-delete').on('click', function() {
-      var anEvent, req;
-      anEvent = Event.$modal.data('place').event;
-      if ((anEvent.calendarId != null) && (anEvent.resource.id != null)) {
-        req = gapi.client.calendar.events["delete"]({
-          calendarId: anEvent.calendarId,
-          eventId: anEvent.resource.id
-        });
-        req.execute(function(resp) {
-          if (resp.error != null) {
-            return alert('予定が削除できませんでした');
-          }
-        });
-      }
-      Event.events.splice(Event.events.indexOf(anEvent, 1));
-      anEvent.clearMarkers();
+      Event.$modal.data('place').event["delete"]();
       return Event.$modal.data('place', null);
     });
     $('#button-prev, #button-next').on('click', function() {

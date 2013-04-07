@@ -364,6 +364,25 @@ class Event
                 else
                     @resource = resp.result
 
+    delete: ->
+        if @calendarId? and @resource.id?
+            if @calendarId is 'local'
+                events = if localStorage[LOCAL_CALENDAR]? then JSON.parse localStorage[LOCAL_CALENDAR] else []
+                for e, i in events
+                    break if e.id is @resource.id
+                if i < events.length
+                    events.splice i, 1
+                    localStorage[LOCAL_CALENDAR] = JSON.stringify events
+            else
+                req = gapi.client.calendar.events.delete
+                    calendarId: @calendarId
+                    eventId: @resource.id
+                req.execute (resp) ->
+                    if resp.error?
+                        alert '予定が削除できませんでした'
+        Event.events.splice Event.events.indexOf @, 1
+        @clearMarkers()
+
     geocode: (callback) -> # the argument of callback is the first arugment of geocode callback.
         if Event.geocodeCount > 10
             console.log 'too many geocoding requests'
@@ -630,16 +649,7 @@ initializeDOM = ->
         $('#form-event input[name="end-time"]').css 'display', if @checked then 'none' else ''
 
     $('#button-delete').on 'click', ->
-        anEvent = Event.$modal.data('place').event
-        if anEvent.calendarId? and anEvent.resource.id?
-            req = gapi.client.calendar.events.delete
-                calendarId: anEvent.calendarId
-                eventId: anEvent.resource.id
-            req.execute (resp) ->
-                if resp.error?
-                    alert '予定が削除できませんでした'
-        Event.events.splice Event.events.indexOf anEvent, 1
-        anEvent.clearMarkers()
+        Event.$modal.data('place').event.delete()
         Event.$modal.data 'place', null
 
     $('#button-prev, #button-next').on 'click', ->
