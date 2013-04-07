@@ -35,6 +35,7 @@ body {
   max-height: 90%;
 }
 .modal-body {
+  overflow: scroll;
   -webkit-overflow-scrolling: touch;
 }
 /* end of cancel */
@@ -54,9 +55,6 @@ body {
   width: 100%;
   top: 0px;
   bottom: 0px;
-}
-.candidate {
-  opacity: 0.5;
 }
 #directions-panel {
   position: absolute;

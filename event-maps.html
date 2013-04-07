@@ -32,8 +32,8 @@
         <div id="map"></div>
 		<div id="header" class="navbar navbar-fixed-top">
 			<div class="navbar-inner">
-				<button type="button" id="button-authorize" class="btn" disabled>認証中...</button>
-				<a id="button-calendar" href="#modal-calendar" role="button" class="btn" style="display: none;" data-toggle="modal">カレンダー一覧</a>
+				<a id="button-tutorial" href="#modal-tutorial" role="button" class="btn" data-toggle="modal">このアプリの使い方</a>
+				<a id="button-calendar" href="#modal-calendar" role="button" class="btn hide" data-toggle="modal">カレンダー一覧</a>
 			</div>
 		</div>
 		<div id="directions-panel" class="hide"></div>
@@ -46,6 +46,53 @@
 					<button type="button" id="button-prev" class="btn">前</button>
 					<button type="button" id="button-next" class="btn">次</button>
 				</div>
+			</div>
+		</div>
+		<div id="modal-tutorial" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="label-modal-tutorial" aria-hidden="true">
+			<div class="modal-header">
+				<h5 class="label-modal-tutorial">EventMapsの使い方</h5>
+			</div>
+			<div class="modal-body">
+				<p>
+					EventMapsにようこそ。<br>
+					EventMapsは地図上でスケジュールを立てたり確認したりするアプリです。<br>
+					旅の計画など、場所と時刻を一緒に考えたい時に便利です。<br>
+				</p>
+				<p>
+					地図上のどこかをクリックすると、その場所にマーカが落ちて、予定を入力するウィンドウが開きます。<br>
+					「場所」の欄にはクリックした場所の住所が表示されます。もし他の場所を探したければ、「場所」欄を変更して「<strong>位置を確認する</strong>」ボタンをクリックしてください。１つ見つかればマーカがその場所に移動します。複数見つかれば候補地が選択できるようになります。「場所」は住所である必要はありません。<br>
+					「開始」「終了」欄にはクリックした場所の現在時刻が表示されます。変更できます。<br>
+					他に「タイトル」「詳細」欄を入力して「更新」ボタンをクリックすると保存されます。<br>
+					不要な場合には「削除」をクリックしてください。マーカが消えます。<br>
+					「キャンセル」をクリックすると、マーカはそのままでマーカをクリックするとまた編集ウィンドウが開きます。保存はされていないのでアプリを再読み込みするとこのデータは失われます。
+				</p>
+				<p>
+					地図の右下の「前」「次」ボタンは予定を順に追うためのボタンです。<br>
+					複数予定が入力されている場合、このボタンで開始時刻で見て前の予定、次の予定に移動することができます。
+				<p>
+					予定の編集ウィンドウの中の「<strong>道順を調べる</strong>」ボタンはこのアプリの特長の１つです。<br>
+					このボタンをクリックすると、この場所から次にクリックするマーカまでの道順を調べます。<br>
+					目的地をクリックする前に時刻指定を選ぶウィンドウが出るので、出発地の予定終了時刻/目的地の予定開始時刻/現在時刻のいずれかを選択してください。出発地の予定終了時刻や現在時刻を選択すると、その時刻からの道順を探します。目的地の予定開始時刻を選択すると、その時刻に到着する道順を探します。<br>
+					(残念ながら国によって公共交通機関の検索ができない場合があります。例えば、日本。)<br>
+					このあと、目的地のマーカをクリックしてください。検索を開始します。
+				</p>
+				<p>
+					道順が見つかると、地図上に表示されます。通常複数見つかり、最も速い交通手段の道順を表示します。別の候補を見るには地図の右下の「前」「次」ボタンを使ってください。
+				</p>
+				<p>
+					道順の詳細情報を見るには、左下に現れる「道順情報」ボタンをクリックしてください。<br>
+					出発地の下に、距離と所用時間が表示されます。移動時間に余裕があるか確認したりできます。<br>
+					道順リストの個々の欄をクリックすると、その場所を地図上で見ることができます。<br>
+					地図に戻るには「道順情報」ボタンをクリックしてください。
+				</p>
+				<p>
+					以上、EventMapsの基本的な使い方でした。<br>
+					EventMapsはGoogleカレンダーのデータを扱うこともできます。予定を、好みのカレンダアプリとEventMaps、両方で見たり編集したりできるので便利です。
+				</p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" id="button-authorize" class="btn" data-dismiss="modal" aria-hidden="true">Googleカレンダにアクセス</button>
+				<button class="btn" data-dismiss="modal" aria-hidden="true">アプリを使ってみる</button>
 			</div>
 		</div>
 		<div id="modal-calendar" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="label-modal-calendar" aria-hidden="true">
@@ -76,10 +123,10 @@
 				<button class="btn" data-dismiss="modal" aria-hidden="true">キャンセル</button>
 			</div>
 		</div>
-		<div id="modal-info" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="label-modal-info" aria-hidden="true">
+		<div id="modal-event" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="label-modal-event" aria-hidden="true">
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-				<h5 id="label-modal-info">予定</h5>
+				<h5 id="label-modal-event">予定</h5>
 			</div>
 			<div class="modal-body">
 				<form id="form-event" class="form-horizontal">

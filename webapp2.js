@@ -12,9 +12,6 @@
     window.addEventListener('orientationchange', (function() {
       return $([document, document.body]).height(innerHeight);
     }), false);
-    $('input[type="text"], input[type="search"]').on('blur', function() {
-      return window.scrollTo(document.body.scrollLeft, 0);
-    });
     return setTimeout((function() {
       window.scrollTo(0, 0);
       $([document, document.body]).height(innerHeight);

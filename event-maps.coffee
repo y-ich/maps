@@ -18,7 +18,7 @@ APP_NAME = 'EventMaps'
 
 map = null
 calendars= null # result of calenders list
-currentCalendar = null
+localCalendar = null
 currentPlace = null
 directionsCondition =
     origin: null
@@ -96,6 +96,13 @@ getTimeZone = (date, position, callback) ->
 getTimeZone.overQueryLimit = false
 
 
+findCalendarById = (calendars, id) ->
+    for e in calendars
+        if e.id is id
+            result = e
+            break
+    result
+
 # compares start times of event resources
 compareEventResources = (x, y) ->
     new Date(x.start.dateTime ? x.start.date + 'T00:00:00Z').getTime() - new Date(y.start.dateTime ? y.start.date + 'T00:00:00Z').getTime()
@@ -104,12 +111,8 @@ compareEventResources = (x, y) ->
 handleAuthResult = (result) ->
     if result? and not result.error?
         gapi.client.load 'calendar', 'v3', ->
-            $('#button-authorize').css 'display', 'none'
-            $('#button-calendar').css 'display', ''
-    else
-        $('#button-authorize').text("このアプリ\"#{APP_NAME}\"にGoogleカレンダーへのアクセスを許可する")
-                              .attr('disabled', null)
-                              .addClass 'primary'
+            $('#button-calendar').removeClass 'hide'
+            $('#button-authorize').addClass 'hide'
 
 # searches directions in all travel modes and call callback.
 searchDirections = (origin, destination, departureTime, callback) ->
@@ -125,7 +128,7 @@ searchDirections = (origin, destination, departureTime, callback) ->
             origin: origin
             travelMode: travelMode
         options.transitOptions = departureTime: departureTime if departureTime?
-        searchDirections.service.route options, ((travelMode, deferred) ->
+        new google.maps.DirectionsService().route options, ((travelMode, deferred) ->
                 (result, status) ->
                     switch status
                         when google.maps.DirectionsStatus.OK
@@ -135,8 +138,6 @@ searchDirections = (origin, destination, departureTime, callback) ->
             )(travelMode, deferred)
     $.when.apply(window, deferreds).then ->
         callback results
-
-searchDirections.service = new google.maps.DirectionsService()
 
 class DirectionsController
     @renderer: new google.maps.DirectionsRenderer
@@ -246,17 +247,11 @@ class Place extends google.maps.Marker
             directionsController = new DirectionsController results
             directionsController.show()
 
-# delegate
-#for name, method of MapState.prototype when typeof method is 'function'
-#    MapFSM.prototype[name] = ((name) ->
-#        -> @setState @state[name](@))(name) # substantiation of name
-
-
 # is a class of Google Calendar Event.
 # is capable to geocode the location of events and saves it as extendedProperties.private.geolocation.
 # Event.geocodeCount should be reset to 0 when starting simultaneous geocode requests 
 class Event
-    @$modal: $('#modal-info')
+    @$modal: $('#modal-event')
     @events: []
     @placeNumber: 0
     @geocodeCount: 0 # Google accepts only ten simultaneous geocode requests. So count them.
@@ -270,6 +265,8 @@ class Event
             e.clearMarkers()
         Event.events = []
         Event.placeNumber = 0
+
+    @changeCalendarId: (id) -> e.calendarId = id for e in Event.events
 
     constructor: (@calendarId, @resource, centering = false, byClick = false) ->
         @resource.summary ?= '新しい予定'
@@ -505,7 +502,7 @@ initializeDOM = ->
                 $calendarList.html '<option value="new">新規作成</option>' + ("<option value=\"#{e.id}\">#{e.summary}</option>" for e in calendars).join('')
 
     $('#button-show').on 'click', ->
-        if Event.events.length > 0 and Event.events[0].calendarId?
+        if Event.events.length > 0 and Event.events[0].calendarId? # if treated specific calendar right before.
             Event.clearAll()
         currentPlace = null
         id = $calendarList.children('option:selected').attr 'value'
@@ -520,15 +517,11 @@ initializeDOM = ->
                     else
                         currentCalendar = resp.result
                         calendars.push currentCalendar
-                        e.calendarId = currentCalendar.id for e in Event.events
+                        Event.changeCalendarId currentCalendar.id # changes calendarId of events in previously non-specific calendar
         else
-            for e in calendars
-                if e.id is id
-                    currentCalendar = e
-                    break
-            e.calendarId = currentCalendar.id for e in Event.events
-            options =
-                calendarId: id
+            currentCalendar = findCalendarById calendars, id
+            Event.changeCalendarId currentCalendar.id
+            options = calendarId: id
             options.timeMin = $('#form-calendar [name="start-date"]')[0].value + 'T00:00:00Z' unless $('#form-calendar [name="start-date"]')[0].value is ''
             options.timeMax = $('#form-calendar [name="end-date"]')[0].value + 'T00:00:00Z' unless $('#form-calendar [name="end-date"]')[0].value is ''
             req = gapi.client.calendar.events.list options
@@ -592,7 +585,7 @@ initializeDOM = ->
         else
             anEvent.insert()
 
-    $('#modal-info').on 'hide', -> spinner.stop()
+    Event.$modal.on 'hide', -> spinner.stop()
 
     $('#form-event input[name="all-day"]').on 'change', ->
         $('#form-event input[name="start-time"]').css 'display', if @checked then 'none' else ''

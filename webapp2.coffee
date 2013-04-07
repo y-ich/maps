@@ -15,8 +15,6 @@ fullScreen = ->
         # scrollTo/scrollLeft will be set beforehand by the other event listener.
         $([document, document.body]).height innerHeight
     ), false
-    $('input[type="text"], input[type="search"]').on 'blur', ->
-        window.scrollTo document.body.scrollLeft, 0 # I wanted to animate but, animation was flickery on iphone as left always reset to 0 during animation. 
     setTimeout (->
         window.scrollTo 0, 0 # hide address bar
         $([document, document.body]).height innerHeight # 100% is not full screen height, is a size below address bar.
