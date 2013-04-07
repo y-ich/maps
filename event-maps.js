@@ -45,9 +45,13 @@
   };
 
   mapSum = function(array, fn) {
-    return array.map(fn).reduce(function(a, b) {
-      return a + b;
-    });
+    if (array.length === 0) {
+      return 0;
+    } else {
+      return array.map(fn).reduce(function(a, b) {
+        return a + b;
+      });
+    }
   };
 
   getLocalizedString = function(key) {
@@ -211,7 +215,7 @@
       return this.results[this.index];
     };
 
-    DirectionsController.prototype.numOfResults = function() {
+    DirectionsController.prototype.numOfRoutes = function() {
       var e;
       return sum((function() {
         var _i, _len, _ref, _results;
@@ -232,7 +236,7 @@
         if (this.index >= this.results.length) {
           this.index = 0;
         }
-        return this.routeIdex = 0;
+        return this.routeIndex = 0;
       }
     };
 
@@ -243,12 +247,13 @@
         if (this.index < 0) {
           this.index = this.results.length - 1;
         }
-        return this.routeIdex = this.results[this.index].routes.length - 1;
+        return this.routeIndex = this.results[this.index].routes.length - 1;
       }
     };
 
     DirectionsController.prototype.show = function() {
-      var result;
+      var result,
+        _this = this;
       result = this.currentResult();
       map.setMapTypeId((function() {
         switch (result.travelMode) {
@@ -262,13 +267,19 @@
       DirectionsController.renderer.setDirections(result);
       DirectionsController.renderer.setRouteIndex(this.routeIndex);
       DirectionsController.renderer.setMap(map);
-      return $('#button-route-info').removeClass('hide');
+      $('#route-number').text("" + (mapSum(this.results.slice(0, this.index), function(e) {
+        return e.routes.length;
+      }) + this.routeIndex + 1) + " / " + (this.numOfRoutes()));
+      setTimeout((function() {
+        return $('#route-info').html(_this.currentResult().travelMode + $('.adp-summary').html());
+      }), 0);
+      return $('.route').removeClass('hide');
     };
 
     DirectionsController.prototype.clear = function() {
       DirectionsController.renderer.setMap(null);
       map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
-      $('#button-route-info').addClass('hide');
+      $('.route').addClass('hide');
       return this.results = null;
     };
 
@@ -1026,7 +1037,7 @@
     $('#button-prev, #button-next').on('click', function() {
       var candidateIndex, eventIndex, sorted, _ref, _ref1, _ref2, _ref3;
       if (directionsController != null) {
-        if (directionsController.numOfResults() === 1) {
+        if (directionsController.numOfRoutes() === 1) {
           alert('道順は１つしか見つかりませんでした');
           return;
         }

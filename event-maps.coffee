@@ -39,7 +39,7 @@ sum = (array) ->
 
 # sums after some transformation
 mapSum = (array, fn) ->
-    array.map(fn).reduce (a, b) -> a + b
+    if array.length == 0 then 0 else array.map(fn).reduce (a, b) -> a + b
 
 
 # localization
@@ -154,7 +154,7 @@ class DirectionsController
 
     currentResult: -> @results[@index]
 
-    numOfResults: -> sum (e.routes.length for e in @results)
+    numOfRoutes: -> sum (e.routes.length for e in @results)
 
     next: ->
         @routeIndex += 1
@@ -162,7 +162,7 @@ class DirectionsController
             @index += 1
             if @index >= @results.length
                 @index = 0
-            @routeIdex = 0
+            @routeIndex = 0
 
     prev: ->
         @routeIndex -= 1
@@ -170,7 +170,7 @@ class DirectionsController
             @index -= 1
             if @index < 0
                 @index = @results.length - 1
-            @routeIdex = @results[@index].routes.length - 1
+            @routeIndex = @results[@index].routes.length - 1
 
     show: ->
         result = @currentResult()
@@ -180,12 +180,14 @@ class DirectionsController
         DirectionsController.renderer.setDirections result
         DirectionsController.renderer.setRouteIndex @routeIndex
         DirectionsController.renderer.setMap map
-        $('#button-route-info').removeClass 'hide'
+        $('#route-number').text("#{mapSum(@results.slice(0, @index), (e) -> e.routes.length) + @routeIndex + 1} / #{@numOfRoutes()}")
+        setTimeout (=> $('#route-info').html @currentResult().travelMode + $('.adp-summary').html()), 0
+        $('.route').removeClass 'hide'
 
     clear: ->
         DirectionsController.renderer.setMap null
         map.setMapTypeId google.maps.MapTypeId.ROADMAP
-        $('#button-route-info').addClass 'hide'
+        $('.route').addClass 'hide'
         @results = null
 
 # saves current state into localStorage
@@ -654,7 +656,7 @@ initializeDOM = ->
 
     $('#button-prev, #button-next').on 'click', ->
         if directionsController?
-            if directionsController.numOfResults() == 1
+            if directionsController.numOfRoutes() == 1
                 alert '道順は１つしか見つかりませんでした'
                 return
             if this.id is 'buttion-prev'

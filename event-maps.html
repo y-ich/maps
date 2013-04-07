@@ -39,12 +39,16 @@
 		<div id="directions-panel" class="hide"></div>
 		<div id="footer" class="navbar navbar-fixed-bottom">
 			<div class="navbar-inner">
-				<div class="btn-group pull-left">
-					<button type="button" id="button-route-info" class="btn hide">道順情報</button>
+				<div class="route pull-left hide">
+					<button type="button" id="button-route-info" class="btn">道順情報</button>
+					<span id="route-info" class="navbar-text"></span>
 				</div>
-				<div class="btn-group pull-right">
-					<button type="button" id="button-prev" class="btn">前</button>
-					<button type="button" id="button-next" class="btn">次</button>
+				<div class="pull-right">
+					<span id="route-number" class="route navbar-text hide"></span>
+					<div class="btn-group">
+						<button type="button" id="button-prev" class="btn">前</button>
+						<button type="button" id="button-next" class="btn">次</button>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -64,7 +68,7 @@
 					「開始」「終了」欄にはクリックした場所の現在時刻が表示されます。変更できます。<br>
 					他に「タイトル」「詳細」欄を入力して「更新」ボタンをクリックすると保存されます。<br>
 					不要な場合には「削除」をクリックしてください。マーカが消えます。<br>
-					「キャンセル」をクリックすると、マーカはそのままでマーカをクリックするとまた編集ウィンドウが開きます。保存はされていないのでアプリを再読み込みするとこのデータは失われます。
+					「戻る」をクリックすると、マーカはそのままでマーカをクリックするとまた編集ウィンドウが開きます。保存はされていないのでアプリを再読み込みするとこのデータは失われます。
 				</p>
 				<p>
 					地図の右下の「前」「次」ボタンは予定を順に追うためのボタンです。<br>
@@ -122,7 +126,7 @@
 			</div>
 			<div class="modal-footer">
 				<button id="button-show" class="btn btn-primary" data-dismiss="modal" aria-hidden="true">カレンダーを見る</button>
-				<button class="btn" data-dismiss="modal" aria-hidden="true">キャンセル</button>
+				<button class="btn" data-dismiss="modal" aria-hidden="true">戻る</button>
 			</div>
 		</div>
 		<div id="modal-event" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="label-modal-event" aria-hidden="true">
@@ -187,7 +191,7 @@
 			<div class="modal-footer">
 				<button id="button-update" class="btn btn-primary" data-dismiss="modal" aria-hidden="true">更新</button>
 				<button id="button-delete" class="btn btn-danger" data-dismiss="modal" aria-hidden="true">削除</button>
-				<button class="btn" data-dismiss="modal" aria-hidden="true">キャンセル</button>
+				<button class="btn" data-dismiss="modal" aria-hidden="true">戻る</button>
 			</div>
 		</div>
 		<div id="modal-directions" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="label-modal-directions" aria-hidden="true">

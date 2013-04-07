@@ -25,6 +25,9 @@ body {
   border: none;
   -webkit-box-shadow: none;
 }
+.navbar-text {
+  background-color: white;
+}
 .icon-chevron-right {
   float: right;
   margin-top: 2px;
