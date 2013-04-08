@@ -761,6 +761,9 @@ window.app =
     initialize: (mapsCallback) ->
         initializeGoogleMaps mapsCallback
         initializeDOM()
+        unless localStorage[MAP_STATUS]?
+            $('#modal-tutorial').modal 'show'
+            saveMapStatus()
     saveMapStatus: saveMapStatus
 
 window.handleClientLoad = -> setTimeout (->

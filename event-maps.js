@@ -1183,7 +1183,11 @@
   window.app = {
     initialize: function(mapsCallback) {
       initializeGoogleMaps(mapsCallback);
-      return initializeDOM();
+      initializeDOM();
+      if (localStorage[MAP_STATUS] == null) {
+        $('#modal-tutorial').modal('show');
+        return saveMapStatus();
+      }
     },
     saveMapStatus: saveMapStatus
   };
