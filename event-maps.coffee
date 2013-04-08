@@ -346,8 +346,6 @@ class Event
                 ).execute (resp) ->
                     if resp.error?
                         console.error 'gapi.client.calendar.events.update', resp
-        else
-            $('#modal-calendar').modal 'show'
 
     insert: ->
         if not @calendarId? or @calendarId is 'local'
@@ -449,13 +447,14 @@ class Event
             callback()
             return
         @geocode (results) =>
+            console.log results
             if byClick
                 @setGeolocation results[0].geometry.location.lat(), results[0].geometry.location.lng(), results[0].formatted_address
             else if results.length == 1
                 @setGeolocation results[0].geometry.location.lat(), results[0].geometry.location.lng(), results[0].formatted_address
                 @setPlace()
                 if @place? and centering
-                    map.setCenter @place.getPosition()
+                    map.fitBounds results[0].geometry.viewport
                     currentPlace = @place
             else
                 @candidates = []
@@ -468,7 +467,7 @@ class Event
                         title: @resource.location + '?'
                         @, e.formatted_address
                 if centering
-                    map.setCenter @candidates[0].getPosition()
+                    map.fitBounds results[0].geometry.viewport
                     currentPlace = @candidates[0]
             callback()
 

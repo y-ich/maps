@@ -561,8 +561,6 @@
             }
           });
         }
-      } else {
-        return $('#modal-calendar').modal('show');
       }
     };
 
@@ -738,13 +736,14 @@
       }
       return this.geocode(function(results) {
         var e, _i, _len;
+        console.log(results);
         if (byClick) {
           _this.setGeolocation(results[0].geometry.location.lat(), results[0].geometry.location.lng(), results[0].formatted_address);
         } else if (results.length === 1) {
           _this.setGeolocation(results[0].geometry.location.lat(), results[0].geometry.location.lng(), results[0].formatted_address);
           _this.setPlace();
           if ((_this.place != null) && centering) {
-            map.setCenter(_this.place.getPosition());
+            map.fitBounds(results[0].geometry.viewport);
             currentPlace = _this.place;
           }
         } else {
@@ -760,7 +759,7 @@
             }, _this, e.formatted_address));
           }
           if (centering) {
-            map.setCenter(_this.candidates[0].getPosition());
+            map.fitBounds(results[0].geometry.viewport);
             currentPlace = _this.candidates[0];
           }
         }
