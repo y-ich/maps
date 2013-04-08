@@ -447,7 +447,6 @@ class Event
             callback()
             return
         @geocode (results) =>
-            console.log results
             if byClick
                 @setGeolocation results[0].geometry.location.lat(), results[0].geometry.location.lng(), results[0].formatted_address
             else if results.length == 1
