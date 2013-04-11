@@ -26,7 +26,6 @@ directionsCondition =
     destination: null
     time: null
 directionsController = null
-authorizeStatus = false
 spinner = new Spinner color: '#000'
 
 #
@@ -112,9 +111,11 @@ compareEventResources = (x, y) ->
 # Google OAuth 2.0 handler
 handleAuthResult = (result) ->
     if result? and not result.error?
-        authorizeStatus = true
         gapi.client.load 'calendar', 'v3', ->
+            $('#button-calendar').attr 'disabled', null
             $('#button-authorize').addClass 'hide'
+    else
+        $('#button-calendar').attr 'disabled', null
 
 # searches directions in all travel modes and call callback.
 searchDirections = (origin, destination, departureTime, callback) ->
@@ -542,16 +543,16 @@ initializeDOM = ->
 
     $calendarList = $('#calendar-list')
     $('#modal-calendar').on 'show', (event) ->
-        if authorizeStatus
-            req = gapi.client.calendar.calendarList.list()
-            req.execute (resp) ->
-                if resp.error?
-                    console.error resp
-                else
-                    calendars = resp.items
-                    $calendarList.html '<option value="local">アプリ内カレンダー</option>' +
-                        ("<option value=\"#{e.id}\">#{e.summary}</option>" for e in calendars).join('') +
-                        '<option value="new">新規Goolgeカレンダー</option>'
+        return unless gapi.client.calendar?
+        req = gapi.client.calendar.calendarList.list()
+        req.execute (resp) ->
+            if resp.error?
+                console.error resp
+            else
+                calendars = resp.items
+                $calendarList.html '<option value="local">アプリ内カレンダー</option>' +
+                    ("<option value=\"#{e.id}\">#{e.summary}</option>" for e in calendars).join('') +
+                    '<option value="new">新規Goolgeカレンダー</option>'
 
     $('#button-show').on 'click', ->
         if Event.events.length > 0 and Event.events[0].calendarId? # if treated specific calendar right before.
