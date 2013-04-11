@@ -353,6 +353,7 @@
             heading: google.maps.geometry.spherical.computeHeading(data.location.latLng, _this.getPosition()),
             pitch: 20
           });
+          streetview.setZoom(0.5);
           return streetview.setVisible(true);
         } else {
           return console.error(status);

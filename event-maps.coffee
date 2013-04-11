@@ -242,6 +242,7 @@ class Place extends google.maps.Marker
                 streetview.setPov
                     heading: google.maps.geometry.spherical.computeHeading(data.location.latLng, @getPosition())
                     pitch: 20
+                streetview.setZoom 0.5
                 streetview.setVisible true
             else
                 console.error status
