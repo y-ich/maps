@@ -266,7 +266,7 @@
       DirectionsController.renderer.setDirections(result);
       DirectionsController.renderer.setRouteIndex(this.routeIndex);
       DirectionsController.renderer.setMap(map);
-      $('#route-number').text("" + (mapSum(this.results.slice(0, this.index), function(e) {
+      $('#prev-next-text').text("" + (mapSum(this.results.slice(0, this.index), function(e) {
         return e.routes.length;
       }) + this.routeIndex + 1) + " / " + (this.numOfRoutes()));
       setTimeout((function() {
@@ -1097,7 +1097,8 @@
         } else {
           currentPlace = (_ref3 = sorted[sorted.length - 1].place) != null ? _ref3 : sorted[sorted.length - 1].candidates[sorted[sorted.length - 1].candidates.length - 1];
         }
-        return map.panTo(currentPlace.getPosition());
+        map.panTo(currentPlace.getPosition());
+        return $('#prev-next-text').text(currentPlace.getTitle());
       }
     });
     $('#button-direction').on('click', function(event) {

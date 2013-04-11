@@ -179,7 +179,7 @@ class DirectionsController
         DirectionsController.renderer.setDirections result
         DirectionsController.renderer.setRouteIndex @routeIndex
         DirectionsController.renderer.setMap map
-        $('#route-number').text("#{mapSum(@results.slice(0, @index), (e) -> e.routes.length) + @routeIndex + 1} / #{@numOfRoutes()}")
+        $('#prev-next-text').text("#{mapSum(@results.slice(0, @index), (e) -> e.routes.length) + @routeIndex + 1} / #{@numOfRoutes()}")
         setTimeout (=> $('#route-info').html @currentResult().travelMode[0] + $('.adp-summary').html()), 0
         $('.route').removeClass 'hide'
 
@@ -692,6 +692,7 @@ initializeDOM = ->
             else
                 currentPlace = sorted[sorted.length - 1].place ? sorted[sorted.length - 1].candidates[sorted[sorted.length - 1].candidates.length - 1]
             map.panTo currentPlace.getPosition()
+            $('#prev-next-text').text currentPlace.getTitle()
 
     $('#button-direction').on 'click', (event) ->
         directionsCondition.origin = Event.$modal.data 'place'
