@@ -225,8 +225,6 @@ class Place extends google.maps.Marker
 
     # shows its Modal Window.
     showInfo: ->
-        @event.setModal @
-        Event.$modal.modal 'show'
         # cancels direction mode
         directionsCondition =
             origin: null
@@ -235,6 +233,18 @@ class Place extends google.maps.Marker
         if directionsController?
             directionsController.clear()
             directionsController = null
+        @event.setModal @
+        new google.maps.StreetViewService().getPanoramaByLocation @getPosition(), 70, (data, status) =>
+            if status is google.maps.StreetViewStatus.OK
+                streetview = map.getStreetView()
+                streetview.setPosition data.location.latLng
+                streetview.setPov
+                    heading: google.maps.geometry.spherical.computeHeading(data.location.latLng, @getPosition())
+                    pitch: 20
+                streetview.setVisible true
+            else
+                console.error status
+        Event.$modal.modal 'show'
 
     showDirections: ->
         directionsCondition.destination = @
@@ -642,7 +652,10 @@ initializeDOM = ->
         else
             anEvent.insert()
 
-    Event.$modal.on 'hide', -> spinner.stop()
+    Event.$modal.on 'shown', -> google.maps.event.trigger map.getStreetView(), 'resize'
+    Event.$modal.on 'hide', ->
+        spinner.stop()
+        map.getStreetView().setVisible false
 
     $('#form-event input[name="all-day"]').on 'change', ->
         $('#form-event input[name="start-time"]').css 'display', if @checked then 'none' else ''
@@ -724,6 +737,15 @@ initializeGoogleMaps = (callback = ->) ->
     mapOptions =
         mapTypeId: google.maps.MapTypeId.ROADMAP
         disableDefaultUI: /iPad|iPhone/.test(navigator.userAgent)
+        streetView: new google.maps.StreetViewPanorama($('#streetview')[0],
+                addressControl: false
+                clickToGo: false
+                imageDateControl: false
+                linksControl: false
+                panControl: false
+                scrollwheel: false
+                zoomControl: false
+                visible: false)
         mapTypeControl: false
         zoomControlOptions:
             position: google.maps.ControlPosition.LEFT_CENTER
@@ -757,7 +779,6 @@ initializeGoogleMaps = (callback = ->) ->
             false, true
 
 # export
-
 window.app =
     initialize: (mapsCallback) ->
         initializeGoogleMaps mapsCallback

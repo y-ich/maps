@@ -333,8 +333,7 @@
     };
 
     Place.prototype.showInfo = function() {
-      this.event.setModal(this);
-      Event.$modal.modal('show');
+      var _this = this;
       directionsCondition = {
         origin: null,
         destination: null,
@@ -342,8 +341,24 @@
       };
       if (directionsController != null) {
         directionsController.clear();
-        return directionsController = null;
+        directionsController = null;
       }
+      this.event.setModal(this);
+      new google.maps.StreetViewService().getPanoramaByLocation(this.getPosition(), 70, function(data, status) {
+        var streetview;
+        if (status === google.maps.StreetViewStatus.OK) {
+          streetview = map.getStreetView();
+          streetview.setPosition(data.location.latLng);
+          streetview.setPov({
+            heading: google.maps.geometry.spherical.computeHeading(data.location.latLng, _this.getPosition()),
+            pitch: 20
+          });
+          return streetview.setVisible(true);
+        } else {
+          return console.error(status);
+        }
+      });
+      return Event.$modal.modal('show');
     };
 
     Place.prototype.showDirections = function() {
@@ -1025,8 +1040,12 @@
         return anEvent.insert();
       }
     });
+    Event.$modal.on('shown', function() {
+      return google.maps.event.trigger(map.getStreetView(), 'resize');
+    });
     Event.$modal.on('hide', function() {
-      return spinner.stop();
+      spinner.stop();
+      return map.getStreetView().setVisible(false);
     });
     $('#form-event input[name="all-day"]').on('change', function() {
       $('#form-event input[name="start-time"]').css('display', this.checked ? 'none' : '');
@@ -1145,6 +1164,16 @@
     mapOptions = {
       mapTypeId: google.maps.MapTypeId.ROADMAP,
       disableDefaultUI: /iPad|iPhone/.test(navigator.userAgent),
+      streetView: new google.maps.StreetViewPanorama($('#streetview')[0], {
+        addressControl: false,
+        clickToGo: false,
+        imageDateControl: false,
+        linksControl: false,
+        panControl: false,
+        scrollwheel: false,
+        zoomControl: false,
+        visible: false
+      }),
       mapTypeControl: false,
       zoomControlOptions: {
         position: google.maps.ControlPosition.LEFT_CENTER
