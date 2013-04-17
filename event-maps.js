@@ -857,7 +857,7 @@
     var $calendarList;
     localize();
     $('#container').css('display', '');
-    $('.modal-body').css('max-height', "" + (innerHeight - 59 - 60 - Math.floor(innerHeight / 5)) + "px");
+    $('.modal-body').css('max-height', "" + (innerHeight - 59 - Math.floor(innerHeight / 5)) + "px");
     new FastClick(document.body);
     $('#button-authorize').on('click', function() {
       return gapi.auth.authorize({
