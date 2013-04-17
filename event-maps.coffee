@@ -708,6 +708,7 @@ initializeDOM = ->
                 currentPlace = sorted[0].place ? sorted[0].candidates[0]
             else
                 currentPlace = sorted[sorted.length - 1].place ? sorted[sorted.length - 1].candidates[sorted[sorted.length - 1].candidates.length - 1]
+            currentPlace.setZIndex google.maps.Marker.MAX_ZINDEX + 1
             map.panTo currentPlace.getPosition()
             $('#prev-next-text').text currentPlace.getTitle()
 

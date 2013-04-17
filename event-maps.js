@@ -1117,6 +1117,7 @@
         } else {
           currentPlace = (_ref3 = sorted[sorted.length - 1].place) != null ? _ref3 : sorted[sorted.length - 1].candidates[sorted[sorted.length - 1].candidates.length - 1];
         }
+        currentPlace.setZIndex(google.maps.Marker.MAX_ZINDEX + 1);
         map.panTo(currentPlace.getPosition());
         return $('#prev-next-text').text(currentPlace.getTitle());
       }
