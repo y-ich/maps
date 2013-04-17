@@ -19,7 +19,7 @@ APP_NAME = 'EventMaps'
 
 map = null
 calendars= null # result of calenders list
-localCalendar = null
+currentCalendar = null
 currentPlace = null
 directionsCondition =
     origin: null
@@ -615,41 +615,43 @@ initializeDOM = ->
 
     $('#button-update').on 'click', ->
         anEvent = Event.$modal.data('place').event
+
+        if anEvent.resource.summary isnt $('#form-event input[name="summary"]').val()
+            anEvent.dirty = true
+            anEvent.resource.summary = $('#form-event input[name="summary"]').val()
+        if anEvent.resource.location isnt $('#form-event input[name="location"]').val()
+            anEvent.dirty = true
+            anEvent.resource.location = $('#form-event input[name="location"]').val()
+            delete anEvent.resource.extendedProperties.private.geolocation
+        if $('#form-event input[name="all-day"]')[0].checked
+            if anEvent.resource.start.date isnt $('#form-event input[name="start-date"]').val().replace(/-/g, '/')
+                anEvent.dirty = true
+                delete anEvent.resource.start.dateTime
+                anEvent.resource.start.date = $('#form-event input[name="start-date"]').val().replace(/-/g, '/')
+            if anEvent.resource.end.date isnt $('#form-event input[name="end-date"]').val().replace(/-/g, '/')
+                anEvent.dirty = true
+                delete anEvent.resource.end.dateTime
+                anEvent.resource.end.date = $('#form-event input[name="end-date"]').val().replace(/-/g, '/')
+        else
+            timeZone = Event.$modal.data('place').startTimeZone
+            startDateTime = new Date $('#form-event input[name="start-date"]').val().replace(/-/g, '/') + ' ' + $('#form-event input[name="start-time"]').val() + timeDifference(timeZone.dstOffset + timeZone.rawOffset)
+            if new Date(anEvent.resource.start.dateTime).getTime() isnt startDateTime.getTime()
+                anEvent.dirty = true
+                delete anEvent.resource.start.date
+                anEvent.resource.start.dateTime = startDateTime.toISOString()
+                anEvent.resource.start.timeZone = timeZone.timeZoneId
+            timeZone = Event.$modal.data('place').endTimeZone
+            endDateTime = new Date $('#form-event input[name="end-date"]').val().replace(/-/g, '/') + ' ' + $('#form-event input[name="end-time"]').val() + timeDifference(timeZone.dstOffset + timeZone.rawOffset)
+            if new Date(anEvent.resource.end.dateTime).getTime() isnt endDateTime.getTime()
+                anEvent.dirty = true
+                delete anEvent.resource.end.date
+                anEvent.resource.end.dateTime = endDateTime.toISOString()
+                anEvent.resource.end.timeZone = timeZone.timeZoneId
+        if anEvent.resource.description isnt $('#form-event input[name="description"]').val()
+            anEvent.dirty = true
+            anEvent.resource.description = $('#form-event input[name="description"]').val()
+
         if anEvent.resource.id?
-            if anEvent.resource.summary isnt $('#form-event input[name="summary"]').val()
-                anEvent.dirty = true
-                anEvent.resource.summary = $('#form-event input[name="summary"]').val()
-            if anEvent.resource.location isnt $('#form-event input[name="location"]').val()
-                anEvent.dirty = true
-                anEvent.resource.location = $('#form-event input[name="location"]').val()
-                delete anEvent.resource.extendedProperties.private.geolocation
-            if $('#form-event input[name="all-day"]')[0].checked
-                if anEvent.resource.start.date isnt $('#form-event input[name="start-date"]').val().replace(/-/g, '/')
-                    anEvent.dirty = true
-                    delete anEvent.resource.start.dateTime
-                    anEvent.resource.start.date = $('#form-event input[name="start-date"]').val().replace(/-/g, '/')
-                if anEvent.resource.end.date isnt $('#form-event input[name="end-date"]').val().replace(/-/g, '/')
-                    anEvent.dirty = true
-                    delete anEvent.resource.end.dateTime
-                    anEvent.resource.end.date = $('#form-event input[name="end-date"]').val().replace(/-/g, '/')
-            else
-                timeZone = Event.$modal.data('place').startTimeZone
-                startDateTime = new Date $('#form-event input[name="start-date"]').val().replace(/-/g, '/') + ' ' + $('#form-event input[name="start-time"]').val() + timeDifference(timeZone.dstOffset + timeZone.rawOffset)
-                if new Date(anEvent.resource.start.dateTime).getTime() isnt startDateTime.getTime()
-                    anEvent.dirty = true
-                    delete anEvent.resource.start.date
-                    anEvent.resource.start.dateTime = startDateTime.toISOString()
-                    anEvent.resource.start.timeZone = timeZone.timeZoneId
-                timeZone = Event.$modal.data('place').endTimeZone
-                endDateTime = new Date $('#form-event input[name="end-date"]').val().replace(/-/g, '/') + ' ' + $('#form-event input[name="end-time"]').val() + timeDifference(timeZone.dstOffset + timeZone.rawOffset)
-                if new Date(anEvent.resource.end.dateTime).getTime() isnt endDateTime.getTime()
-                    anEvent.dirty = true
-                    delete anEvent.resource.end.date
-                    anEvent.resource.end.dateTime = endDateTime.toISOString()
-                    anEvent.resource.end.timeZone = timeZone.timeZoneId
-            if anEvent.resource.description isnt $('#form-event input[name="description"]').val()
-                anEvent.dirty = true
-                anEvent.resource.description = $('#form-event input[name="description"]').val()
             anEvent.update() if anEvent.dirty
         else
             anEvent.insert()
