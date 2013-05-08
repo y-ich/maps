@@ -30,10 +30,12 @@
     });
   }
 
-  app.initialize(function() {
-    return $('.startup').on($.support.transition.end, function() {
-      return $(this).css('display', 'none');
-    }).addClass('fade');
+  $(function() {
+    return app.initialize(function() {
+      return $('.startup').on($.support.transition.end, function() {
+        return $(this).css('display', 'none');
+      }).addClass('fade');
+    });
   });
 
   window.onpagehide = app.saveMapStatus;

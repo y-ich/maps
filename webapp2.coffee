@@ -33,9 +33,11 @@ types = ['checking', 'noupdate', 'downloading', 'progress','cached', 'updateread
 for type in types
     applicationCache.addEventListener type, (event) -> console.log 'cache', event.type
 
-app.initialize ->
-    $('.startup').on($.support.transition.end, -> $(this).css 'display', 'none')
-                 .addClass 'fade'
+$(->
+    app.initialize ->
+        $('.startup').on($.support.transition.end, -> $(this).css 'display', 'none')
+                     .addClass 'fade'
+)
 # fullScreen() if /iPhone/.test(navigator.userAgent) and /Safari/.test(navigator.userAgent)
 
 window.onpagehide = app.saveMapStatus

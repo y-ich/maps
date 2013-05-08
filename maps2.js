@@ -242,9 +242,10 @@
   };
 
   window.app = {
-    initialize: function() {
+    initialize: function(callback) {
       initializeGoogleMaps();
-      return initializeDOM();
+      initializeDOM();
+      return callback();
     },
     saveMapStatus: saveMapStatus
   };

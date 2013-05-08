@@ -94,7 +94,8 @@ initializeGoogleMaps = ->
 # export
 
 window.app =
-    initialize: ->
+    initialize: (callback) ->
         initializeGoogleMaps()
         initializeDOM()
+        callback()
     saveMapStatus: saveMapStatus
