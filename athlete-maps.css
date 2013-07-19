@@ -1,0 +1,85 @@
+/*
+# Google Maps Web App for Athletes
+# Copyright (C) ICHIKAWA, Yuji (New 3 Rs) 2013
+*/
+html,
+body {
+  width: 100%;
+  height: 100%;
+}
+/*
+ * Twitter Bootstrap canceling
+ */
+body {
+  padding: 0px;
+}
+/* end of cancel */
+#map img {
+  max-width: none;
+  /* work around against a coherence between Google Maps and Bootstrap. You still need for Bootstrap 2.3.1. */
+
+}
+/* intrinsic */
+#map-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0px;
+  top: 0px;
+  -webkit-transition: height 0.5s linear;
+  -moz-transition: height 0.5s linear;
+  -o-transition: height 0.5s linear;
+  transition: height 0.5s linear;
+}
+#map {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0px;
+  top: 0px;
+  -webkit-transition: width 0.5s linear;
+  -moz-transition: width 0.5s linear;
+  -o-transition: width 0.5s linear;
+  transition: width 0.5s linear;
+}
+.route #map {
+  width: 70%;
+}
+#panel {
+  position: absolute;
+  width: 0%;
+  height: 100%;
+  right: 0px;
+  top: 0px;
+  overflow: scroll;
+  -webkit-transition: width 0.5s linear;
+  -moz-transition: width 0.5s linear;
+  -o-transition: width 0.5s linear;
+  transition: width 0.5s linear;
+}
+.route #panel {
+  width: 30%;
+}
+#search {
+  position: absolute;
+  margin-top: 5px;
+  left: 50px;
+  width: 500px;
+}
+#graph {
+  position: absolute;
+  width: 100%;
+  height: 0%;
+  left: 0px;
+  bottom: 0px;
+  -webkit-transition: height 0.5s linear;
+  -moz-transition: height 0.5s linear;
+  -o-transition: height 0.5s linear;
+  transition: height 0.5s linear;
+}
+.graph #map-container {
+  height: 80%;
+}
+.graph #graph {
+  height: 20%;
+}
