@@ -15,12 +15,20 @@
         <div id="map-container">
             <div id="map"></div>
             <div id="panel">
-                <button id="altitude" type="button" class="btn">標高データ</button>
+                <form id="elevation" action="">
+                    <label for="threshold">
+                        steepness
+                        <input name="threshold" type="number" value="5" />°
+                    </label>
+                    <button class="btn">Get Elevations</button>
+                </form>
                 <div id="directions-panel"></div>
             </div>
             <input id="search" type="text" class="input-medium search-query">
         </div>
-        <div id="graph"></div>
+        <div id="graph">
+            <div id="data"></div>
+        </div>
     </div>
     <script src="js/support-util.js"></script>
     <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
@@ -29,6 +37,7 @@
     <script src="js/raphael-min.js"></script>
     <script src="js/g.raphael-min.js"></script>
     <script src="js/g.line-min.js"></script>
+    <script src="js/spin.min.js"></script>
     <script src="athlete-maps.js"></script>
     <script type="text/javascript"><!--
 

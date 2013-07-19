@@ -7,6 +7,9 @@ map = null
 infoWindow = null
 $infoContent = null
 history = null
+graph = Raphael 'graph', innerWidth, $('#graph').innerHeight()
+
+spinner = new Spinner()
 
 elevationService = new google.maps.ElevationService()
 elevationAlongSteps = (steps, callback) ->
@@ -16,46 +19,51 @@ elevationAlongSteps = (steps, callback) ->
     for s in steps
         path = path.concat s.path
 
-    deferredes = []
-    results = []
-    for i in [0..Math.floor((path.length - 1) / MAGIC)]
-        deferred = $.Deferred()
-        deferredes.push deferred
-        setTimeout ((i, deferred) ->
-            ->
-                elevationService.getElevationForLocations
-                        locations: path.slice(i * MAGIC, (i + 1) * MAGIC)
-                    , (result, status) ->
-                        if status is google.maps.ElevationStatus.OK
-                            deferred.resolve()
-                            results[i] = result
-                        else
-                            deferred.reject()
-                            console.log status
-        )(i, deferred), 2000 * i
+    totalResult = []
+    aux = (index) ->
+        elevationService.getElevationForLocations
+                locations: path.slice(index, index + MAGIC)
+        , (result, status) ->
+            if status is google.maps.ElevationStatus.OK
+                totalResult = totalResult.concat result
+                index += MAGIC
+                if index < path.length
+                    aux index
+                else
+                    callback totalResult
+            else
+                console.log status
 
-    $.when.apply(window, deferredes).done(->
-        result = results.reduce (a, b) -> a.concat b
-        callback result
-    ).fail ->
-        console.log 'fail'
+    aux 0
 
 drawElevation = (elevationResults) ->
     elevations = elevationResults.map (x) -> x.elevation
     slopes= [0]
     distances = [0]
+    steep = 0
+    maxSlope = 0
+    threshold = parseFloat $('#elevation input[name="threshold"]').val()
     for i in [0...elevationResults.length - 1]
         d = google.maps.geometry.spherical.computeDistanceBetween elevationResults[i].location, elevationResults[i + 1].location
-        slopes.push if d != 0 then (elevations[i + 1] - elevations[i]) / d * 100 else slopes[slopes.length - 1]
+        slope = if d != 0 then (elevations[i + 1] - elevations[i]) / d * 100 else slopes[slopes.length - 1]
+        maxSlope = Math.max maxSlope, slope
+        slopes.push slope
+        steep += d if slope > threshold
         distances.push distances[i] + d
-    $('#container').addClass 'graph'
-    $('#graph').on $.support.transition.end, ->
-        google.maps.event.trigger map, 'resize'
-        r = Raphael 'graph', innerWidth, $('#graph').innerHeight()
-        r.linechart 20, 0, innerWidth - 40, $('#graph').innerHeight() / 2 - 10, distances, elevations,
+    $('#data').text "max slope: #{maxSlope}°  steep distance: #{Math.floor steep}km(#{Math.floor(steep / distances[distances.length - 1] * 100)}%)"
+    aux = ->
+        graph.clear()
+        graph.linechart 20, 0, innerWidth - 40, $('#graph').innerHeight() / 2 - 10, distances, elevations,
             axis: '0 1 0 1'
-        r.linechart 20, $('#graph').innerHeight() / 2 - 10, innerWidth - 40, $('#graph').innerHeight() / 2 - 10, distances, slopes,
+        graph.linechart 20, $('#graph').innerHeight() / 2 - 10, innerWidth - 40, $('#graph').innerHeight() / 2 - 10, [distances, [distances[0], distances[distances.length - 1]]], [slopes, [0, 0]],
             axis: '0 1 1 1'
+    if $('#container').hasClass 'graph'
+        aux()
+    else
+        $('#container').addClass 'graph'
+        $('#graph').on $.support.transition.end, ->
+            google.maps.event.trigger map, 'resize'
+            aux()
 
 $infoContent = $('''
     <div>
@@ -83,9 +91,7 @@ $infoContent.children('#goal').on 'click', ->
             if status is google.maps.DirectionsStatus.OK
                 startMarker.setMap null
                 currentMarker.setMap null
-                $('#map-container').addClass 'route'
-                $('#panel').one $.support.transition.end, ->
-                    google.maps.event.trigger map, 'resize'
+                render = ->
                     if directionsRenderer?
                         directionsRenderer.setDirections result
                     else
@@ -99,6 +105,13 @@ $infoContent.children('#goal').on 'click', ->
                         google.maps.event.addListener directionsRenderer, 'directions_changed', ->
                             history.push
                                 directionsResult: @getDirections()
+                if $('#map-container').hasClass 'route'
+                    render()
+                else
+                    $('#map-container').addClass 'route'
+                    $('#panel').one $.support.transition.end, ->
+                        google.maps.event.trigger map, 'resize'
+                        render()
             else
                 alert status
 
@@ -138,7 +151,7 @@ google.maps.event.addListener autocomplete, 'place_changed', ->
             map: map
             position: place.geometry.location
 
-$('#altitude').on 'click', ->
+$('#elevation').on 'submit', (event) ->
     directions = directionsRenderer.getDirections()
     index = directionsRenderer.getRouteIndex() ? 0
     directionsInHistory = history.find (e) -> e.directionsResult is directions
@@ -148,7 +161,10 @@ $('#altitude').on 'click', ->
         steps = []
         for e in directions.routes[index].legs
             steps = steps.concat e.steps
+        spinner.spin document.body
         elevationAlongSteps steps, (result) ->
+            spinner.stop()
             directionsInHistory.elevationResults ?= []
             directionsInHistory.elevationResults[index] = result
             drawElevation result
+    event.preventDefault()

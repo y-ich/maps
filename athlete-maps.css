@@ -77,6 +77,12 @@ body {
   -o-transition: height 0.5s linear;
   transition: height 0.5s linear;
 }
+#data {
+  position: absolute;
+  top: 10px;
+  left: 100px;
+  opacity: 0.8;
+}
 .graph #map-container {
   height: 80%;
 }
