@@ -105,17 +105,20 @@
       return e / 1000;
     });
     aux = function() {
-      var roadMessage, slopeGraph;
+      var graphXOffset, roadMessage, slopeGraph;
+      graphXOffset = 60;
       graph.clear();
-      graph.linechart(20, 0, innerWidth - 40, ($('#graph').innerHeight() - 20) / 2 - 10, distances, elevations, {
+      graph.text(30, 20, 'elevation');
+      graph.linechart(graphXOffset, 0, innerWidth - graphXOffset - 30, ($('#graph').innerHeight() - 20) / 2 - 10, distances, elevations, {
         axis: '0 1 0 1'
       });
-      slopeGraph = graph.linechart(20, ($('#graph').innerHeight() - 20) / 2 - 10, innerWidth - 40, $('#graph').innerHeight() / 2 - 10, [distances, [distances[0], distances[distances.length - 1]], [distances[maxSlopeIndex], distances[maxSlopeIndex]], [distances[minSlopeIndex], distances[minSlopeIndex]]], [slopes, [0, 0], [minSlope, maxSlope], [minSlope, maxSlope]], {
+      graph.text(30, ($('#graph').innerHeight() - 20) / 2 + 10, 'slope');
+      slopeGraph = graph.linechart(graphXOffset, ($('#graph').innerHeight() - 20) / 2 - 10, innerWidth - graphXOffset - 30, $('#graph').innerHeight() / 2 - 10, [distances, [distances[0], distances[distances.length - 1]], [distances[maxSlopeIndex], distances[maxSlopeIndex]], [distances[minSlopeIndex], distances[minSlopeIndex]]], [slopes, [0, 0], [minSlope, maxSlope], [minSlope, maxSlope]], {
         axis: '0 1 1 1'
       });
       slopeGraph.clickColumn(function(event) {
         var distance, e, _j, _len;
-        distance = (event.clientX - 20) / (innerWidth - 40) * distances[distances.length - 1];
+        distance = (event.clientX - graphXOffset) / (innerWidth - 40) * distances[distances.length - 1];
         for (i = _j = 0, _len = distances.length; _j < _len; i = ++_j) {
           e = distances[i];
           if (e > distance) {
@@ -138,6 +141,28 @@
     }
   };
 
+  setContent = function(description) {
+    return $infoContent.children('#description').text(description);
+  };
+
+  createMarker = function(position) {
+    var marker;
+    marker = new google.maps.Marker({
+      animation: google.maps.Animation.DROP,
+      draggable: true,
+      map: map,
+      position: position
+    });
+    google.maps.event.addListener(marker, 'animation_changed', function() {
+      return google.maps.event.trigger(marker, 'click');
+    });
+    return google.maps.event.addListener(marker, 'click', function() {
+      currentMarker = this;
+      setContent(this.getPosition().toString());
+      return infoWindow.open(map, this);
+    });
+  };
+
   $infoContent = $('<div>\n    <p id="description"></p>\n    <button id="start" type="button" class="btn">スタート</button>\n    <button id="goal" type="button" class="btn">ゴール</button>\n</div>');
 
   $infoContent.children('#start').on('click', function() {
@@ -151,6 +176,9 @@
     setTimeout((function() {
       return infoWindow.close();
     }), 0);
+    if (startMarker == null) {
+      return;
+    }
     return new google.maps.DirectionsService().route({
       avoidHighways: true,
       avoidTolls: true,
@@ -202,25 +230,6 @@
     content: $infoContent[0]
   });
 
-  setContent = function(description) {
-    return $infoContent.children('#description').text(description);
-  };
-
-  createMarker = function(position) {
-    var marker;
-    marker = new google.maps.Marker({
-      animation: google.maps.Animation.DROP,
-      draggable: true,
-      map: map,
-      position: position
-    });
-    return google.maps.event.addListener(marker, 'click', function() {
-      currentMarker = this;
-      setContent(this.getPosition().toString());
-      return infoWindow.open(map, this);
-    });
-  };
-
   map = new google.maps.Map(document.getElementById('map'), {
     center: new google.maps.LatLng(34.584199, 135.835163),
     zoom: 10,
@@ -239,12 +248,7 @@
     place = autocomplete.getPlace();
     if (place.geometry != null) {
       map.panTo(place.geometry.location);
-      return new google.maps.Marker({
-        animation: google.maps.Animation.DROP,
-        draggable: true,
-        map: map,
-        position: place.geometry.location
-      });
+      return createMarker(place.geometry.location);
     }
   });
 
@@ -284,7 +288,8 @@
 
   $('#panel-close').on('click', function() {
     $('#container').removeClass('graph');
-    return $('#map-container').removeClass('route');
+    $('#map-container').removeClass('route');
+    return directionsRenderer.setMap(null);
   });
 
 }).call(this);

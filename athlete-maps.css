@@ -80,13 +80,13 @@ input[type="number"] {
 #graph {
   position: absolute;
   width: 100%;
-  height: 0%;
+  height: 25%;
   left: 0px;
-  bottom: 0px;
-  -webkit-transition: height 0.5s linear;
-  -moz-transition: height 0.5s linear;
-  -o-transition: height 0.5s linear;
-  transition: height 0.5s linear;
+  bottom: -25%;
+  -webkit-transition: bottom 0.5s linear;
+  -moz-transition: bottom 0.5s linear;
+  -o-transition: bottom 0.5s linear;
+  transition: bottom 0.5s linear;
 }
 #elevation {
   margin: 10px 0 0;
@@ -100,5 +100,5 @@ input[type="number"] {
   height: 75%;
 }
 .graph #graph {
-  height: 25%;
+  bottom: 0%;
 }

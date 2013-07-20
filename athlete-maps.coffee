@@ -68,15 +68,18 @@ drawElevation = (elevationResults) ->
         distances.push distances[i - 1] + d
     distances = distances.map (e) -> e / 1000
     aux = ->
+        graphXOffset = 60
         graph.clear()
-        graph.linechart 20, 0, innerWidth - 40, ($('#graph').innerHeight() - 20) / 2 - 10, distances, elevations,
+        graph.text 30, 20, 'elevation'
+        graph.linechart graphXOffset, 0, innerWidth - graphXOffset - 30, ($('#graph').innerHeight() - 20) / 2 - 10, distances, elevations,
             axis: '0 1 0 1'
-        slopeGraph = graph.linechart 20, ($('#graph').innerHeight() - 20) / 2 - 10, innerWidth - 40, $('#graph').innerHeight() / 2 - 10,
+        graph.text 30, ($('#graph').innerHeight() - 20) / 2 + 10, 'slope'
+        slopeGraph = graph.linechart graphXOffset, ($('#graph').innerHeight() - 20) / 2 - 10, innerWidth - graphXOffset - 30, $('#graph').innerHeight() / 2 - 10,
             [distances, [distances[0], distances[distances.length - 1]], [distances[maxSlopeIndex], distances[maxSlopeIndex]], [distances[minSlopeIndex], distances[minSlopeIndex]]],
             [slopes, [0, 0], [minSlope, maxSlope], [minSlope, maxSlope]],
             axis: '0 1 1 1'
         slopeGraph.clickColumn (event) ->
-            distance = (event.clientX - 20) / (innerWidth - 40) * distances[distances.length - 1]
+            distance = (event.clientX - graphXOffset) / (innerWidth - 40) * distances[distances.length - 1]
             for e, i in distances
                 break if e > distance
             map.panTo elevationResults[i].location
@@ -89,6 +92,21 @@ drawElevation = (elevationResults) ->
     else
         $('#container').addClass 'graph'
         $('#graph').on $s.vendor.transitionend, aux
+
+setContent = (description) -> $infoContent.children('#description').text description
+
+createMarker = (position) ->
+    marker = new google.maps.Marker
+        animation: google.maps.Animation.DROP
+        draggable: true
+        map: map
+        position: position
+    google.maps.event.addListener marker, 'animation_changed', ->
+        google.maps.event.trigger marker, 'click'
+    google.maps.event.addListener marker, 'click', ->
+        currentMarker = this
+        setContent @getPosition().toString()
+        infoWindow.open map, this
 
 $infoContent = $('''
     <div>
@@ -104,6 +122,7 @@ $infoContent.children('#start').on 'click', ->
 
 $infoContent.children('#goal').on 'click', ->
     setTimeout (-> infoWindow.close()), 0
+    return unless startMarker?
     new google.maps.DirectionsService().route
             avoidHighways: true
             avoidTolls: true
@@ -142,19 +161,6 @@ $infoContent.children('#goal').on 'click', ->
 infoWindow = new google.maps.InfoWindow
     content: $infoContent[0]
 
-setContent = (description) -> $infoContent.children('#description').text description
-
-createMarker = (position) ->
-    marker = new google.maps.Marker
-        animation: google.maps.Animation.DROP
-        draggable: true
-        map: map
-        position: position
-    google.maps.event.addListener marker, 'click', ->
-        currentMarker = this
-        setContent @getPosition().toString()
-        infoWindow.open map, this
-
 map = new google.maps.Map document.getElementById('map'),
     center: new google.maps.LatLng(34.584199, 135.835163)
     zoom: 10
@@ -169,11 +175,7 @@ google.maps.event.addListener autocomplete, 'place_changed', ->
     place = autocomplete.getPlace()
     if place.geometry?
         map.panTo place.geometry.location
-        new google.maps.Marker
-            animation: google.maps.Animation.DROP
-            draggable: true
-            map: map
-            position: place.geometry.location
+        createMarker place.geometry.location
 
 $('#elevation').on 'submit', (event) ->
     directions = directionsRenderer.getDirections()
@@ -199,3 +201,4 @@ $('#map-container, #map').on $s.vendor.transitionend, ->
 $('#panel-close').on 'click', ->
     $('#container').removeClass 'graph'
     $('#map-container').removeClass 'route'
+    directionsRenderer.setMap null
