@@ -24,15 +24,19 @@ elevationAlongSteps = (steps, callback) ->
         elevationService.getElevationForLocations
                 locations: path.slice(index, index + MAGIC)
         , (result, status) ->
-            if status is google.maps.ElevationStatus.OK
-                totalResult = totalResult.concat result
-                index += MAGIC
-                if index < path.length
-                    aux index
+            switch status
+                when google.maps.ElevationStatus.OK
+                    totalResult = totalResult.concat result
+                    index += MAGIC
+                    if index < path.length
+                        setTimeout (-> aux index), 1500
+                    else
+                        callback totalResult
+                when google.maps.ElevationStatus.OVER_QUERY_LIMIT
+                    console.log status
+                    setTimeout (-> aux index), 3000
                 else
-                    callback totalResult
-            else
-                console.log status
+                    console.log status
 
     aux 0
 
@@ -40,23 +44,37 @@ drawElevation = (elevationResults) ->
     elevations = elevationResults.map (x) -> x.elevation
     slopes= [0]
     distances = [0]
-    steep = 0
+    steepGo = 0
+    steepBack = 0
     maxSlope = 0
+    maxSlopeIndex = 0
+    minSlope = 0
+    minSlopeIndex = 0
     threshold = parseFloat $('#elevation input[name="threshold"]').val()
-    for i in [0...elevationResults.length - 1]
-        d = google.maps.geometry.spherical.computeDistanceBetween elevationResults[i].location, elevationResults[i + 1].location
-        slope = if d != 0 then (elevations[i + 1] - elevations[i]) / d * 100 else slopes[slopes.length - 1]
-        maxSlope = Math.max maxSlope, slope
+    for i in [1..elevationResults.length - 1]
+        d = google.maps.geometry.spherical.computeDistanceBetween elevationResults[i - 1].location, elevationResults[i].location
+        slope = if d != 0 then (elevations[i] - elevations[i - 1]) / d * 100 else slopes[slopes.length - 1]
         slopes.push slope
-        steep += d if slope > threshold
-        distances.push distances[i] + d
-    $('#data').text "max slope: #{maxSlope}°  steep distance: #{Math.floor steep}km(#{Math.floor(steep / distances[distances.length - 1] * 100)}%)"
+        if slope > maxSlope
+            maxSlope = slope
+            maxSlopeIndex = i
+        if slope < minSlope
+            minSlope = slope
+            minSlopeIndex = i
+        steepGo += d if slope > threshold
+        steepBack += d if slope < -threshold
+        distances.push distances[i - 1] + d
     aux = ->
         graph.clear()
         graph.linechart 20, 0, innerWidth - 40, $('#graph').innerHeight() / 2 - 10, distances, elevations,
             axis: '0 1 0 1'
-        graph.linechart 20, $('#graph').innerHeight() / 2 - 10, innerWidth - 40, $('#graph').innerHeight() / 2 - 10, [distances, [distances[0], distances[distances.length - 1]]], [slopes, [0, 0]],
+        graph.linechart 20, $('#graph').innerHeight() / 2 - 10, innerWidth - 40, $('#graph').innerHeight() / 2 - 10,
+            [distances, [distances[0], distances[distances.length - 1]], [distances[maxSlopeIndex], distances[maxSlopeIndex]], [distances[minSlopeIndex], distances[minSlopeIndex]]],
+            [slopes, [0, 0], [minSlope, maxSlope], [minSlope, maxSlope]],
             axis: '0 1 1 1'
+        roadMessage = (max, steep) ->
+            "max slope: #{Math.floor max}°  steep distance: #{Math.floor(steep / 100) / 10}km(#{Math.floor(steep / distances[distances.length - 1] * 100)}%)"
+        $('#data').text 'way - ' + roadMessage(maxSlope, steepGo) + ' / way back - ' +roadMessage(-minSlope, steepBack)
     if $('#container').hasClass 'graph'
         aux()
     else

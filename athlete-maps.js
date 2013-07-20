@@ -40,16 +40,25 @@
       return elevationService.getElevationForLocations({
         locations: path.slice(index, index + MAGIC)
       }, function(result, status) {
-        if (status === google.maps.ElevationStatus.OK) {
-          totalResult = totalResult.concat(result);
-          index += MAGIC;
-          if (index < path.length) {
-            return aux(index);
-          } else {
-            return callback(totalResult);
-          }
-        } else {
-          return console.log(status);
+        switch (status) {
+          case google.maps.ElevationStatus.OK:
+            totalResult = totalResult.concat(result);
+            index += MAGIC;
+            if (index < path.length) {
+              return setTimeout((function() {
+                return aux(index);
+              }), 1500);
+            } else {
+              return callback(totalResult);
+            }
+            break;
+          case google.maps.ElevationStatus.OVER_QUERY_LIMIT:
+            console.log(status);
+            return setTimeout((function() {
+              return aux(index);
+            }), 3000);
+          default:
+            return console.log(status);
         }
       });
     };
@@ -57,34 +66,52 @@
   };
 
   drawElevation = function(elevationResults) {
-    var aux, d, distances, elevations, i, maxSlope, slope, slopes, steep, threshold, _i, _ref;
+    var aux, d, distances, elevations, i, maxSlope, maxSlopeIndex, minSlope, minSlopeIndex, slope, slopes, steepBack, steepGo, threshold, _i, _ref;
     elevations = elevationResults.map(function(x) {
       return x.elevation;
     });
     slopes = [0];
     distances = [0];
-    steep = 0;
+    steepGo = 0;
+    steepBack = 0;
     maxSlope = 0;
+    maxSlopeIndex = 0;
+    minSlope = 0;
+    minSlopeIndex = 0;
     threshold = parseFloat($('#elevation input[name="threshold"]').val());
-    for (i = _i = 0, _ref = elevationResults.length - 1; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-      d = google.maps.geometry.spherical.computeDistanceBetween(elevationResults[i].location, elevationResults[i + 1].location);
-      slope = d !== 0 ? (elevations[i + 1] - elevations[i]) / d * 100 : slopes[slopes.length - 1];
-      maxSlope = Math.max(maxSlope, slope);
+    for (i = _i = 1, _ref = elevationResults.length - 1; 1 <= _ref ? _i <= _ref : _i >= _ref; i = 1 <= _ref ? ++_i : --_i) {
+      d = google.maps.geometry.spherical.computeDistanceBetween(elevationResults[i - 1].location, elevationResults[i].location);
+      slope = d !== 0 ? (elevations[i] - elevations[i - 1]) / d * 100 : slopes[slopes.length - 1];
       slopes.push(slope);
-      if (slope > threshold) {
-        steep += d;
+      if (slope > maxSlope) {
+        maxSlope = slope;
+        maxSlopeIndex = i;
       }
-      distances.push(distances[i] + d);
+      if (slope < minSlope) {
+        minSlope = slope;
+        minSlopeIndex = i;
+      }
+      if (slope > threshold) {
+        steepGo += d;
+      }
+      if (slope < -threshold) {
+        steepBack += d;
+      }
+      distances.push(distances[i - 1] + d);
     }
-    $('#data').text("max slope: " + maxSlope + "°  steep distance: " + (Math.floor(steep)) + "km(" + (Math.floor(steep / distances[distances.length - 1] * 100)) + "%)");
     aux = function() {
+      var roadMessage;
       graph.clear();
       graph.linechart(20, 0, innerWidth - 40, $('#graph').innerHeight() / 2 - 10, distances, elevations, {
         axis: '0 1 0 1'
       });
-      return graph.linechart(20, $('#graph').innerHeight() / 2 - 10, innerWidth - 40, $('#graph').innerHeight() / 2 - 10, [distances, [distances[0], distances[distances.length - 1]]], [slopes, [0, 0]], {
+      graph.linechart(20, $('#graph').innerHeight() / 2 - 10, innerWidth - 40, $('#graph').innerHeight() / 2 - 10, [distances, [distances[0], distances[distances.length - 1]], [distances[maxSlopeIndex], distances[maxSlopeIndex]], [distances[minSlopeIndex], distances[minSlopeIndex]]], [slopes, [0, 0], [minSlope, maxSlope], [minSlope, maxSlope]], {
         axis: '0 1 1 1'
       });
+      roadMessage = function(max, steep) {
+        return "max slope: " + (Math.floor(max)) + "°  steep distance: " + (Math.floor(steep / 100) / 10) + "km(" + (Math.floor(steep / distances[distances.length - 1] * 100)) + "%)";
+      };
+      return $('#data').text('way - ' + roadMessage(maxSlope, steepGo) + ' / way back - ' + roadMessage(-minSlope, steepBack));
     };
     if ($('#container').hasClass('graph')) {
       return aux();
