@@ -105,13 +105,25 @@
       return e / 1000;
     });
     aux = function() {
-      var roadMessage;
+      var roadMessage, slopeGraph;
       graph.clear();
       graph.linechart(20, 0, innerWidth - 40, ($('#graph').innerHeight() - 20) / 2 - 10, distances, elevations, {
         axis: '0 1 0 1'
       });
-      graph.linechart(20, ($('#graph').innerHeight() - 20) / 2 - 10, innerWidth - 40, $('#graph').innerHeight() / 2 - 10, [distances, [distances[0], distances[distances.length - 1]], [distances[maxSlopeIndex], distances[maxSlopeIndex]], [distances[minSlopeIndex], distances[minSlopeIndex]]], [slopes, [0, 0], [minSlope, maxSlope], [minSlope, maxSlope]], {
+      slopeGraph = graph.linechart(20, ($('#graph').innerHeight() - 20) / 2 - 10, innerWidth - 40, $('#graph').innerHeight() / 2 - 10, [distances, [distances[0], distances[distances.length - 1]], [distances[maxSlopeIndex], distances[maxSlopeIndex]], [distances[minSlopeIndex], distances[minSlopeIndex]]], [slopes, [0, 0], [minSlope, maxSlope], [minSlope, maxSlope]], {
         axis: '0 1 1 1'
+      });
+      slopeGraph.clickColumn(function(event) {
+        var distance, e, _j, _len;
+        distance = (event.clientX - 20) / (innerWidth - 40) * distances[distances.length - 1];
+        for (i = _j = 0, _len = distances.length; _j < _len; i = ++_j) {
+          e = distances[i];
+          if (e > distance) {
+            break;
+          }
+        }
+        map.panTo(elevationResults[i].location);
+        return map.setZoom(15);
       });
       roadMessage = function(max, steep) {
         return "max slope: " + (Math.floor(max)) + "°  steep distance: " + (Math.floor(steep / 100) / 10) + "km(" + (Math.floor(steep / distances[distances.length - 1] * 100)) + "%)";
@@ -122,10 +134,7 @@
       return aux();
     } else {
       $('#container').addClass('graph');
-      return $('#graph').on($.support.transition.end, function() {
-        google.maps.event.trigger(map, 'resize');
-        return aux();
-      });
+      return $('#graph').on($s.vendor.transitionend, aux);
     }
   };
 
@@ -179,8 +188,7 @@
           return render();
         } else {
           $('#map-container').addClass('route');
-          return $('#panel').one($.support.transition.end, function() {
-            google.maps.event.trigger(map, 'resize');
+          return $('#panel').one($s.vendor.transitionend, function() {
             return render();
           });
         }
@@ -268,6 +276,15 @@
       });
     }
     return event.preventDefault();
+  });
+
+  $('#map-container, #map').on($s.vendor.transitionend, function() {
+    return google.maps.event.trigger(map, 'resize');
+  });
+
+  $('#panel-close').on('click', function() {
+    $('#container').removeClass('graph');
+    return $('#map-container').removeClass('route');
   });
 
 }).call(this);

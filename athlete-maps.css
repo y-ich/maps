@@ -63,6 +63,11 @@ input[type="number"] {
   -o-transition: width 0.5s linear;
   transition: width 0.5s linear;
 }
+#panel-close {
+  position: absolute;
+  right: 20px;
+  top: 10px;
+}
 .route #panel {
   width: 30%;
 }

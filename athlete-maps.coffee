@@ -71,10 +71,16 @@ drawElevation = (elevationResults) ->
         graph.clear()
         graph.linechart 20, 0, innerWidth - 40, ($('#graph').innerHeight() - 20) / 2 - 10, distances, elevations,
             axis: '0 1 0 1'
-        graph.linechart 20, ($('#graph').innerHeight() - 20) / 2 - 10, innerWidth - 40, $('#graph').innerHeight() / 2 - 10,
+        slopeGraph = graph.linechart 20, ($('#graph').innerHeight() - 20) / 2 - 10, innerWidth - 40, $('#graph').innerHeight() / 2 - 10,
             [distances, [distances[0], distances[distances.length - 1]], [distances[maxSlopeIndex], distances[maxSlopeIndex]], [distances[minSlopeIndex], distances[minSlopeIndex]]],
             [slopes, [0, 0], [minSlope, maxSlope], [minSlope, maxSlope]],
             axis: '0 1 1 1'
+        slopeGraph.clickColumn (event) ->
+            distance = (event.clientX - 20) / (innerWidth - 40) * distances[distances.length - 1]
+            for e, i in distances
+                break if e > distance
+            map.panTo elevationResults[i].location
+            map.setZoom 15
         roadMessage = (max, steep) ->
             "max slope: #{Math.floor max}°  steep distance: #{Math.floor(steep / 100) / 10}km(#{Math.floor(steep / distances[distances.length - 1] * 100)}%)"
         $('#data').text 'way - ' + roadMessage(maxSlope, steepGo) + ' / way back - ' +roadMessage(-minSlope, steepBack)
@@ -82,9 +88,7 @@ drawElevation = (elevationResults) ->
         aux()
     else
         $('#container').addClass 'graph'
-        $('#graph').on $.support.transition.end, ->
-            google.maps.event.trigger map, 'resize'
-            aux()
+        $('#graph').on $s.vendor.transitionend, aux
 
 $infoContent = $('''
     <div>
@@ -130,8 +134,7 @@ $infoContent.children('#goal').on 'click', ->
                     render()
                 else
                     $('#map-container').addClass 'route'
-                    $('#panel').one $.support.transition.end, ->
-                        google.maps.event.trigger map, 'resize'
+                    $('#panel').one $s.vendor.transitionend, ->
                         render()
             else
                 alert status
@@ -189,3 +192,10 @@ $('#elevation').on 'submit', (event) ->
             directionsInHistory.elevationResults[index] = result
             drawElevation result
     event.preventDefault()
+
+$('#map-container, #map').on $s.vendor.transitionend, ->
+    google.maps.event.trigger map, 'resize'
+
+$('#panel-close').on 'click', ->
+    $('#container').removeClass 'graph'
+    $('#map-container').removeClass 'route'
