@@ -13,6 +13,9 @@ body {
 body {
   padding: 0px;
 }
+.progress {
+  margin: 0 10px 10px 10px;
+}
 /* end of cancel */
 input[type="number"] {
   width: 40px;
@@ -80,15 +83,17 @@ input[type="number"] {
   -o-transition: height 0.5s linear;
   transition: height 0.5s linear;
 }
+#elevation {
+  margin: 10px 0 0;
+}
 #data {
   position: absolute;
-  top: 10px;
-  left: 100px;
-  opacity: 0.8;
+  bottom: 0px;
+  left: 40px;
 }
 .graph #map-container {
-  height: 80%;
+  height: 75%;
 }
 .graph #graph {
-  height: 20%;
+  height: 25%;
 }

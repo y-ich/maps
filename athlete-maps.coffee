@@ -29,8 +29,10 @@ elevationAlongSteps = (steps, callback) ->
                     totalResult = totalResult.concat result
                     index += MAGIC
                     if index < path.length
+                        $('#progress-bar').css 'width', index / (path.length - 1) * 100 + '%'
                         setTimeout (-> aux index), 1500
                     else
+                        $('#progress-bar').css 'width', '0%'
                         callback totalResult
                 when google.maps.ElevationStatus.OVER_QUERY_LIMIT
                     console.log status
@@ -64,11 +66,12 @@ drawElevation = (elevationResults) ->
         steepGo += d if slope > threshold
         steepBack += d if slope < -threshold
         distances.push distances[i - 1] + d
+    distances = distances.map (e) -> e / 1000
     aux = ->
         graph.clear()
-        graph.linechart 20, 0, innerWidth - 40, $('#graph').innerHeight() / 2 - 10, distances, elevations,
+        graph.linechart 20, 0, innerWidth - 40, ($('#graph').innerHeight() - 20) / 2 - 10, distances, elevations,
             axis: '0 1 0 1'
-        graph.linechart 20, $('#graph').innerHeight() / 2 - 10, innerWidth - 40, $('#graph').innerHeight() / 2 - 10,
+        graph.linechart 20, ($('#graph').innerHeight() - 20) / 2 - 10, innerWidth - 40, $('#graph').innerHeight() / 2 - 10,
             [distances, [distances[0], distances[distances.length - 1]], [distances[maxSlopeIndex], distances[maxSlopeIndex]], [distances[minSlopeIndex], distances[minSlopeIndex]]],
             [slopes, [0, 0], [minSlope, maxSlope], [minSlope, maxSlope]],
             axis: '0 1 1 1'
