@@ -59,12 +59,16 @@ input[type="number"] {
 
 #panel {
 	position: absolute;
-	width: 0%;
+	width: 30%;
 	height: 100%;
-	right: 0px;
+	right: -30%;
     top: 0px;
 	overflow: scroll;
-	.transition(width 0.5s linear);
+	.transition(right 0.5s linear);
+}
+
+.route #panel {
+	right: 0%;
 }
 
 #panel-close {
@@ -72,11 +76,6 @@ input[type="number"] {
 	right: 20px;
 	top: 10px;
 }
-
-.route #panel {
-	width: 30%;
-}
-
 
 #search {
 	position: absolute;
