@@ -49,13 +49,13 @@ input[type="number"] {
   transition: width 0.5s linear;
 }
 .route #map {
-  width: 70%;
+  width: 75%;
 }
 #panel {
   position: absolute;
-  width: 30%;
+  width: 25%;
   height: 100%;
-  right: -30%;
+  right: -25%;
   top: 0px;
   overflow: scroll;
   -webkit-transition: right 0.5s linear;

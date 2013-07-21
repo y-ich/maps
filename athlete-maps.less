@@ -5,6 +5,8 @@
 
 @import "lib/prefixer";
 
+@panel-width: 25%;
+
 html, body {
     width: 100%;
     height: 100%;
@@ -54,14 +56,14 @@ input[type="number"] {
 }
 
 .route #map {
-	width: 70%;
+	width: 100% - @panel-width;
 }
 
 #panel {
 	position: absolute;
-	width: 30%;
+	width: @panel-width;
 	height: 100%;
-	right: -30%;
+	right: -@panel-width;
     top: 0px;
 	overflow: scroll;
 	.transition(right 0.5s linear);

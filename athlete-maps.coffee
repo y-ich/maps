@@ -1,5 +1,9 @@
 Array::find = (predicate) -> @filter(predicate)[0] ? null
 
+lAlpedHuez =
+    start: new google.maps.LatLng(45.059304965363985, 6.037845611572266)
+    goal: new google.maps.LatLng(45.09551908397622, 6.070418357849121)
+
 currentMarker = null
 startMarker = null
 directionsRenderer = null
@@ -10,6 +14,42 @@ history = null
 graph = Raphael 'graph', innerWidth, $('#graph').innerHeight()
 
 spinner = new Spinner()
+
+route = (origin, destination, callback = ->) ->
+    route.service.route
+            avoidHighways: true
+            avoidTolls: true
+            destination: destination
+            origin: origin
+            provideRouteAlternatives: true
+            travelMode: google.maps.TravelMode.DRIVING
+        , (result, status) ->
+            history = []
+            if status is google.maps.DirectionsStatus.OK
+                render = ->
+                    if directionsRenderer?
+                        directionsRenderer.setDirections result
+                    else
+                        history.push
+                            directionsResult: result
+                        directionsRenderer = new google.maps.DirectionsRenderer
+                            directions: result
+                            draggable: true
+                            map: map
+                            panel: $('#directions-panel')[0]
+                        google.maps.event.addListener directionsRenderer, 'directions_changed', ->
+                            history.push
+                                directionsResult: @getDirections()
+                    callback()
+                if $('#map-container').hasClass 'route'
+                    render()
+                else
+                    $('#map-container').addClass 'route'
+                    $('#panel').one $s.vendor.transitionend, ->
+                        render()
+            else
+                alert status
+route.service = new google.maps.DirectionsService()
 
 elevationService = new google.maps.ElevationService()
 elevationAlongSteps = (steps, callback) ->
@@ -54,8 +94,8 @@ drawElevation = (elevationResults) ->
     minSlopeIndex = 0
     threshold = parseFloat $('#elevation input[name="threshold"]').val()
     for i in [1..elevationResults.length - 1]
-        d = google.maps.geometry.spherical.computeDistanceBetween elevationResults[i - 1].location, elevationResults[i].location
-        slope = if d != 0 then (elevations[i] - elevations[i - 1]) / d * 100 else slopes[slopes.length - 1]
+        d = google.maps.geometry.spherical.computeDistanceBetween(elevationResults[i - 1].location, elevationResults[i].location) / 1000
+        slope = if d != 0 then (elevations[i] - elevations[i - 1]) / (d * 1000) * 100 else slopes[slopes.length - 1]
         slopes.push slope
         if slope > maxSlope
             maxSlope = slope
@@ -66,7 +106,6 @@ drawElevation = (elevationResults) ->
         steepGo += d if slope > threshold
         steepBack += d if slope < -threshold
         distances.push distances[i - 1] + d
-    distances = distances.map (e) -> e / 1000
     aux = ->
         graphXOffset = 60
         graph.clear()
@@ -85,7 +124,7 @@ drawElevation = (elevationResults) ->
             map.panTo elevationResults[i].location
             map.setZoom 15
         roadMessage = (max, steep) ->
-            "max slope: #{Math.floor max}°  steep distance: #{Math.floor(steep / 100) / 10}km(#{Math.floor(steep / distances[distances.length - 1] * 100)}%)"
+            "max slope: #{Math.floor max}°  steep distance: #{Math.floor(steep * 10) / 10}km(#{Math.floor(steep / distances[distances.length - 1] * 100)}%)"
         $('#data').text 'way - ' + roadMessage(maxSlope, steepGo) + ' / way back - ' +roadMessage(-minSlope, steepBack)
     if $('#container').hasClass 'graph'
         aux()
@@ -123,46 +162,15 @@ $infoContent.children('#start').on 'click', ->
 $infoContent.children('#goal').on 'click', ->
     setTimeout (-> infoWindow.close()), 0
     return unless startMarker?
-    new google.maps.DirectionsService().route
-            avoidHighways: true
-            avoidTolls: true
-            destination: currentMarker.getPosition()
-            origin: startMarker.getPosition()
-            provideRouteAlternatives: true
-            travelMode: google.maps.TravelMode.DRIVING
-        , (result, status) ->
-            history = []
-            if status is google.maps.DirectionsStatus.OK
-                startMarker.setMap null
-                currentMarker.setMap null
-                render = ->
-                    if directionsRenderer?
-                        directionsRenderer.setDirections result
-                    else
-                        history.push
-                            directionsResult: result
-                        directionsRenderer = new google.maps.DirectionsRenderer
-                            directions: result
-                            draggable: true
-                            map: map
-                            panel: $('#directions-panel')[0]
-                        google.maps.event.addListener directionsRenderer, 'directions_changed', ->
-                            history.push
-                                directionsResult: @getDirections()
-                if $('#map-container').hasClass 'route'
-                    render()
-                else
-                    $('#map-container').addClass 'route'
-                    $('#panel').one $s.vendor.transitionend, ->
-                        render()
-            else
-                alert status
+    route startMarker.getPosition(), currentMarker.getPosition(), ->
+        startMarker.setMap null
+        currentMarker.setMap null
 
 infoWindow = new google.maps.InfoWindow
     content: $infoContent[0]
 
 map = new google.maps.Map document.getElementById('map'),
-    center: new google.maps.LatLng(34.584199, 135.835163)
+    center: lAlpedHuez.goal
     zoom: 10
     mapTypeId: google.maps.MapTypeId.ROADMAP
     panControl: false
@@ -202,3 +210,6 @@ $('#panel-close').on 'click', ->
     $('#container').removeClass 'graph'
     $('#map-container').removeClass 'route'
     directionsRenderer.setMap null
+
+route lAlpedHuez.start, lAlpedHuez.goal, ->
+    $('#elevation').trigger 'submit'
