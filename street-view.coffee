@@ -69,10 +69,11 @@ startWatch = ->
         timeout: 60000
 
 window.ondeviceorientation = (event) ->
-    map.getStreetView().setPov
-        heading: event.webkitCompassHeading
-        pitch: 0
-    $map.css '-webkitTransform', "rotate(#{-event.webkitCompassHeading}deg)"
+    if watchId?
+        map.getStreetView().setPov
+            heading: event.webkitCompassHeading
+            pitch: 0
+        $map.css '-webkitTransform', "rotate(#{-event.webkitCompassHeading}deg)"
 
 window.onpagehide = ->
     navigator.geolocation.clearWatch watchId if watchId?
