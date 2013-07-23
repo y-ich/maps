@@ -116,11 +116,13 @@
   };
 
   window.ondeviceorientation = function(event) {
-    map.getStreetView().setPov({
-      heading: event.webkitCompassHeading,
-      pitch: 0
-    });
-    return $map.css('-webkitTransform', "rotate(" + (-event.webkitCompassHeading) + "deg)");
+    if (watchId != null) {
+      map.getStreetView().setPov({
+        heading: event.webkitCompassHeading,
+        pitch: 0
+      });
+      return $map.css('-webkitTransform', "rotate(" + (-event.webkitCompassHeading) + "deg)");
+    }
   };
 
   window.onpagehide = function() {
