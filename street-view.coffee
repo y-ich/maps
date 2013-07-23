@@ -48,6 +48,7 @@ say = (str) ->
 
 startWatch = ->
     rotationMap()
+    map.setZoom 18
     watchId = navigator.geolocation.watchPosition ((position) ->
         latLng = new google.maps.LatLng position.coords.latitude, position.coords.longitude
         map.setCenter latLng

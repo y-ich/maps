@@ -70,6 +70,7 @@
 
   startWatch = function() {
     rotationMap();
+    map.setZoom(18);
     return watchId = navigator.geolocation.watchPosition((function(position) {
       var latLng, leg, step, _i, _len, _ref, _results;
       latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
