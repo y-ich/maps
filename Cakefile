@@ -1,7 +1,7 @@
 {spawn, exec} = require 'child_process'
 
 maps = ['googleMapsExtensions.coffee', 'maps.coffee']
-maps2 = ['googleDrive.coffee', 'maps2.coffee']
+fusionMaps = ['googleDrive.coffee', 'fusion-maps.coffee']
 eventMaps = ['event-maps.coffee']
 start = 'webapp.coffee'
 start2 = 'webapp2.coffee'
@@ -20,13 +20,13 @@ task 'watch', 'continually build with --watch', ->
     spec.stdout.on 'data', (data) -> console.log data.toString().trim()
 
 task 'watch2', 'continually build with --watch', ->
-    src = spawn 'coffee', ['-wcj', 'maps2.js'].concat maps2
+    src = spawn 'coffee', ['-wcj', 'fusion-maps.js'].concat fusionMaps
     src.stdout.on 'data', (data) -> console.log data.toString().trim()
 
     src2 = spawn 'coffee', ['-wc', start2]
     src2.stdout.on 'data', (data) -> console.log data.toString().trim()
 
-    test = spawn 'coffee', ['-wcbj', 'test/maps2.js'].concat maps2
+    test = spawn 'coffee', ['-wcbj', 'test/fusion-maps.js'].concat fusionMaps
     test.stdout.on 'data', (data) -> console.log data.toString().trim()
 
     spec = spawn 'coffee', ['-wc','spec']
