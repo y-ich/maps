@@ -15,6 +15,40 @@ graph = Raphael 'graph', innerWidth, $('#graph').innerHeight()
 
 spinner = new Spinner()
 
+createKML = (directionsRoute) ->
+    steps = [].concat.apply [], (e.steps for e in directionsRoute.legs)
+    """
+    <?xml version="1.0" encoding="UTF-8"?>
+    <kml xmlns="http://www.opengis.net/kml/2.2">
+      <Document>
+        <name>Route search result</name>
+        <description></description>
+        <Style id="yellowLineGreenPoly">
+          <LineStyle>
+            <color>7f00ffff</color>
+            <width>4</width>
+          </LineStyle>
+          <PolyStyle>
+            <color>7f00ff00</color>
+          </PolyStyle>
+        </Style>
+        <Placemark>
+          <name>#{directionsRoute.legs[0].start_address} - #{directionsRoute.legs[directionsRoute.legs.length - 1].end_address}</name>
+          <description></description>
+          <styleUrl>#yellowLineGreenPoly</styleUrl>
+          <LineString>
+            <extrude>1</extrude>
+            <tessellate>1</tessellate>
+            <altitudeMode>clampToGround</altitudeMode>
+            <coordinates>
+              #{("#{step.start_location.lng()},#{step.start_location.lat()},0\n" for step in steps).join('')}
+            </coordinates>
+          </LineString>
+        </Placemark>
+      </Document>
+    </kml>
+    """
+
 route = (origin, destination, callback = ->) ->
     route.service.route
             avoidHighways: true
