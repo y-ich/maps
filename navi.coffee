@@ -8,7 +8,7 @@ navigationMode = false
 
 say = (string) ->
         MAX_LENGTH = 100
-        audio = new WAudio "translate_tts?tl=#{lang}&q=#{encodeURIComponent string[0...MAX_LENGTH]}"
+        audio = new WAudio "http://safari-park.herokuapp.com/translate_tts?tl=#{lang}&q=#{encodeURIComponent string[0...MAX_LENGTH]}"
         audio.play()
 
 route = (origin, destination, callback = ->) ->
