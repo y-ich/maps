@@ -6,7 +6,7 @@ eventMaps = ['event-maps.coffee']
 start = 'webapp.coffee'
 start2 = 'webapp2.coffee'
 
-task 'watch', 'continually build with --watch', ->
+task 'maps', 'continually build with --watch', ->
     src = spawn 'coffee', ['-wcj', 'maps.js'].concat maps
     src.stdout.on 'data', (data) -> console.log data.toString().trim()
 
@@ -19,7 +19,7 @@ task 'watch', 'continually build with --watch', ->
     spec = spawn 'coffee', ['-wc','spec']
     spec.stdout.on 'data', (data) -> console.log data.toString().trim()
 
-task 'watch2', 'continually build with --watch', ->
+task 'fusion-maps', 'continually build with --watch', ->
     src = spawn 'coffee', ['-wcj', 'fusion-maps.js'].concat fusionMaps
     src.stdout.on 'data', (data) -> console.log data.toString().trim()
 
@@ -32,7 +32,7 @@ task 'watch2', 'continually build with --watch', ->
     spec = spawn 'coffee', ['-wc','spec']
     spec.stdout.on 'data', (data) -> console.log data.toString().trim()
 
-task 'watch3', 'continually build with --watch', ->
+task 'event-maps', 'continually build with --watch', ->
     src = spawn 'coffee', ['-wcj', 'event-maps.js'].concat eventMaps
     src.stdout.on 'data', (data) -> console.log data.toString().trim()
 
@@ -45,7 +45,6 @@ task 'watch3', 'continually build with --watch', ->
     spec = spawn 'coffee', ['-wc','spec']
     spec.stdout.on 'data', (data) -> console.log data.toString().trim()
 
-task 'css', 'compile less', ->
-    child = exec 'lessc maps.less > maps.css', (error, stdout, stderr) ->
-        console.log 'stdout: ' + stderr
-        console.log 'error: ' + error if error?
+task 'navi', 'continually build with --watch', ->
+    app = spawn 'coffee', ['-wcj', 'navi.js'].concat ['waudio.coffee', 'navi.coffee']
+    app.stdout.on 'data', (data) -> console.log data.toString().trim()
