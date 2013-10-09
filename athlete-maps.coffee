@@ -1,3 +1,6 @@
+KML_SERVER = 'maps2013.herokuapp.com'
+# KML_SERVER = '192.168.0.8:5000'
+
 Array::find = (predicate) -> @filter(predicate)[0] ? null
 
 lAlpedHuez =
@@ -14,6 +17,40 @@ history = null
 graph = Raphael 'graph', innerWidth, $('#graph').innerHeight()
 
 spinner = new Spinner()
+
+createKML = (directionsRoute) ->
+    steps = [].concat.apply [], (e.steps for e in directionsRoute.legs)
+    """
+    <?xml version="1.0" encoding="UTF-8"?>
+    <kml xmlns="http://www.opengis.net/kml/2.2">
+      <Document>
+        <name>Route search result</name>
+        <description></description>
+        <Style id="yellowLineGreenPoly">
+          <LineStyle>
+            <color>7f00ffff</color>
+            <width>4</width>
+          </LineStyle>
+          <PolyStyle>
+            <color>7f00ff00</color>
+          </PolyStyle>
+        </Style>
+        <Placemark>
+          <name>#{directionsRoute.legs[0].start_address} - #{directionsRoute.legs[directionsRoute.legs.length - 1].end_address}</name>
+          <description></description>
+          <styleUrl>#yellowLineGreenPoly</styleUrl>
+          <LineString>
+            <extrude>1</extrude>
+            <tessellate>1</tessellate>
+            <altitudeMode>clampToGround</altitudeMode>
+            <coordinates>
+              #{(("#{p.lng()},#{p.lat()},0\n" for p in step.path).join('') for step in steps).join('')}
+            </coordinates>
+          </LineString>
+        </Placemark>
+      </Document>
+    </kml>
+    """
 
 route = (origin, destination, callback = ->) ->
     route.service.route
@@ -47,6 +84,7 @@ route = (origin, destination, callback = ->) ->
                     $('#map-container').addClass 'route'
                     $('#panel').one $s.vendor.transitionend, ->
                         render()
+                $('#kml').attr 'href', "#{if /Mobile.*Safari/.test navigator.userAgent then 'comgoogleearth' else 'http'}://#{KML_SERVER}/earth/kml/#{new Date().getTime()}.kml"
             else
                 alert status
 route.service = new google.maps.DirectionsService()
@@ -210,6 +248,20 @@ $('#panel-close').on 'click', ->
     $('#container').removeClass 'graph'
     $('#map-container').removeClass 'route'
     directionsRenderer.setMap null
+
+$('#kml').on 'click', ->
+    $this = $(this)
+    xhr = $.ajax $this.attr('href').replace(/comgoogleearth/, 'http'),
+        async: false
+        type: 'POST'
+        # contentType: 'application/vnd.google-earth.kml+xml; charset=UTF-8' # This contentType causes request to change to 'OPTIONS'.
+        contentType: 'text/plain; charset=UTF-8'
+        data: createKML(directionsRenderer.getDirections().routes[directionsRenderer.getRouteIndex() ? 0])
+    if xhr.status is 200
+        true
+    else
+        setTimeout (-> alert 'Failed to connect the server. Touch again, please'), 0
+        false
 
 route lAlpedHuez.start, lAlpedHuez.goal, ->
     $('#elevation').trigger 'submit'
