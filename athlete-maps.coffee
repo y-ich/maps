@@ -1,3 +1,6 @@
+KML_SERVER = 'maps2013.herokuapp.com'
+# KML_SERVER = '192.168.0.8:5000'
+
 Array::find = (predicate) -> @filter(predicate)[0] ? null
 
 lAlpedHuez =
@@ -41,7 +44,7 @@ createKML = (directionsRoute) ->
             <tessellate>1</tessellate>
             <altitudeMode>clampToGround</altitudeMode>
             <coordinates>
-              #{("#{step.start_location.lng()},#{step.start_location.lat()},0\n" for step in steps).join('')}
+              #{(("#{p.lng()},#{p.lat()},0\n" for p in step.path).join('') for step in steps).join('')}
             </coordinates>
           </LineString>
         </Placemark>
@@ -81,6 +84,7 @@ route = (origin, destination, callback = ->) ->
                     $('#map-container').addClass 'route'
                     $('#panel').one $s.vendor.transitionend, ->
                         render()
+                $('#kml').attr 'href', "#{if /Mobile.*Safari/.test navigator.userAgent then 'comgoogleearth' else 'http'}://#{KML_SERVER}/earth/kml/#{new Date().getTime()}.kml"
             else
                 alert status
 route.service = new google.maps.DirectionsService()
@@ -244,6 +248,20 @@ $('#panel-close').on 'click', ->
     $('#container').removeClass 'graph'
     $('#map-container').removeClass 'route'
     directionsRenderer.setMap null
+
+$('#kml').on 'click', ->
+    $this = $(this)
+    xhr = $.ajax $this.attr('href').replace(/comgoogleearth/, 'http'),
+        async: false
+        type: 'POST'
+        # contentType: 'application/vnd.google-earth.kml+xml; charset=UTF-8' # This contentType causes request to change to 'OPTIONS'.
+        contentType: 'text/plain; charset=UTF-8'
+        data: createKML(directionsRenderer.getDirections().routes[directionsRenderer.getRouteIndex() ? 0])
+    if xhr.status is 200
+        true
+    else
+        setTimeout (-> alert 'Failed to connect the server. Touch again, please'), 0
+        false
 
 route lAlpedHuez.start, lAlpedHuez.goal, ->
     $('#elevation').trigger 'submit'
