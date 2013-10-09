@@ -6,11 +6,27 @@ directionsRenderer = null
 watchId = null
 navigationMode = false
 
-say = (string) ->
-        MAX_LENGTH = 100
-        audio = new WAudio "http://safari-park.herokuapp.com/translate_tts?tl=#{lang}&q=#{encodeURIComponent string[0...MAX_LENGTH]}"
-        audio.play()
+say = if speechSynthesis?
+        (string) ->
+            phrase = new SpeechSynthesisUtterance string
+            phrase.lang = lang
+            phrase.volume = 1
+            phrase.rate = 0.5
+            phrase.pitch = 1.2
+            speechSynthesis.speak phrase
+    else
+        (string) ->
+            MAX_LENGTH = 100
+            audio = new WAudio "http://safari-park.herokuapp.com/translate_tts?tl=#{lang}&q=#{encodeURIComponent string[0...MAX_LENGTH]}"
+            audio.play()
 
+unlockSpeech = if speechSynthesis?
+        -> say ''
+    else
+        -> WAudio.unlock()
+
+window.say = say
+        
 route = (origin, destination, callback = ->) ->
     route.service.route
             avoidHighways: true
@@ -117,7 +133,7 @@ $('#start-stop').on 'click', (event) ->
         $(this).text 'Navi'
     else
         $('#panel').css 'display', 'none'
-        WAudio.unlock()
+        unlockSpeech()
         $('#silent')[0].play()
         startWatch()
         $(this).text 'Stop'
