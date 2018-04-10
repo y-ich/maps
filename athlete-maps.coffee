@@ -226,7 +226,8 @@ google.maps.event.addListener autocomplete, 'place_changed', ->
 $('#elevation').on 'submit', (event) ->
     directions = directionsRenderer.getDirections()
     index = directionsRenderer.getRouteIndex() ? 0
-    directionsInHistory = history.find (e) -> e.directionsResult is directions
+    console.log history, directions
+    directionsInHistory = history.find (e) -> e.directionsResult.routes[0] is directions.routes[0]
     if directionsInHistory.elevationResults?[index]?
         drawElevation directionsInHistory.elevationResults[index]
     else
